@@ -1,3 +1,9 @@
-# eBird Best Practices Workhop at OCA 2023
+# Curso ROC: Análisis de datos de eBird en R
 
-The contents of this repository comprise the notes for a workshop on best practices for using [eBird](https://ebird.org/home) data and [eBird Status](https://science.ebird.org/en/status-and-trends) data products presented at the [Ornithological Congress of The Americas (OCA)](https://oca2023.com.br/evento/oca2023/home) in August 2023 in Gramado, Brazil. 
+Los contenidos de este repositorio constan de los materiales utilizandos en el "Curso ROC: Análisis de datos de eBird en R" realizado en octubre de 2025. 
+El curso consta de 4 módulos:
+1. Introducción al entorno R en el contexto de [eBird](https://ebird.org/home)
+2. Buenas prácticas para el uso de datos de eBird
+3. Modelamiento de distribución y abundancia relativa
+4. Usos y aplicaciones de productos [Estados y Tendencias](https://science.ebird.org/en/status-and-trends)
+
