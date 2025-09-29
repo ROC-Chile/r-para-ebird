@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 book:
-  title: "eBird Workshops OCA II"
+  title: "Curso ROC: R para eBird"
   chapters:
     - index.qmd
     - ebird.qmd
@@ -12,9 +12,9 @@ book:
     mode: source
 
   page-footer:
-    left: "eBird Workshops OCA II"
-  site-url: https://ebird.github.io/ebird-workshop-oca/
-  repo-url: https://github.com/ebird/ebird-workshop-oca/
+    left: "Curso ROC: R para eBird"
+  site-url: https://ROC-Chile.github.io/r-para-ebird/
+  repo-url: https://github.com/ROC-Chile/r-para-ebird
   repo-branch: main
   repo-actions: [edit, issue]
 
@@ -23,7 +23,7 @@ format:
     theme: cosmo
     toc: true
     toc-depth: 3
-    author-meta: "Matthew Strimas-Mackey, Tom Auer"
+    author-meta: "Erik Sandvig, Marion Díaz, Vicente Pantoja, Matthew Strimas-Mackey, Tom Auer"
 
 knitr:
   opts_chunk:
