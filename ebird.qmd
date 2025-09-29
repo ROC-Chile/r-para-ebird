@@ -46,7 +46,7 @@ library(ggplot2)
 library(lubridate)
 library(sf)
 
-f_sed <- "xxx"
+f_sed <- "data/ebd_BR-RS_fotfly_smp_relJun-2023_sampling.txt"
 checklists <- read_sampling(f_sed, unique = FALSE)
 glimpse(checklists)
 ```
