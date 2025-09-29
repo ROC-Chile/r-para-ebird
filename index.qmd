@@ -8,7 +8,7 @@ editor_options:
 
 # Introducción {.unnumbered}
 
-Esta página contiene el material utilizado durante el Curso Roc: Análisis de datos de eBird en R.
+Esta página contiene el material utilizado durante el **Curso Roc: Análisis de datos de eBird en R.**
 
 El curso consta de 4 módulos:
 
