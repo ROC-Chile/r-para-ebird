@@ -46,7 +46,7 @@ library(ggplot2)
 library(lubridate)
 library(sf)
 
-f_sed <- "data/ebd_BR-RS_fotfly_smp_relJun-2023_sampling.txt"
+f_sed <- "xxx"
 checklists <- read_sampling(f_sed, unique = FALSE)
 glimpse(checklists)
 ```
@@ -218,10 +218,10 @@ select(zf, observation_count, species_observed) %>%
 
 Now that you have a detection/non-detection dataset, it's likely that you want to do something with it. For example, you may want to make a map, identify priority areas for a species, or train a species distribution model. Regardless of the specific application, it's likely that some amount of filtering of the data is required first. Some of the ways you may want to filter eBird data include:
 
-- **Temporal filtering**: filter the data to a specific range of years or to a specific time of year.
-- **Spatial filtering**: filter the data to focus on a specific region, e.g. a protected area.
-- **Increasing precision**: some eBird checklists are quite long in distance or duration leading to spatial or temporal imprecision. By removing longer checklists we can increase the spatial precision of the dataset.
-- **Reducing variation in effort**: unlike structured scientific surveys, data can be submitted to eBird using a variety of protocols and there is significant variation in effort between checklists in the eBird dataset. Variation in protocol and effort leads to variation in detectability (more effort generally leads to higher detectability). We can choose to impose more structure on the eBird dataset by filtering to reduce variation in protocol and effort.
+-   **Temporal filtering**: filter the data to a specific range of years or to a specific time of year.
+-   **Spatial filtering**: filter the data to focus on a specific region, e.g. a protected area.
+-   **Increasing precision**: some eBird checklists are quite long in distance or duration leading to spatial or temporal imprecision. By removing longer checklists we can increase the spatial precision of the dataset.
+-   **Reducing variation in effort**: unlike structured scientific surveys, data can be submitted to eBird using a variety of protocols and there is significant variation in effort between checklists in the eBird dataset. Variation in protocol and effort leads to variation in detectability (more effort generally leads to higher detectability). We can choose to impose more structure on the eBird dataset by filtering to reduce variation in protocol and effort.
 
 The specific filtering you apply will depend on how you intend to use the eBird data. However, for the sake of this example, let's filter the eBird data to only traveling and stationary checklists from 2013-2022 that are less than 6 hours in duration and 10 km in length.
 

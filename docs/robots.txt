@@ -1,1 +1,1 @@
-Sitemap: https://ebird.github.io/ebird-workshop-oca/sitemap.xml
+Sitemap: https://ROC-Chile.github.io/r-para-ebird/sitemap.xml
