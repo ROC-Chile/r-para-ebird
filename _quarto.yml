@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 book:
-  title: "Curso ROC: R para eBird"
+  title: "Curso ROC: Análisis de datos de eBird en R"
   chapters:
     - index.qmd
     - intror.qmd
@@ -14,7 +14,7 @@ book:
     mode: source
 
   page-footer:
-    left: "Curso ROC: R para eBird"
+    left: "Curso ROC: Análisis de datos de eBird en R"
   site-url: https://ROC-Chile.github.io/r-para-ebird/
   repo-url: https://github.com/ROC-Chile/r-para-ebird
   repo-branch: main
