@@ -6,7 +6,9 @@ book:
   title: "Curso ROC: R para eBird"
   chapters:
     - index.qmd
+    - intror.qmd
     - ebird.qmd
+    - distabund.qmd
     - ebirdst.qmd
   editor:
     mode: source

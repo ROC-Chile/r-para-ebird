@@ -1,0 +1,11 @@
+---
+output: html_document
+editor:
+    mode: source
+editor_options: 
+  chunk_output_type: console
+---
+
+# Introducción al entorno R en el contexto de eBird {#sec-r}
+
+## Introducción {#sec-r-intro}
