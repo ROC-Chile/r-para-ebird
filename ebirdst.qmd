@@ -12,7 +12,7 @@ The [eBird Status and Trends](https://science.ebird.org/en/status-and-trends) pr
 
 This workshop will introduce attendees to the eBird Status Data Products and the `ebirdst` R package developed specifically for working with these data. We will introduce attendees to the range of available data, then demonstrate how to download these data products and load them into R for further analysis. Next we'll work through a series of applications. Let's start by loading the packages we'll use throughout this workshop.
 
-This workshop is being co-taught by members of [Red de Observadores de Aves](https://www.redobservadores.cl/), the eBird partner in Chile, so many of the examples will focus on Chilean birds such as the Green-backed Firecown.
+This workshop is being co-taught by members of [Red de Observadores de Aves](https://www.redobservadores.cl/), the eBird partner in Chile, so many of the examples will focus on Chilean birds such as the Green-backed Firecrown.
 
 ![© Tamara Catalán Bermudez, Macaulay Library (#327967101)](images/grbfir1_327967101.jpg)
 
