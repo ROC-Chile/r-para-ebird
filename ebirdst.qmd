@@ -6,13 +6,11 @@ editor_options:
   chunk_output_type: console
 ---
 
-# eBird Status Data Products {#sec-ebirdst}
+# Productos de Estados y Tendencias de eBird {#sec-ebirdst}
 
-The [eBird Status and Trends](https://science.ebird.org/en/status-and-trends) project uses full-annual cycle machine-learning models combining eBird data with remote-sensing data and accounting for variation in observer behavior and effort to produce high resolution, weekly estimates of range boundaries, occurrence rate, and relative abundance of bird species. The latest version, with estimates for the year 2021, includes results for 2,282 species globally. Interactive visualizations for these species are available through the [eBird Status and Trends website](https://science.ebird.org/en/status-and-trends) and the eBird Status Data Products are available through the R package [`ebirdst`](https://ebird.github.io/ebirdst/).
+El proyecto Estados y Tendencias utiliza modelos de machine learning de ciclo anual completo que combinan datos de eBird con datos de teledetección y toman en cuenta las variaciones en el comportamiento y el esfuerzo de los observadores para producir estimaciones semanales de alta resolución de los límites de distribución, la tasa de ocurrencia y la abundancia relativa de las especies de aves. La última versión, con estimaciones hasta el año 2023, incluye resultados para 2981 especies en todo el mundo, de las cuales 471 han sido registradas en Chile. Las visualizaciones interactivas de estas especies están disponibles en el [sitio web de eBird Estados y Tendencias](https://science.ebird.org/es/status-and-trends) y los productos de datos de Estados y Tendencias de eBird están disponibles a través del paquete de R [`ebirdst`](https://ebird.github.io/ebirdst/).
 
-This workshop will introduce attendees to the eBird Status Data Products and the `ebirdst` R package developed specifically for working with these data. We will introduce attendees to the range of available data, then demonstrate how to download these data products and load them into R for further analysis. Next we'll work through a series of applications. Let's start by loading the packages we'll use throughout this workshop.
-
-This workshop is being co-taught by members of [Red de Observadores de Aves](https://www.redobservadores.cl/), the eBird partner in Chile, so many of the examples will focus on Chilean birds such as the Green-backed Firecrown.
+En este modulo nos familiarizaremos con los productos de datos de Estados y Tendencias de eBird y el paquete R `ebirdst`, desarrollado específicamente para trabajar con estos datos. Presentaremos la gama de datos disponibles y, a continuación, les mostraremos cómo descargar estos productos de datos y cargarlos en R para su posterior análisis. Luego, trabajaremos con una serie de ejemplos de aplicaciones prácticas. Comencemos cargando los paquetes que utilizaremos a lo largo de este taller.
 
 ![© Tamara Catalán Bermudez, Macaulay Library (#327967101)](images/grbfir1_327967101.jpg)
 
@@ -32,7 +30,7 @@ library(tidyr)
 
 ## Data access {#sec-ebirdst-access}
 
-Access to the eBird Status Data Products is granted through an Access Request Form at: <https://ebird.org/st/request>. The terms of use have been desiged to be quite permissive in many cases, particularly academic and research use. After reading the [eBird Status and Trends Products Terms of Use](https://ebird.org/science/status-and-trends/st-data-access-terms-of-use/) and filling out the [Access Request Form](https://ebird.org/st/request) you will be provided with an alphanumeric access key. To store the access key so it can be accessed by R and the `ebirdst` package, run the following (replacing `"XXXXXXXXX"` with your actual key):
+El acceso a los productos de Estados y Tendencias de eBird se obtiene mediante un formulario de solicitud de acceso disponible en: <https://ebird.org/st/request>. Las condiciones de uso se han diseñado para ser bastante permisivas en muchos casos, especialmente en lo que respecta al uso académico y de investigación. Después de leer las [Condiciones de uso de los productos de estado y tendencias de eBird](https://ebird.org/science/status-and-trends/st-data-access-terms-of-use/) y rellenar el [Formulario de solicitud de acceso](https://ebird.org/st/request), se le proporcionará una clave de acceso alfanumérica. Para almacenar la clave de acceso de modo que R y el paquete `ebirdst` puedan acceder a ella, ejecute lo siguiente (sustituyendo `"XXXXXXXXX"` por su clave real):
 
 ```{r}
 #| label: ebirdst-access-key
@@ -40,30 +38,30 @@ Access to the eBird Status Data Products is granted through an Access Request Fo
 set_ebirdst_access_key("XXXXXXXXX")
 ```
 
-Then immediately **restart R**. This will save the access key as the environment variable `EBIRDST_KEY` in your `.Renviron` file so it's accessible within your R session.
+A continuación, **reinicie R** inmediatamente. Esto guardará la clave de acceso como variable de entorno EBIRDST_KEY en su archivo .Renviron, de modo que pueda acceder a ella desde su sesión de R.
 
 ::: callout-important
 ## Checkpoint
 
-To ensure your data access key is working, attempt run the following code, which will download a single small file. Speak to the instructor if this doesn't work.
+Para asegurarte de que tu clave de acceso a los datos funciona, intenta ejecutar el siguiente código, que descargará un único archivo pequeño. Si no funciona, habla con el instructor o envíanos un correo para buscar una solución al problema.
 
 ```{r}
 #| label: ebirdst-access-sol
 #| eval: false
-ebirdst_download("grbfir1", pattern = "abundance_median_lr_2021", force = TRUE)
+ebirdst_download_status("grbfir1", pattern = "abundance_median_3km_2023", force = TRUE)
 ```
 :::
 
-## Status and Trends species {#sec-ebirdst-species}
+## Especies con Estados y Tendencias {#sec-ebirdst-species}
 
-The `ebirdst_runs` object is a data frame listing all the available species:
+El objeto `ebirdst_runs` es un data frame que enumera todas las especies disponibles:
 
 ```{r species}
 #| label: ebirdst-species-runs
 glimpse(ebirdst_runs)
 ```
 
-If you're working in RStudio, you can use `View()` to interactively explore this data frame. You can also consult the [Status and Trends species page](https://science.ebird.org/en/status-and-trends/species) the full list of available species. On this page you can also filter by region, for example to see only those species with some portion of their range [falling within Brazil](https://science.ebird.org/en/status-and-trends/species?regionCode=BR).
+If you're working in RStudio, you can use `View()` to interactively explore this data frame. You can also consult the [Status and Trends species page](https://science.ebird.org/en/status-and-trends/species) the full list of available species. On this page you can also filter by region, for example to see only those species with some portion of their range [falling within Chile](https://science.ebird.org/en/status-and-trends/species?regionCode=CL).
 
 ### Expert review {#sec-ebirdst-review}
 
@@ -105,7 +103,7 @@ The function `ebirdst_download()` downloads data for a single species given a sp
 ```{r}
 #| label: ebirdst-download-fake
 #| eval: false
-path <- ebirdst_download(species = "Green-backed Firecrown")
+path <- ebirdst_download_status(species = "Green-backed Firecrown")
 path
 ```
 
@@ -144,7 +142,7 @@ The full data package for each species contains a large number of files, many of
 
 ```{r}
 #| label: ebirdst-download-specific-dryrun
-ebirdst_download("Green-backed Firecrown", dry_run = TRUE)
+ebirdst_download_status("Green-backed Firecrown", dry_run = TRUE)
 ```
 
 Then, once you've identified the files you want, you can use the `pattern` argument to download only those files. For example, imagine we only want the `abundance` files:
@@ -152,7 +150,7 @@ Then, once you've identified the files you want, you can use the `pattern` argum
 ```{r}
 #| label: ebirdst-download-specific-pattern
 #| eval: false
-ebirdst_download("Green-backed Firecrown", pattern = "abundance")
+ebirdst_download_status("Green-backed Firecrown", pattern = "abundance")
 ```
 
 ::: callout-tip
@@ -162,7 +160,7 @@ To avoid any issues resulting from all participants downloading data over a slow
 
 ```{r}
 #| label: ebirdst-load-path
-path <- get_species_path("Green-backed Firecrown", path = "data/ebirdst-data/")
+path <- get_species_path("Green-backed Firecrown")
 path
 ```
 
@@ -196,7 +194,7 @@ where `metric` is typically `median`, except for the relative abundance CIs, whi
 
 ```{r}
 #| label: ebirdst-load-weekly-abd
-abd_median_hr <- load_raster(path, product = "abundance", resolution = "hr")
+abd_median_3km <- load_raster(path, product = "abundance", resolution = "3km")
 print(abd_median_hr)
 ```
 
@@ -204,17 +202,17 @@ We often refer to these raster objects as "weekly cubes" (e.g. the "weekly abund
 
 ```{r}
 #| label: ebirdst-load-weekly-parse
-as.Date(names(abd_median_hr))
+as.Date(names(abd_median_3km))
 ```
 
 As another example, we could load the low resolution upper and lower abundance confidence intervals.
 
 ```{r}
 #| label: ebirdst-load-weekly-ci
-abd_lower_lr <- load_raster(path, product = "abundance", metric = "lower", 
-                            resolution = "lr")
-abd_upper_lr <- load_raster(path, product = "abundance", metric = "upper", 
-                            resolution = "lr")
+abd_lower_27km <- load_raster(path, product = "abundance", metric = "lower", 
+                            resolution = "27km")
+abd_upper_27km <- load_raster(path, product = "abundance", metric = "upper", 
+                            resolution = "27km")
 ```
 
 ::: {.callout-caution icon="false"}
@@ -229,7 +227,7 @@ Try loading the weekly median percent of population cube at medium resolution.
 ```{r}
 #| label: ebirdst-load-weekly-sol
 pct_pop <- load_raster(path, product = "percent-population", metric = "median", 
-                       resolution = "mr")
+                       resolution = "9km")
 print(pct_pop)
 ```
 :::
@@ -248,7 +246,7 @@ where `metric` is either `mean` or `max`. The function `load_raster(period = "se
 #| label: ebirdst-load-seasonal-abd
 abd_seasonal_mean <- load_raster(path, product = "abundance", 
                                  period = "seasonal", metric = "mean", 
-                                 resolution = "lr")
+                                 resolution = "27km")
 print(abd_seasonal_mean)
 ```
 
@@ -264,7 +262,7 @@ Finally, as a convenience, the data products include year-round rasters summariz
 ```{r}
 abd_fy_max <- load_raster(path, product = "abundance", 
                           period = "full-year", metric = "max", 
-                          resolution = "hr")
+                          resolution = "3km")
 ```
 
 ## Exploring the raster data {#sec-ebirdst-explore}
@@ -273,9 +271,9 @@ Let's load the low resolution weekly and seasonal relative abundance cubes and u
 
 ```{r}
 #| label: ebirdst-explore-load
-abd_weekly <- load_raster(path, product = "abundance", resolution = "mr")
+abd_weekly <- load_raster(path, product = "abundance", resolution = "9km")
 abd_seasonal <- load_raster(path, product = "abundance", period = "seasonal", 
-                            resolution = "mr")
+                            resolution = "9km")
 ```
 
 These cubes can easily be subset to a single week or season.
@@ -352,9 +350,9 @@ Let's start by loading the medium resolution weekly proportion of population cub
 #| label: ebirdst-applications-trajectories-data
 # proportion of population cubes
 pop_grbfir1 <- get_species_path("grbfir1", path = "data/ebirdst-data/") %>% 
-  load_raster(product = "percent-population", resolution = "mr")
+  load_raster(product = "percent-population", resolution = "9km")
 pop_pattyr2 <- get_species_path("pattyr2", path = "data/ebirdst-data/") %>% 
-  load_raster(product = "percent-population", resolution = "mr")
+  load_raster(product = "percent-population", resolution = "9km")
 
 # los lagos boundary, projected to match the raster data
 los_lagos <- read_sf("data/gis-data.gpkg", "ne_states") %>% 
@@ -431,7 +429,7 @@ for (i in seq_len(nrow(species_list))) {
   this_species <- species_list[i, ]
   pop <- get_species_path(this_species$species_code, 
                           path = "data/ebirdst-data/") %>% 
-    load_raster("percent-population", period = "seasonal", resolution = "mr")
+    load_raster("percent-population", period = "seasonal", resolution = "9km")
   
   # subset to the layer we need: breeding or resident
   pop <- pop[[ifelse(this_species$resident, "resident", "breeding")]]
