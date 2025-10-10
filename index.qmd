@@ -47,4 +47,4 @@ remotes::install_github("ebird/ebird-best-practices")
 
 Hemos creado un [video](https://www.youtube.com/watch?v=SLbjGBjgj_w) introductorio explicando los pasos a seguir para la descarga e instalación de todos los requerimientos del curso.
 
-{{< video https://www.youtube.com/watch?v=VIDEO_ID >}}
+{{< video https://www.youtube.com/watch?v=SLbjGBjgj_w >}}
