@@ -34,8 +34,8 @@ El acceso a los productos de Estados y Tendencias de eBird se obtiene mediante u
 
 ```{r}
 #| label: ebirdst-access-key
-#| eval: false
-set_ebirdst_access_key("XXXXXXXXX")
+#| eval: true
+set_ebirdst_access_key("fvlcg6pt15cs", overwrite = TRUE)
 ```
 
 A continuación, **reinicie R** inmediatamente. Esto guardará la clave de acceso como variable de entorno EBIRDST_KEY en su archivo .Renviron, de modo que pueda acceder a ella desde su sesión de R.
@@ -47,8 +47,10 @@ Para asegurarte de que tu clave de acceso a los datos funciona, intenta ejecutar
 
 ```{r}
 #| label: ebirdst-access-sol
-#| eval: false
-ebirdst_download_status("grbfir1", pattern = "abundance_median_3km_2023", force = TRUE)
+#| eval: true
+dir.create("data/ebirdst-data", recursive = TRUE, showWarnings = FALSE) 
+
+ebirdst_download_status("grbfir1", pattern = "abundance_median_3km", path = "data/ebirdst-data/", force = TRUE)
 ```
 :::
 
@@ -98,19 +100,19 @@ ebirdst_runs %>%
 
 ## Downloading data {#sec-ebirdst-download}
 
-The function `ebirdst_download()` downloads data for a single species given a species name (common name, scientific name, or species code). For example, to download the data for Green-backed Firecrown use:
+The function `ebirdst_download_status()` downloads data for a single species given a species name (common name, scientific name, or species code). For example, to download the data for Green-backed Firecrown use:
 
 ```{r}
 #| label: ebirdst-download-fake
 #| eval: false
-path <- ebirdst_download_status(species = "Green-backed Firecrown")
+path <- ebirdst_download_status(species = "Green-backed Firecrown", path = "data/ebirdst-data")
 path
 ```
 
 ```{r}
 #| label: ebirdst-download-path
 #| echo: false
-path <- get_species_path("Green-backed Firecrown")
+path <- get_species_path("Green-backed Firecrown", path = "data/ebirdst-data")
 path
 ```
 
@@ -150,7 +152,7 @@ Then, once you've identified the files you want, you can use the `pattern` argum
 ```{r}
 #| label: ebirdst-download-specific-pattern
 #| eval: false
-ebirdst_download_status("Green-backed Firecrown", pattern = "abundance")
+ebirdst_download_status("Green-backed Firecrown", pattern = "abundance", path = "data/ebirdst-data/")
 ```
 
 ::: callout-tip
@@ -160,7 +162,7 @@ To avoid any issues resulting from all participants downloading data over a slow
 
 ```{r}
 #| label: ebirdst-load-path
-path <- get_species_path("Green-backed Firecrown")
+path <- get_species_path("Green-backed Firecrown", path = "data/ebirdst-data", dataset = "status")
 path
 ```
 
@@ -194,8 +196,8 @@ where `metric` is typically `median`, except for the relative abundance CIs, whi
 
 ```{r}
 #| label: ebirdst-load-weekly-abd
-abd_median_3km <- load_raster(path, product = "abundance", resolution = "3km")
-print(abd_median_hr)
+abd_median_3km <- load_raster(species = "grbfir1", path = "data/ebirdst-data/", product = "abundance", period = "weekly", metric = "median", resolution = "3km")
+print(abd_median_3km)
 ```
 
 We often refer to these raster objects as "weekly cubes" (e.g. the "weekly abundance cube"). Notice that the cubes contains 52 layers, corresponding to the weeks of the year. The layer names are the dates associated with the mid-point of each week.
@@ -209,10 +211,19 @@ As another example, we could load the low resolution upper and lower abundance c
 
 ```{r}
 #| label: ebirdst-load-weekly-ci
-abd_lower_27km <- load_raster(path, product = "abundance", metric = "lower", 
-                            resolution = "27km")
-abd_upper_27km <- load_raster(path, product = "abundance", metric = "upper", 
-                            resolution = "27km")
+abd_lower_27km <- load_raster(species = "grbfir1", 
+                              path = "data/ebirdst-data/",
+                              product = "abundance", 
+                              metric = "lower", 
+                              period = "weekly",
+                              resolution = "27km")
+
+abd_upper_27km <- load_raster(species = "grbfir1", 
+                              path = "data/ebirdst-data/",
+                              product = "abundance", 
+                              metric = "upper", 
+                              period = "weekly",
+                              resolution = "27km")
 ```
 
 ::: {.callout-caution icon="false"}
@@ -226,7 +237,10 @@ Try loading the weekly median percent of population cube at medium resolution.
 
 ```{r}
 #| label: ebirdst-load-weekly-sol
-pct_pop <- load_raster(path, product = "percent-population", metric = "median", 
+pct_pop <- load_raster(species = "grbfir1", 
+                       path = "data/ebirdst-data/",
+                       product = "proportion-population", 
+                       metric = "median", 
                        resolution = "9km")
 print(pct_pop)
 ```
@@ -244,8 +258,11 @@ where `metric` is either `mean` or `max`. The function `load_raster(period = "se
 
 ```{r}
 #| label: ebirdst-load-seasonal-abd
-abd_seasonal_mean <- load_raster(path, product = "abundance", 
-                                 period = "seasonal", metric = "mean", 
+abd_seasonal_mean <- load_raster(species = "grbfir1", 
+                                 path = "data/ebirdst-data/",
+                                 product = "abundance", 
+                                 period = "seasonal", 
+                                 metric = "mean", 
                                  resolution = "27km")
 print(abd_seasonal_mean)
 ```
@@ -260,8 +277,11 @@ names(abd_seasonal_mean)
 Finally, as a convenience, the data products include year-round rasters summarizing the mean or max across all weeks that fall within a season that passed the expert review process. These can be accessed similarly to the seasonal products, just with `period = "full-year"` instead. For example, these layers can be used in conservation planning to assess the most important sites across the full range and full annual cycle of a species.
 
 ```{r}
-abd_fy_max <- load_raster(path, product = "abundance", 
-                          period = "full-year", metric = "max", 
+abd_fy_max <- load_raster(species = "grbfir1",  
+                          path = "data/ebirdst-data/", 
+                          product = "abundance", 
+                          period = "full-year", 
+                          metric = "max", 
                           resolution = "3km")
 ```
 
@@ -271,9 +291,15 @@ Let's load the low resolution weekly and seasonal relative abundance cubes and u
 
 ```{r}
 #| label: ebirdst-explore-load
-abd_weekly <- load_raster(path, product = "abundance", resolution = "9km")
-abd_seasonal <- load_raster(path, product = "abundance", period = "seasonal", 
-                            resolution = "9km")
+abd_weekly <- load_raster(species = "grbfir1",  
+                          path = "data/ebirdst-data/",
+                          product = "abundance", 
+                          resolution = "27km")
+abd_seasonal <- load_raster(species = "grbfir1",  
+                            path = "data/ebirdst-data/", 
+                            product = "abundance", 
+                            period = "seasonal", 
+                            resolution = "27km")
 ```
 
 These cubes can easily be subset to a single week or season.
@@ -281,7 +307,7 @@ These cubes can easily be subset to a single week or season.
 ```{r}
 #| label: ebirdst-explore-subset
 # week of may 17
-abd_weekly[["2021-05-17"]]
+abd_weekly[["2023-05-17"]]
 # breeding season
 abd_seasonal[["breeding"]]
 ```
@@ -292,8 +318,8 @@ We can also subset the weekly cube to a range of weeks. For example, let's subse
 #| label: ebirdst-explore-mean
 # determine which dates we want to include
 week_dates <- as.Date(names(abd_weekly))
-start_date <- as.Date("2021-05-01")
-end_date <- as.Date("2021-05-31")
+start_date <- as.Date("2023-05-01")
+end_date <- as.Date("2023-05-31")
 week_in_may <- week_dates >= start_date & week_dates <= end_date
 
 # subset to weeks in may
@@ -349,10 +375,20 @@ Let's start by loading the medium resolution weekly proportion of population cub
 ```{r}
 #| label: ebirdst-applications-trajectories-data
 # proportion of population cubes
-pop_grbfir1 <- get_species_path("grbfir1", path = "data/ebirdst-data/") %>% 
-  load_raster(product = "percent-population", resolution = "9km")
-pop_pattyr2 <- get_species_path("pattyr2", path = "data/ebirdst-data/") %>% 
-  load_raster(product = "percent-population", resolution = "9km")
+pop_grbfir1 <- load_raster(species = "grbfir1", 
+                       path = "data/ebirdst-data/",
+                       product = "proportion-population", 
+                       metric = "median", 
+                       resolution = "9km")
+
+
+ebirdst_download_status("Patagonian Tyrant", path = "data/ebirdst-data/")
+
+pop_pattyr2 <- load_raster(species = "pattyr2", 
+                       path = "data/ebirdst-data/",
+                       product = "proportion-population", 
+                       metric = "median", 
+                       resolution = "9km")
 
 # los lagos boundary, projected to match the raster data
 los_lagos <- read_sf("data/gis-data.gpkg", "ne_states") %>% 
@@ -405,10 +441,15 @@ For this application, we calculate the proportion of the population within prote
 species_list <- c("cthhue1", "chipig2", "chimoc1", "grbfir1", "chutap1", 
                   "pattyr2", "strwoo6", "chifli1", "thtray1", "auspar1")
 
+# download data for this list of species
+for (i in 1:length(species_list)){
+  ebirdst_download_status(species_list[i], path = "data/ebirdst-data/", pattern = "proportion-population_seasonal_mean_9km")
+}
+
 # add common names, migrant/resident status, and quality
 species_list <- filter(ebirdst_runs, species_code %in% species_list) %>% 
-  mutate(quality = ifelse(resident, resident_quality, breeding_quality)) %>% 
-  select(species_code, common_name, resident, quality)
+  mutate(quality = ifelse(is_resident, resident_quality, breeding_quality)) %>% 
+  select(species_code, common_name, is_resident, quality)
 print(species_list)
 ```
 
@@ -423,20 +464,22 @@ Relative abundance estimates are impacted by detection rates, which can vary bet
 ```{r}
 #| label: ebirdst-applications-pop
 # loop over the species list extracting the seasonal percent of population
-percent_population <- list()
+proportion_population <- list()
 for (i in seq_len(nrow(species_list))) {
   # load the seasonal cube for this species
   this_species <- species_list[i, ]
-  pop <- get_species_path(this_species$species_code, 
-                          path = "data/ebirdst-data/") %>% 
-    load_raster("percent-population", period = "seasonal", resolution = "9km")
+  pop <- load_raster(this_species$species_code, 
+                     path = "data/ebirdst-data", 
+                     product = "proportion-population", 
+                     period = "seasonal",
+                     resolution = "9km")
   
   # subset to the layer we need: breeding or resident
-  pop <- pop[[ifelse(this_species$resident, "resident", "breeding")]]
-  percent_population[[this_species$species_code]] <- pop
+  pop <- pop[[ifelse(this_species$is_resident, "resident", "breeding")]]
+  proportion_population[[this_species$species_code]] <- pop
 }
 # stack the rasters into a single object
-percent_population <- rast(percent_population)
+proportion_population <- rast(proportion_population)
 ```
 
 The GIS data available in the workshop data package contains polygon boundaries for public protected areas in Chile, let's load them now and project to match the raster layers. For this example, we'll combine all the protected area polygons together into one feature; however, this analysis could be modified to consider how the distribution of species varies between protected areas.
@@ -445,28 +488,28 @@ The GIS data available in the workshop data package contains polygon boundaries 
 #| label: ebirdst-applications-protected
 protected <- read_sf("data/gis-data.gpkg",  layer = "protected_areas") %>% 
   st_combine() %>% 
-  st_transform(crs = crs(percent_population))
+  st_transform(crs = crs(proportion_population))
 ```
 
 Finally, we can use `exactextracr` to calculate the total percent of population within protected areas for each species.
 
 ```{r}
 #| label: ebirdst-applications-ee
-percent_protected <- exact_extract(percent_population, protected, fun = "sum")
+percent_protected <- exact_extract(proportion_population, protected, fun = "sum")
 percent_protected <- as.numeric(percent_protected[1, ])
 percent_protected <- data.frame(species_code = species_list$species_code,
                                 common_name = species_list$common_name,
-                                percent_population = percent_protected) %>% 
-  arrange(desc(percent_population))
+                                proportion_population = percent_protected) %>% 
+  arrange(desc(proportion_population))
 print(percent_protected)
 
 # plot the data
 ggplot(percent_protected) +
-  aes(x = fct_reorder(common_name, percent_population),
-      y = percent_population) +
+  aes(x = fct_reorder(common_name, proportion_population),
+      y = proportion_population) +
   geom_col() +
   scale_y_continuous(labels = scales::percent) +
-  labs(x = NULL, y = "Percent of population in protected areas") +
+  labs(x = NULL, y = "Proportion of population in protected areas") +
   coord_flip()
 ```
 
@@ -479,11 +522,11 @@ For the final application, we'll perform a multi-species site prioritization exe
 # boundary of chile
 chile <- read_sf("data/gis-data.gpkg", layer = "ne_states") %>% 
   filter(country_code == "CL") %>% 
-  st_transform(crs = crs(percent_population))
+  st_transform(crs = crs(proportion_population))
 
 # importance: mean percent of population across species
 # fill missing values with zeros prior to averaging
-importance <- ifel(is.na(percent_population), 0, percent_population) %>% 
+importance <- ifel(is.na(proportion_population), 0, proportion_population) %>% 
   mean(na.rm = TRUE) %>% 
   # crop and mask importance to focus on chile
   crop(chile) %>% 
@@ -547,7 +590,7 @@ The high importance sites we identified are shown in green, while the existing p
 ```{r}
 #| label: ebirdst-applications-prioritization-compare
 # mask the percent of population layers by the selected sites
-selected_pp <- percent_population %>% 
+selected_pp <- proportion_population %>% 
   crop(selected_sites) %>% 
   mask(selected_sites, maskvalues = c(0, NA))
 # calculate total percent of population within proposed sites
@@ -558,26 +601,28 @@ percent_selected <- data.frame(species_code = names(selected_pp),
 # combine with values for existing network
 comparison <- inner_join(percent_protected, percent_selected,
                          by = "species_code") %>% 
-  rename(existing_network = percent_population,
+  rename(existing_network = proportion_population,
          prioritized_sites = selected_percent) %>% 
   pivot_longer(cols = c(existing_network, prioritized_sites),
                names_to = "network_type",
-               values_to = "percent_population")
+               values_to = "proportion_population")
 
-# plot the data
 ggplot(comparison) +
-  aes(x = fct_reorder(common_name, percent_population),
-      y = percent_population,
+  aes(x = fct_reorder(common_name, proportion_population, .fun = max),
+      y = proportion_population,
       group = network_type,
       fill = network_type) +
   geom_col(position = "dodge") +
   scale_y_continuous(labels = scales::percent) +
   scale_fill_brewer(palette = "Set1") +
   labs(x = NULL, 
-       y = "Percent of population in protected areas",
+       y = "Proportion of population in protected areas",
        fill = NULL) +
   coord_flip() +
+  theme_linedraw() +
   theme(legend.position = "bottom")
+
+
 ```
 
 So, for the same total area, we could capture a much larger proportion of the populations of these species if we use eBird Status data products for these species in our site prioritization. This example is, of course, overly simplistic. For example, in a real world application, different sites have different costs associated with protection and you would want to account for that during prioritization. For more complex prioritization problems, systematic conservation planning tools like the R package [`prioritizr`](https://prioritizr.net/) can be used effectively with eBird Status data products.
