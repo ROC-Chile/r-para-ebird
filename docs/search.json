@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "Curso ROC: Análisis de datos de eBird en R",
     "section": "",
-    "text": "Introducción\nEsta página contiene el material utilizado durante el Curso Roc: Análisis de datos de eBird en R.\nEl curso consta de 4 módulos:\n1. Introducción al entorno R en el contexto de eBird\n2. Buenas prácticas para el uso de datos de eBird:introduction to the eBird Basic Dataset (EBD), challenges associated with using eBird data for analysis, and best practices for preparing eBird data for modeling.\n3. Modelamiento de distribución y abundancia relativa\n4. Usos y aplicaciones de productos Estados y Tendencias:downloading eBird Status data products, loading the data into R, and using them for a variety of applications.",
+    "text": "Introducción\nEsta página contiene el material utilizado durante el Curso Roc: Análisis de datos de eBird en R.\nEl curso consta de 4 módulos:\n1. Introducción al entorno R en el contexto de eBird\n2. Buenas prácticas para el uso de datos de eBird: introduction to the eBird Basic Dataset (EBD), challenges associated with using eBird data for analysis, and best practices for preparing eBird data for modeling.\n3. Modelamiento de distribución y abundancia relativa\n4. Usos y aplicaciones de productos Estados y Tendencias: descarga de productos de Estados y Tendencias, carga de datos en R y su uso para una variedad de aplicaciones.",
     "crumbs": [
       "Introducción"
     ]
@@ -159,6 +159,36 @@
     "text": "4.1 Data access\nEl proyecto Estados y Tendencias utiliza modelos de machine learning de ciclo anual completo que combinan datos de eBird con datos de teledetección y toman en cuenta las variaciones en el comportamiento y el esfuerzo de los observadores para producir estimaciones semanales de alta resolución de los límites de distribución, la tasa de ocurrencia y la abundancia relativa de las especies de aves. La última versión, con estimaciones hasta el año 2023, incluye resultados para 2981 especies en todo el mundo, de las cuales 471 han sido registradas en Chile. Las visualizaciones interactivas de estas especies están disponibles en el sitio web de eBird Estados y Tendencias y los productos de datos de Estados y Tendencias de eBird están disponibles a través del paquete de R ebirdst.\nEn este modulo nos familiarizaremos con los productos de datos de Estados y Tendencias de eBird y el paquete R ebirdst, desarrollado específicamente para trabajar con estos datos. Presentaremos la gama de datos disponibles y, a continuación, les mostraremos cómo descargar estos productos de datos y cargarlos en R para su posterior análisis. Luego, trabajaremos con una serie de ejemplos de aplicaciones prácticas. Comencemos cargando los paquetes que utilizaremos a lo largo de este taller.\nEl acceso a los productos de Estados y Tendencias de eBird se obtiene mediante un formulario de solicitud de acceso disponible en: https://ebird.org/st/request. Las condiciones de uso se han diseñado para ser bastante permisivas en muchos casos, especialmente en lo que respecta al uso académico y de investigación. Después de leer las Condiciones de uso de los productos de estado y tendencias de eBird y rellenar el Formulario de solicitud de acceso, se le proporcionará una clave de acceso alfanumérica. Para almacenar la clave de acceso de modo que R y el paquete ebirdst puedan acceder a ella, ejecute lo siguiente (sustituyendo \"XXXXXXXXX\" por su clave real):\nset_ebirdst_access_key(\"fvlcg6pt15cs\", overwrite = TRUE)\nA continuación, reinicie R inmediatamente. Esto guardará la clave de acceso como variable de entorno EBIRDST_KEY en su archivo .Renviron, de modo que pueda acceder a ella desde su sesión de R.",
     "crumbs": [
       "<span class='chapter-number'>4</span>  <span class='chapter-title'>Productos de Estados y Tendencias de eBird</span>"
+    ]
+  },
+  {
+    "objectID": "intror.html#sec-intro-tidyverse",
+    "href": "intror.html#sec-intro-tidyverse",
+    "title": "1  Introducción al entorno R en el contexto de eBird",
+    "section": "1.2 Tidyverse",
+    "text": "1.2 Tidyverse\nThroughout this workshop, we use packages from the Tidyverse, an opinionated collection of R packages designed for data science. Packages such as ggplot2, for data visualization, and dplyr, for data manipulation, are two of the most well known Tidyverse packages; however, there are many more. We’ll try to explain any functions as they come up; however, for a good general resource on working with data in R using the Tidyverse see the free online book R for Data Science by Hadley Wickham.\nThe one piece of the Tidyverse that we will cover up front is the pipe operator %&gt;%. The pipe takes the expression to the left of it and “pipes” it into the first argument of the expression on the right.\n\nlibrary(dplyr)\n\n# without pipe\nmean(1:10)\n#&gt; [1] 5.5\n\n# with pipe\n1:10 %&gt;% mean()\n#&gt; [1] 5.5\n\nThe pipe can code significantly more readable by avoiding nested function calls, reducing the need for intermediate variables, and making sequential operations read left-to-right. For example, to add a new variable to a data frame, then summarize using a grouping variable, the following are equivalent:\n\n# intermediate variables\nmtcars_kg &lt;- mutate(mtcars, wt_kg = 454 * wt)\nmtcars_grouped &lt;- group_by(mtcars_kg, cyl)\nsummarize(mtcars_grouped, wt_kg = mean(wt_kg))\n#&gt; # A tibble: 3 × 2\n#&gt;     cyl wt_kg\n#&gt;   &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1     4 1038.\n#&gt; 2     6 1415.\n#&gt; 3     8 1816.\n\n# nested function calls\nsummarize(\n  group_by(\n    mutate(mtcars, wt_kg = 454 * wt),\n    cyl\n  ),\n  wt_kg = mean(wt_kg)\n)\n#&gt; # A tibble: 3 × 2\n#&gt;     cyl wt_kg\n#&gt;   &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1     4 1038.\n#&gt; 2     6 1415.\n#&gt; 3     8 1816.\n\n# pipes\nmtcars %&gt;% \n  mutate(wt_kg = 454 * wt) %&gt;% \n  group_by(cyl) %&gt;% \n  summarize(wt_kg = mean(wt_kg))\n#&gt; # A tibble: 3 × 2\n#&gt;     cyl wt_kg\n#&gt;   &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1     4 1038.\n#&gt; 2     6 1415.\n#&gt; 3     8 1816.\n\n\n\n\n\n\n\nExercise\n\n\n\nRewrite the following code using pipes:\n\nset.seed(1)\nround(log(runif(10, min = 0.5)), 1)\n#&gt;  [1] -0.5 -0.4 -0.2  0.0 -0.5 -0.1  0.0 -0.2 -0.2 -0.6\n\n\n\n\n\n\n\n\n\nSolution\n\n\n\n\n\n\nset.seed(1)\nrunif(10, min = 0.5) %&gt;% \n  log() %&gt;% \n  round(digits = 1)\n#&gt;  [1] -0.5 -0.4 -0.2  0.0 -0.5 -0.1  0.0 -0.2 -0.2 -0.6",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introducción al entorno R en el contexto de eBird</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#sec-intro-config",
+    "href": "index.html#sec-intro-config",
+    "title": "Curso ROC: Análisis de datos de eBird en R",
+    "section": "Configuración",
+    "text": "Configuración\nEste cruso está pensado para ser interactivo. Todos los ejemplos están escritos en el lenguaje de programación R, y el instructor los irá resolviendo en tiempo real. Recomendamos seguir la clase seguirlo escribiendo el mismo código en su computador. Para evitar retrasos innecesarios, siga estas instrucciones de configuración antes del curso:\n\nCrea una cuenta de eBird si aún no tiene una y solicita acceso a los datos crudos de eBird y a los productos de Estados y Tendencias:\n\nSolicita acceso al eBird Basic Dataset (EBD).\nSolicita acceso a los productos de Estados y Tendencias\n\nDescarga e instala la última versión de R. Se requiere la versión 4.0.0 o posterior de R para poder seguir este curso\nDescarga e instala la última versión de RStudio. RStudio no es necesario para este taller; sin embargo, los instructores lo utilizarán y es posible que te resulte más fácil seguir el curso si trabajas en el mismo entorno.\nLos ejercicios de este curso utilizan varios paquetes de R. Para instalar todos los paquetes necesarios, ejecute el siguiente código\n\n\nif (!requireNamespace(\"remotes\", quietly = TRUE)) {\n  install.packages(\"remotes\")\n}\nremotes::install_github(\"ebird/ebird-best-practices\")\n\n\nAsegúrate de que todos los paquetes estén actualizados a sus versiones más recientes haciendo clic en el botón Actualizar de la pestaña Paquetes en RStudio.\nDescarga el paquete de datos que utiliazremos en este curso.",
+    "crumbs": [
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "index.html#sec-tutorial-config",
+    "href": "index.html#sec-tutorial-config",
+    "title": "Curso ROC: Análisis de datos de eBird en R",
+    "section": "Tutorial de configuración",
+    "text": "Tutorial de configuración\nHemos creado un video) introductorio explicando los pasos a seguir para la descarga e instalación de todos los requerimientos del curso.",
+    "crumbs": [
+      "Introducción"
     ]
   }
 ]

@@ -9,3 +9,69 @@ editor_options:
 # Introducción al entorno R en el contexto de eBird {#sec-r}
 
 ## Introducción {#sec-r-intro}
+
+## Tidyverse {#sec-intro-tidyverse}
+
+Throughout this workshop, we use packages from the [Tidyverse](https://www.tidyverse.org/), an opinionated collection of R packages designed for data science. Packages such as [`ggplot2`](https://ggplot2.tidyverse.org/), for data visualization, and [`dplyr`](https://dplyr.tidyverse.org/), for data manipulation, are two of the most well known Tidyverse packages; however, there are many more. We’ll try to explain any functions as they come up; however, for a good general resource on working with data in R using the Tidyverse see the free online book [R for Data Science](https://r4ds.hadley.nz/) by [Hadley Wickham](https://hadley.nz/).
+
+The one piece of the Tidyverse that we will cover up front is the pipe operator `%>%`. The pipe takes the expression to the left of it and "pipes" it into the first argument of the expression on the right.
+
+```{r}
+#| label: intro-tidyverse-pipe
+library(dplyr)
+
+# without pipe
+mean(1:10)
+
+# with pipe
+1:10 %>% mean()
+```
+
+The pipe can code significantly more readable by avoiding nested function calls, reducing the need for intermediate variables, and making sequential operations read left-to-right. For example, to add a new variable to a data frame, then summarize using a grouping variable, the following are equivalent:
+
+```{r}
+#| label: intro-tidyverse-dplyr
+# intermediate variables
+mtcars_kg <- mutate(mtcars, wt_kg = 454 * wt)
+mtcars_grouped <- group_by(mtcars_kg, cyl)
+summarize(mtcars_grouped, wt_kg = mean(wt_kg))
+
+# nested function calls
+summarize(
+  group_by(
+    mutate(mtcars, wt_kg = 454 * wt),
+    cyl
+  ),
+  wt_kg = mean(wt_kg)
+)
+
+# pipes
+mtcars %>% 
+  mutate(wt_kg = 454 * wt) %>% 
+  group_by(cyl) %>% 
+  summarize(wt_kg = mean(wt_kg))
+```
+
+::: {.callout-caution icon="false"}
+## Exercise
+
+Rewrite the following code using pipes:
+
+```{r}
+#| label: intro-tidyverse-ex
+set.seed(1)
+round(log(runif(10, min = 0.5)), 1)
+```
+:::
+
+::: {.callout-note icon="false" collapse="true"}
+## Solution
+
+```{r}
+#| label: intro-tidyverse-sol
+set.seed(1)
+runif(10, min = 0.5) %>% 
+  log() %>% 
+  round(digits = 1)
+```
+:::
