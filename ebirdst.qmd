@@ -63,151 +63,142 @@ El objeto `ebirdst_runs` es un data frame que enumera todas las especies disponi
 glimpse(ebirdst_runs)
 ```
 
-If you're working in RStudio, you can use `View()` to interactively explore this data frame. You can also consult the [Status and Trends species page](https://science.ebird.org/en/status-and-trends/species) the full list of available species. On this page you can also filter by region, for example to see only those species with some portion of their range [falling within Chile](https://science.ebird.org/en/status-and-trends/species?regionCode=CL).
+Desde RStudio también puedes utilizar `View()` para explorar de forma interactiva la base de datos. También puedes consultar la página de [especies en Estados y Tendencias](https://science.ebird.org/en/status-and-trends/species) para ver la lista completa de especies disponibles. En esta página puedes filtrar por región, por ejemplo, para ver solo aquellas especies con alguna parte de su área de distribución [dentro de Chile](https://science.ebird.org/en/status-and-trends/species?regionCode=CL).
 
-### Expert review {#sec-ebirdst-review}
+### Revisión de expertos {#sec-ebirdst-review}
 
-All species go through a process of expert human review prior to being released. The `ebirdst_runs` data frame also contains information from this review process. Reviewers assess each of the four seasons: breeding, non-breeding, pre-breeding migration, and post-breeding migration. Resident (i.e., non-migratory) species are identified by having `TRUE` in the `resident` column of `ebirdst_runs`, and these species are assessed across the whole year rather than seasonally. `ebirdst_runs` contains two important pieces of information for each season: a **quality** rating and **seasonal dates**.
+Todas las especies pasan por un proceso de revisión por parte de expertos humanos antes de ser publicadas. El marco de datos «ebirdst_runs» también contiene información de este proceso de revisión. Los revisores evalúan cada una de las cuatro estaciones: reproducción, no reproducción, migración previa a la reproducción y migración posterior a la reproducción. Las especies residentes (es decir, no migratorias) se identifican con el valor «TRUE» en la columna `resident` column of `ebirdst_runs`, y estas especies se evalúan a lo largo de todo el año en lugar de por temporadas. «ebirdst_runs» contiene dos datos importantes para cada estación: una calificación de **calidad (quality)**  y **fechas estacionales (seasonal dates)**.
 
-The **seasonal dates** define the weeks that fall within each season; the relative abundance estimates for these weeks get averaged to produce the seasonal relative abundance maps on the Status and Trends website. Breeding and non-breeding season dates are defined for each species as the weeks during those seasons when the species' population does not move. For this reason, these seasons are also described as stationary periods. Migration periods are defined as the periods of movement between the stationary non-breeding and breeding seasons. Note that for many species these migratory periods include not only movement from breeding grounds to non-breeding grounds, but also post-breeding dispersal, molt migration, and other movements.
+Las seasonal dates definen las semanas que comprenden cada estación; las estimaciones de abundancia relativa para estas semanas se promedian para producir los mapas de abundancia relativa estacional en el sitio de Estados y Tendencias. Las fechas de la temporada reproductiva y no reproductiva se definen para cada especie como las semanas durante esas estaciones en las que la población de la especie no se desplaza. Por esta razón, estas estaciones también se describen como períodos estacionarios. Los períodos de migración se definen como los períodos de movimiento entre las temporadas estacionarias no reproductivas y reproductivas. Cabe señalar que, para muchas especies, estos períodos migratorios incluyen no solo el movimiento desde las zonas de reproducción a las zonas no reproductivas, sino también la dispersión posterior a la reproducción, la migración por muda y otros movimientos.
 
-Reviewers also examine the model estimates for each season to assess the amount of extrapolation or omission present in the model, and assign an associated **quality** rating ranging from 0 (lowest quality) to 3 (highest quality). Extrapolation refers to cases where the model predicts occurrence where the species is known to be absent, while omission refers to the model failing to predict occurrence where a species is known to be present.
+Los revisores también examinan las estimaciones del modelo para cada temporada con el fin de evaluar el grado de extrapolación u omisión presente en el modelo, y asignan una calificación de **calidad** asociada que va de 0 (calidad más baja) a 3 (calidad más alta). La extrapolación se refiere a los casos en los que el modelo predice la presencia de una especie cuando se sabe que está ausente, mientras que la omisión se refiere a los casos en los que el modelo no predice la presencia de una especie cuando se sabe que está presente.
 
-A rating of 0 implies this season failed review and model results should not be used at all for this period. Ratings of 1-3 correspond to a gradient of more to less extrapolation and/or omission, and we often use a traffic light analogy when referring to them:
+Una calificación de 0 implica que esta temporada no ha superado la revisión y que los resultados del modelo no deben utilizarse en absoluto para este período. Las calificaciones de 1 a 3 corresponden a un gradiente de mayor a menor extrapolación y/u omisión, y a menudo utilizamos una analogía con los semáforos para referirnos a ellas:
 
-1.  [**Red light (1)**]{style="color:#f20a02"}: low quality, extensive extrapolation and/or omission and noise, but at least some regions have estimates that are accurate; can be used with caution in certain regions.
-2.  [**Yellow light (2)**]{style="color:#f2ea49"}: medium quality, some extrapolation and/or omission; use with caution.
-3.  [**Green light (3)**]{style="color:#00cc25"}: high quality, very little or no extrapolation and/or omission; these seasons can be safely used.
+1.  [**Luz roja (1)**]{style="color:#f20a02"}: baja calidad, extrapolación y/u omisión extensas y ruido, pero al menos algunas regiones tienen estimaciones precisas; se puede utilizar con precaución en determinadas regiones.
+2.  [**Luz amarilla (2)**]{style="color:#f2ea49"}: calidad media, cierta extrapolación y/u omisión; utilizar con precaución.
+3.  [**Luz verde (3)**]{style="color:#00cc25"}: calidad alta, muy poca o ninguna extrapolación y/u omisión; estas temporadas se pueden utilizar con seguridad.
 
 ::: {.callout-caution icon="false"}
-## Exercise
+## Ejercicio
 
-Look up a species of interest to you. Identify the seasonal dates and the review quality ratings.
+Elije una especie que te interese. Identifica las fechas estacionales y la calificacion de calidad.
 :::
 
 ::: {.callout-note icon="false" collapse="true"}
-## Solution
+## Solución
 
-Green-backed Firecrown is coded as a migrant with all four seasons receiving quality ratings of 2 suggesting there is some extrapolation or omission.
+El Picaflor chico está catalogado como migratorio, con una calificación de calidad de 2 en las cuatro estaciones, lo que sugiere que hay alguna extrapolación u omisión.
 
 ```{r}
 #| label: ebirdst-review-sol
 ebirdst_runs %>% 
-  filter(common_name == "Green-backed Firecrown") %>% 
+  filter(scientific_name == "Sephanoides sephaniodes") %>% 
   glimpse()
 ```
 :::
 
-## Downloading data {#sec-ebirdst-download}
+## Descarga de datos {#sec-ebirdst-download}
 
-The function `ebirdst_download_status()` downloads data for a single species given a species name (common name, scientific name, or species code). For example, to download the data for Green-backed Firecrown use:
+La función `ebirdst_download_status()` descarga datos de una sola especie a partir del nombre de la especie (nombre común, nombre científico o código de especie). Por ejemplo, para descargar los datos del Picaflor chico, utilice:
 
 ```{r}
 #| label: ebirdst-download-fake
 #| eval: false
-path <- ebirdst_download_status(species = "Green-backed Firecrown", path = "data/ebirdst-data")
+path <- ebirdst_download_status(species = "Sephanoides sephaniodes", path = "data/ebirdst-data")
 path
 ```
 
 ```{r}
 #| label: ebirdst-download-path
 #| echo: false
-path <- get_species_path("Green-backed Firecrown", path = "data/ebirdst-data")
+path <- get_species_path("Sephanoides sephaniodes", path = "data/ebirdst-data")
 path
 ```
 
-The function will automatically identify a suitable location to store the downloaded data and return that path, which we captured in the variable `path`. We can see which files were downloaded with:
+La función identificará automáticamente una ubicación adecuada para almacenar los datos descargados y devolverá esa ruta, que hemos capturado en la variable `path`. Podemos ver qué archivos se han descargado con:
 
 ```{r}
 #| label: ebirdst-download-list
 list.files(path, recursive = TRUE)
 ```
 
-Within this data package directory, the files are organized according to the following structure:
+Dentro de este directorio de paquetes de datos, los archivos están organizados según la siguiente estructura:
 
--   `weekly/`: a directory containing weekly estimates of occurrence, count, relative abundance, and percent of population on a regular grid in GeoTIFF format at three resolutions. See below for more details.
--   `seasonal/`: a directory containing seasonal estimates of occurrence, count, relative abundance, and percent of population on a regular grid in GeoTIFF format at three resolutions. These are derived from the corresponding weekly raster data. Dates defining the boundary of each season are set on a species-specific basis by an expert reviewer familiar with the species. These dates are available in the ebirdst_runs data frame. Only seasons that passed the expert review process are included. See below for more details.
--   `ranges/`: a directory containing GeoPackages storing range boundary polygons. See below for more details.
--   `config.json`: run-specific parameters, mostly for internal use, but also containing useful parameters for mapping the abundance data.
+- `weekly/`: un directorio que contiene estimaciones semanales de ocurrencia, conteo, abundancia relativa y proporción de población en una cuadrícula regular en formato GeoTIFF con tres resoluciones. Ver más abajo para obtener más detalles.
+- `seasonal/`: un directorio que contiene estimaciones estacionales de ocurrencia, conteo, abundancia relativa y proporción de población en una cuadrícula regular en formato GeoTIFF con tres resoluciones. Estas se derivan de los datos ráster semanales correspondientes. Las fechas que definen los límites de cada estación se establecen en función de cada especie por un revisor experto familiarizado con la misma. Estas fechas están disponibles en el marco de datos ebirdst_runs. Solo se incluyen las estaciones que han superado el proceso de revisión por expertos. Ver más abajo para obtener más detalles.
+- `ranges/`: un directorio que contiene GeoPackages que almacenan polígonos de límites de distribución. Ver más abajo para obtener más detalles.
+- `config.json`: parámetros específicos de la ejecución, principalmente para uso interno, pero que también contienen parámetros útiles para cartografiar los datos de abundancia.
 
 ::: callout-tip
 ## Tip
 
-Spatial data fall into two broad categories: raster data and vector data. **Raster** data represents spatial data as a regular grid of cells with a value or set of values assigned to each. **Vector** data represents spatial data as discrete points, lines, or polygons. In the eBird Status data products, raster data are distributed as GeoTIFFs, while vector data are distributed as GeoPackages.
+Los datos espaciales se dividen en dos grandes categorías: datos ráster y datos vectoriales. Los datos **ráster** representan los datos espaciales como una cuadrícula regular de celdas con un valor o conjunto de valores asignados a cada una. Los datos **vectoriales** representan los datos espaciales como puntos, líneas o polígonos discretos. En los productos de datos de eBird Status, los datos ráster se distribuyen como GeoTIFF, mientras que los datos vectoriales se distribuyen como GeoPackages.
 :::
 
-For a species whose data have already been downloaded, you can use `get_species_path("Green-backed Firecrown")` to identify the path to the data.
+Para una especie cuyos datos ya se han descargado, puede utilizar `get_species_path("Sephanoides sephaniodes")` para identificar la ruta de acceso a los datos.
 
-### Downloading specific files {#sec-ebirdst-download-specific}
+### Descarga de archivos específicos {#sec-ebirdst-download-specific}
 
-The full data package for each species contains a large number of files, many of which may be unnecessary for your application. You can use the `dry_run = TRUE` argument to `ebirdst_download()` to list the available files without downloading them.
+El paquete completo de datos de cada especie contiene un gran número de archivos, muchos de los cuales pueden ser innecesarios para su aplicación. Puede utilizar el argumento `dry_run = TRUE` en `ebirdst_download()` para obtener una lista de los archivos disponibles sin descargarlos.
 
 ```{r}
 #| label: ebirdst-download-specific-dryrun
-ebirdst_download_status("Green-backed Firecrown", dry_run = TRUE)
+ebirdst_download_status("Sephanoides sephaniodes", dry_run = TRUE)
 ```
 
-Then, once you've identified the files you want, you can use the `pattern` argument to download only those files. For example, imagine we only want the `abundance` files:
+Una vez identificados los archivos que desea, puede utilizar el argumento `pattern` para descargar solo esos archivos. Por ejemplo, imaginemos que solo queremos los archivos `abundance`:
 
 ```{r}
 #| label: ebirdst-download-specific-pattern
 #| eval: false
-ebirdst_download_status("Green-backed Firecrown", pattern = "abundance", path = "data/ebirdst-data/")
+ebirdst_download_status("Sephanoides sephaniodes", pattern = "abundance", path = "data/ebirdst-data/")
 ```
 
-::: callout-tip
-## Tip
+## Cargando datos en R {#sec-ebirdst-load}
 
-To avoid any issues resulting from all participants downloading data over a slow internet connection at the same time, for the remainder of this lesson we'll use data included in the [data package for this workshop](index.qmd#sec-intro-data). These data packages should be in the `data/ebirst-data/` subdirectory of your RStudio project. To find the path to the data for a particular species using a non-standard download location, use
+En este curso, nos centraremos en los productos de datos ráster, que se pueden cargar en R utilizando la función `load_raster()` de `ebirdst`. En R, utilizaremos el paquete `terra` para trabajar con datos ráster. Los productos de datos ráster se dividen en dos grandes categorías que proporcionan estimaciones semanales y estacionales.
 
-```{r}
-#| label: ebirdst-load-path
-path <- get_species_path("Green-backed Firecrown", path = "data/ebirdst-data", dataset = "status")
-path
-```
+### Estimaciones semanales ráster {#sec-ebirdst-load-weekly}
 
-However, when working with eBird Status data products after this workshop, it's best to use the standard download location and skip adding `path = "data/ebirdst-data/"`.
-:::
+Los productos básicos de datos ráster son las estimaciones semanales de presencia, conteo, abundancia relativa y proporción de población. Todas las estimaciones son el valor medio esperado para un listado con desplazamiento de eBird de 1 km y 1 hora realizado por un observador experto en el momento óptimo del día y en las condiciones meteorológicas óptimas para observar la especie en cuestión.
 
-## Loading data in R {#sec-ebirdst-load}
+- **Ocurrencia** `occurrence`: la probabilidad esperada de encontrar una especie.
+- **Conteo** `count`: el conteo esperado de una especie, condicionado a su ocurrencia en la ubicación dada.
+- **Abundancia relativa** `abundance`: la abundancia relativa esperada de una especie, calculada como el producto de la probabilidad de ocurrencia y el conteo condicionado a la ocurrencia. Además de la abundancia relativa mediana, se proporcionan intervalos de confianza (IC) superiores e inferiores, definidos en el decil 10 y el decil 90 de la abundancia relativa, respectivamente.
+- **Proporción de población** `proportion-population`: la proporción de la abundancia relativa total dentro de cada celda. Se trata de un producto derivado que se calcula dividiendo cada valor de celda de abundancia relativa del ráster por la suma de todos los valores de celda.
 
-In this workshop, we'll focus on the raster data products, which can all be loaded into R using the `ebirdst` function `load_raster()`. In R, we'll use the `terra` package to work with raster data. Raster data products fall into two broad categories providing weekly and seasonal estimates.
+Todas las predicciones se realizan en una cuadrícula global estándar de 2,96 km x 2,96 km; sin embargo, también se proporcionan archivos GeoTIFF de menor resolución, que suelen ser mucho más rápidos de manejar. Las tres resoluciones son:
 
-### Weekly raster estimates {#sec-ebirdst-load-weekly}
+- Alta resolución (`3km`): datos con una resolución nativa de 2,96 km.
+- Resolución media (`9km`): datos `3km` agregados por un factor de 3 en cada dirección, lo que da como resultado una resolución de 8,89 km.
+- Baja resolución (`27km`): datos `3km` agregados por un factor de 9 en cada dirección, lo que da como resultado una resolución de 26,7 km.
 
-The core raster data products are the weekly estimates of occurrence, count, relative abundance, and percent of population. All estimates are the median expected value for a 1km, 1 hour eBird Traveling Count by an expert eBird observer at the optimal time of day and for optimal weather conditions to observe the given species.
-
--   **Occurrence** `occurrence`: the expected probability of encountering a species.
--   **Count** `count`: the expected count of a species, conditional on its occurrence at the given location.
--   **Relative abundance** `abundance`: the expected relative abundance of a species, computed as the product of the probability of occurrence and the count conditional on occurrence. In addition to the median relative abundance, upper and lower confidence intervals (CIs) are provided, defined at the 10th and 90th quantile of relative abundance, respectively.
--   **Percent of population** `precent-population`: the proportion of the total relative abundance within each cell. This is a derived product calculated by dividing each cell value in the relative abundance raster by the sum of all cell values
-
-All predictions are made on a standard 2.96km x 2.96km global grid, however, for convenience lower resolution GeoTIFFs are also provided, which are typically much faster to work with. The three resolutions are:
-
--   High resolution (`hr`): the native 2.96 km resolution data
--   Medium resolution (`mr`): the `hr` data aggregated by a factor of 3 in each direction resulting in a resolution of 8.89 km
--   Low resolution (`lr`): the `hr` data aggregated by a factor of 9 in each direction resulting in a resolution of 26.7 km
-
-The weekly cubes use the following naming convention:
+Los archivos semanales utilizan la siguiente convención de nomenclatura:
 
 `weekly/<species_code>_<product>_<metric>_<resolution>_<year>.tif`
 
-where `metric` is typically `median`, except for the relative abundance CIs, which use `lower` and `upper`. The function `load_raster()` is used to load these data into R and takes arguments for `product`, `metric` and `resolution`. For example, to load the high resolution median relative abundance, use
+donde `metric` suele ser `median`, excepto en los IC de abundancia relativa, que utilizan `lower` y `upper`. La función `load_raster()` se utiliza para cargar estos datos en R y toma argumentos para `product`, `metric` y `resolution`. Por ejemplo, para cargar la abundancia relativa mediana de alta resolución, utilice:
 
 ```{r}
 #| label: ebirdst-load-weekly-abd
-abd_median_3km <- load_raster(species = "grbfir1", path = "data/ebirdst-data/", product = "abundance", period = "weekly", metric = "median", resolution = "3km")
+abd_median_3km <- load_raster(species = "grbfir1", 
+                              path = "data/ebirdst-data/", 
+                              product = "abundance", 
+                              period = "weekly", 
+                              metric = "median", 
+                              resolution = "3km")
 print(abd_median_3km)
 ```
 
-We often refer to these raster objects as "weekly cubes" (e.g. the "weekly abundance cube"). Notice that the cubes contains 52 layers, corresponding to the weeks of the year. The layer names are the dates associated with the mid-point of each week.
+A menudo nos referimos a estos objetos ráster como `cubos semanales` (por ejemplo, el `cubo de abundancia semanal`). Obsérvese que los cubos contienen 52 capas, que corresponden a las semanas del año. Los nombres de las capas son las fechas asociadas al punto medio de cada semana.
 
 ```{r}
 #| label: ebirdst-load-weekly-parse
 as.Date(names(abd_median_3km))
 ```
 
-As another example, we could load the low resolution upper and lower abundance confidence intervals.
+Como otro ejemplo, podríamos cargar los intervalos de confianza de abundancia superior e inferior de baja resolución.
 
 ```{r}
 #| label: ebirdst-load-weekly-ci
@@ -227,13 +218,13 @@ abd_upper_27km <- load_raster(species = "grbfir1",
 ```
 
 ::: {.callout-caution icon="false"}
-## Exercise
+## Ejercicio
 
-Try loading the weekly median percent of population cube at medium resolution.
+Intente cargar el cubo del porcentaje medio semanal de la población con una resolución media.
 :::
 
 ::: {.callout-note icon="false" collapse="true"}
-## Solution
+## Solución
 
 ```{r}
 #| label: ebirdst-load-weekly-sol
@@ -246,16 +237,15 @@ print(pct_pop)
 ```
 :::
 
-### Seasonal raster estimates {#sec-ebirdst-load-seasonal}
+### Rásters de estimaciones estacionales {#sec-ebirdst-load-seasonal}
 
-The seasonal raster estimates are provided for the same set of products and at the same three resolutions as the weekly estimates. They're derived from the weekly data by taking the cell-wise mean or max across the weeks within each season. Recall that the seasonal boundary dates are available in the data frame `ebirdst_runs`; data is not provided for seasons with a quality score of 0.
+Los rásters de estimaciones estacionales se proporcionan para el mismo conjunto de productos y con las mismas tres resoluciones que las estimaciones semanales. Se obtienen a partir de los datos semanales tomando la media o el máximo por celda a lo largo de las semanas de cada estación. Recuerde que las fechas límite estacionales están disponibles en `ebirdst_runs`; no se proporcionan datos para las estaciones con una puntuación de calidad de 0.
 
-The seasonal GeoTIFFs use the following naming convention:
+Los GeoTIFF estacionales utilizan la siguiente convención de nomenclatura:
 
 `seasonal/<species_code>_<product>_seasonal_<metric>_<resolution>_<year>.tif`
 
-where `metric` is either `mean` or `max`. The function `load_raster(period = "seasonal")` is used to load these data into R and takes arguments for `product`, `metric` and `resolution`. For example, to load the low resolution mean seasonal relative abundance, use
-
+donde `metric` es `mean` o `max`. La función `load_raster(period = "seasonal")` se utiliza para cargar estos datos en R y toma argumentos para `product`, `metric` y `resolution`. Por ejemplo, para cargar la abundancia relativa estacional media de baja resolución, utilice:
 ```{r}
 #| label: ebirdst-load-seasonal-abd
 abd_seasonal_mean <- load_raster(species = "grbfir1", 
@@ -267,14 +257,14 @@ abd_seasonal_mean <- load_raster(species = "grbfir1",
 print(abd_seasonal_mean)
 ```
 
-Notice there are four layers in this raster corresponding to the four seasons.
+Observe que hay cuatro capas en este ráster que corresponden a las cuatro estaciones.
 
 ```{r}
 #| label: ebirdst-load-seasonal-seasons
 names(abd_seasonal_mean)
 ```
 
-Finally, as a convenience, the data products include year-round rasters summarizing the mean or max across all weeks that fall within a season that passed the expert review process. These can be accessed similarly to the seasonal products, just with `period = "full-year"` instead. For example, these layers can be used in conservation planning to assess the most important sites across the full range and full annual cycle of a species.
+Por último, para mayor comodidad, los productos de datos incluyen rásteres anuales que resumen la media o el máximo de todas las semanas que caen dentro de una estación que ha superado el proceso de revisión por expertos. Se puede acceder a ellos de forma similar a los productos estacionales, solo que con «period = "full-year"» en lugar de «period = "week"». Por ejemplo, estas capas se pueden utilizar en la planificación de la conservación para evaluar los sitios más importantes en todo el área de distribución y el ciclo anual completo de una especie.
 
 ```{r}
 abd_fy_max <- load_raster(species = "grbfir1",  
@@ -285,9 +275,9 @@ abd_fy_max <- load_raster(species = "grbfir1",
                           resolution = "3km")
 ```
 
-## Exploring the raster data {#sec-ebirdst-explore}
+## Explorando los datos ráster {#sec-ebirdst-explore}
 
-Let's load the low resolution weekly and seasonal relative abundance cubes and use them to demonstrate some basic raster operations with the data.
+Carguemos los ráster de abundancia relativa semanal y estacional de baja resolución y utilicémoslos para demostrar algunas operaciones ráster básicas con los datos.
 
 ```{r}
 #| label: ebirdst-explore-load
@@ -295,6 +285,7 @@ abd_weekly <- load_raster(species = "grbfir1",
                           path = "data/ebirdst-data/",
                           product = "abundance", 
                           resolution = "27km")
+
 abd_seasonal <- load_raster(species = "grbfir1",  
                             path = "data/ebirdst-data/", 
                             product = "abundance", 
@@ -302,52 +293,55 @@ abd_seasonal <- load_raster(species = "grbfir1",
                             resolution = "27km")
 ```
 
-These cubes can easily be subset to a single week or season.
+Estos ráster se pueden dividir fácilmente en subconjuntos de una sola semana o temporada.
 
 ```{r}
 #| label: ebirdst-explore-subset
 # week of may 17
 abd_weekly[["2023-05-17"]]
+
 # breeding season
 abd_seasonal[["breeding"]]
 ```
 
-We can also subset the weekly cube to a range of weeks. For example, let's subset to only the estimates for weeks in May, then take the average across the weeks.
+También podemos dividir el ráster semanal en un rango de semanas. Por ejemplo, dividamos solo las estimaciones de las semanas de mayo y luego calculemos el promedio de todas las semanas.
 
 ```{r}
 #| label: ebirdst-explore-mean
-# determine which dates we want to include
+# determine qué fechas podemos incluir
 week_dates <- as.Date(names(abd_weekly))
 start_date <- as.Date("2023-05-01")
 end_date <- as.Date("2023-05-31")
 week_in_may <- week_dates >= start_date & week_dates <= end_date
 
-# subset to weeks in may
+# subset a las semanas de mayo
 abd_weekly_may <- abd_weekly[[week_in_may]]
 
-# average across weeks
+# promedio semanal
 mean(abd_weekly_may, na.rm = TRUE)
 ```
 
-Making a simple map of the data will produce unexpected results. For example, let's map the breeding season relative abundance for Green-backed Firecrown.
+Crear un mapa sencillo con los datos producirá resultados inesperados. Por ejemplo, vamos a trazar un mapa de la abundancia relativa durante la temporada de reproducción del Picaflro chico.
 
 ```{r}
 #| label: ebirdst-explore-map
 plot(abd_seasonal[["breeding"]])
 ```
 
-Recall that all eBird Status data products are provided for the entire globe, regardless of the range of the species. Also, notice that some areas, such as most of the Amazon Basin, have missing values indicating that there was insufficient data to make a prediction in the region. Other areas, such as North America, had sufficient data to predict that the species is absent. Let's try using the GIS data included in the workshop data package to crop the raster to the Chilean region of Los Lagos to make a more meaningful map.
+Recuerda que todos los productos de datos de eBird Status se proporcionan para todo el mundo, independientemente del área de distribución de las especies. Además, tenga en cuenta que algunas zonas, como la mayor parte de la cuenca del Amazonas, tienen valores faltantes, lo que indica que no se disponía de datos suficientes para hacer una predicción en la región. Otras zonas, como América del Norte, contaban con datos suficientes para predecir que la especie está ausente. Probemos a utilizar los datos SIG incluidos en el paquete de datos del curso para recortar el ráster a la región de Los Lagos y crear un mapa más significativo.
 
 ```{r}
 #| label: ebirdst-explore-chilemap
-# los lagos boundary, projected to match the raster data
+# Límite de Los Lagos, proyectado para coincidir con los datos ráster.
 los_lagos <- read_sf("data/gis-data.gpkg",  layer = "ne_states") %>% 
   filter(state == "Los Lagos") %>% 
   st_transform(crs = crs(abd_seasonal)) %>% 
   st_geometry()
-# crop raster data to chile
+
+# Recortar datos ráster a Chile
 abd_breeding_ll <- crop(abd_seasonal[["breeding"]], los_lagos)
-# map
+
+# mapear
 plot(abd_breeding_ll)
 plot(los_lagos, add = TRUE)
 ```
@@ -355,7 +349,7 @@ plot(los_lagos, add = TRUE)
 ::: callout-important
 ## Checkpoint
 
-Let's take a break before proceeding onto some more realistic applications of the eBird Status data products. Make sure you're comfortable loading the data into R and performing some of the basic operations.
+Hagamos una pausa antes de continuar con algunas aplicaciones más realistas de los productos de datos de eBird Status. Asegúrate de que te sientes cómodo cargando los datos en R y realizando algunas de las operaciones básicas.
 :::
 
 ## Applications {#sec-ebirdst-applications}
