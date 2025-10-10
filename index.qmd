@@ -45,6 +45,6 @@ remotes::install_github("ebird/ebird-best-practices")
 
 ## Tutorial de configuración {#sec-tutorial-config}
 
-Hemos creado un [video](https://www.youtube.com/watch?v=SLbjGBjgj_w)) introductorio explicando los pasos a seguir para la descarga e instalación de todos los requerimientos del curso.
+Hemos creado un [video](https://www.youtube.com/watch?v=SLbjGBjgj_w) introductorio explicando los pasos a seguir para la descarga e instalación de todos los requerimientos del curso.
 
-{{< video https://www.youtube.com/embed/watch?v=SLbjGBjgj_w >}}
+{{< video https://www.youtube.com/watch?v=VIDEO_ID >}}
