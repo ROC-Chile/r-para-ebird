@@ -352,23 +352,23 @@ plot(los_lagos, add = TRUE)
 Hagamos una pausa antes de continuar con algunas aplicaciones más realistas de los productos de datos de eBird Status. Asegúrate de que te sientes cómodo cargando los datos en R y realizando algunas de las operaciones básicas.
 :::
 
-## Applications {#sec-ebirdst-applications}
+## Aplicaciones de productos S&T {#sec-ebirdst-applications}
 
-The remainder of the workshop will work through three example applications using the eBird Status data products:
+Ahora trabajaremos algunos ejemplos de aplicaciones prácticas utilizando los productos de Estados y Tendencias.
 
-1.  [Trajectories](#sec-ebirdst-applications-trajectories): chart the change in the percent of the population in a region throughout the year for a set of species.
-2.  [Regional statistics](#sec-ebirdst-applications-stats): calculate the proportion of the breeding population falling within protected areas for a set of species.
-3.  [Prioritization](#sec-ebirdst-applications-prioritization): use eBird Status data products to identify important sites for protection of a set of species.
+1.  [Trayectorias](#sec-ebirdst-applications-trajectories): visualiza el cambio en la proporción de la población de un grupo de especies en una región determinada a lo largo del año.
+2.  [Estadísticas regionales](#sec-ebirdst-applications-stats): calcula la proporción de la población reproductiva presente en áreas protegidas para un grupo de especies.
+3.  [Priorización](#sec-ebirdst-applications-prioritization): us los productos de Estados para identificas áreas de importancia para la protección de un grupo de especies.
 
-### Trajectories {#sec-ebirdst-applications-trajectories}
+### Trayectorias {#sec-ebirdst-applications-trajectories}
 
-In this application, we'll look at the change in for populations for two species throughout the year in Los Lagos, Chile. We'll consider Green-backed Firecrown and Patagonian Tyrant, two migrant species that are nearly endemic to Chile (data for both species are in the workshop data package). When comparing multiple species, or a single species between different seasons, as is the case here, it's important to consider the proportion of population rather than relative abundance to mitigate the impact of differences in detectability between seasons and speces.
+En este ejercicio, analizaremos el cambio en las poblaciones de dos especies a lo largo del año en la región de Los Lagos. Consideraremos el Picaflor chico y la Viudita, dos especies migratorias que son casi endémicas de Chile. Al comparar varias especies, o una sola especie entre diferentes estaciones, como es el caso aquí, es importante tener en cuenta la proporción de la población en lugar de la abundancia relativa para mitigar el impacto de las diferencias en la detectabilidad entre estaciones y especies.
 
-Let's start by loading the medium resolution weekly proportion of population cubes for these species as well as a boundary polygon for Los Lagos.
+Comencemos cargando los datos de proporción de población semanal de resolución media para estas especies, así como un polígono límite para Los Lagos.
 
 ```{r}
 #| label: ebirdst-applications-trajectories-data
-# proportion of population cubes
+# datos de proporción de la población
 pop_grbfir1 <- load_raster(species = "grbfir1", 
                        path = "data/ebirdst-data/",
                        product = "proportion-population", 
@@ -384,84 +384,84 @@ pop_pattyr2 <- load_raster(species = "pattyr2",
                        metric = "median", 
                        resolution = "9km")
 
-# los lagos boundary, projected to match the raster data
+# límite de Los Lagos proyectado a la misma proyección de los datos ráster
 los_lagos <- read_sf("data/gis-data.gpkg", "ne_states") %>% 
   filter(state == "Los Lagos") %>% 
   st_transform(crs = crs(pop_grbfir1)) %>% 
   st_geometry()
 ```
 
-Now, we'll use the R package `exactextractr` to calculate the sum of the proportions for each species within Los Lagos.
+Ahora utilizaremos el paquete `exactextractr` para calcular la suma de las proporciones de cada especies en Los Lagos.
 
 ```{r}
 #| label: ebirdst-applications-trajectories-summarize
-# sum within los lagos
-# firecrown
-traj_grbfir1 <- exact_extract(pop_grbfir1, los_lagos, fun = "sum")
-traj_grbfir1 <- data.frame(species = "Green-backed Firecrown",
+# suma dentro de los lagos
+# picaflor chico
+tray_grbfir1 <- exact_extract(pop_grbfir1, los_lagos, fun = "sum")
+tray_grbfir1 <- data.frame(species = "Green-backed Firecrown",
                            week = as.Date(names(pop_grbfir1)),
-                           prop_pop = as.numeric(traj_grbfir1[1, ]))
-# tyrant
-traj_pattyr2 <- exact_extract(pop_pattyr2, los_lagos, fun = "sum")
-traj_pattyr2 <- data.frame(species = "Patagonian Tyrant",
+                           prop_pop = as.numeric(tray_grbfir1[1, ]))
+# viudita
+tray_pattyr2 <- exact_extract(pop_pattyr2, los_lagos, fun = "sum")
+tray_pattyr2 <- data.frame(species = "Patagonian Tyrant",
                            week = as.Date(names(pop_pattyr2)),
-                           prop_pop = as.numeric(traj_pattyr2[1, ]))
+                           prop_pop = as.numeric(tray_pattyr2[1, ]))
 
-# combine
-trajectories <- bind_rows(traj_grbfir1, traj_pattyr2)
-head(trajectories)
+# combinar
+trayectorias <- bind_rows(tray_grbfir1, tray_pattyr2)
+head(trayectorias)
 ```
 
 Finally we can plot the trajectories.
 
 ```{r}
 #| label: ebirdst-applications-trajectories-plot
-ggplot(trajectories, aes(x = week, y = prop_pop, color = species)) +
+ggplot(trayectorias, aes(x = week, y = prop_pop, color = species)) +
   geom_line() +
   scale_y_continuous(labels = scales::percent) +
-  labs(x = "Week", 
-       y = "% of population",
-       title = "Weekly % of population trajectory in Las Lagos",
+  labs(x = "Semana", 
+       y = "% de población",
+       title = "Trayectorias de % semanal de la proporción de la población en Los Lagos",
        color = NULL) +
   theme(legend.position = "bottom")
 ```
 
-### Regional statistics {#sec-ebirdst-applications-stats}
+### Estadísticas regionales {#sec-ebirdst-applications-stats}
 
-For this application, we calculate the proportion of the population within protected areas in Chile for a set of species. As an example species group, we'll use a set of 10 species that are endemic or nearly endemic to Chile. For migratory species we’ll focus on the breeding season.
+Para este ejercicio calcularemos la proporción de la población dentro de areas protegidas en Chile para un grupo de especies. Como un ejemplo de grupo de especies usaremos 10 especies endémicas o casi endémicas de Chile. Para las especies que sean migratorias nos enfocaremos en la temporada reproductiva.
 
 ```{r}
 #| label: ebirdst-applications-stats
-species_list <- c("cthhue1", "chipig2", "chimoc1", "grbfir1", "chutap1", 
-                  "pattyr2", "strwoo6", "chifli1", "thtray1", "auspar1")
+lista_especies <- c("cthhue1", "chipig2", "chimoc1", "crachi1", "chutap1", 
+                  "slbpar1", "chitin1", "whttap1", "moutur1", "dutcan1")
 
-# download data for this list of species
-for (i in 1:length(species_list)){
-  ebirdst_download_status(species_list[i], path = "data/ebirdst-data/", pattern = "proportion-population_seasonal_mean_9km")
+# descargar datos para el grupo de especies
+for (i in 1:length(lista_especies)){
+  ebirdst_download_status(lista_especies[i], path = "data/ebirdst-data/", pattern = "proportion-population_seasonal_mean_9km")
 }
 
-# add common names, migrant/resident status, and quality
-species_list <- filter(ebirdst_runs, species_code %in% species_list) %>% 
+# agregar nombre común, residente/migratoria y calidad
+lista_especies <- filter(ebirdst_runs, species_code %in% lista_especies) %>% 
   mutate(quality = ifelse(is_resident, resident_quality, breeding_quality)) %>% 
-  select(species_code, common_name, is_resident, quality)
-print(species_list)
+  dplyr::select(species_code, common_name, is_resident, quality)
+print(lista_especies)
 ```
 
-We have two migrants and 8 resident species. Notice that `r sum(species_list$quality == 1)` of these species have quality ratings of 1 indicating that caution should be exercised when using the results. For real world use you should examine the relative abundance maps for errors prior to using them for analysis; however, for this example, we'll use this species list as is. We'll load and combine the breeding (for migrants) and resident (for residents) percent of population layers for this list of species. Data for all 10 of these species has been included in the workshop data package.
+Tenemos dos especies migratorias y ocho residentes. Observe que `r sum(lista_especies$quality == 1)` de estas especies tienen una calificación de calidad de 1, lo que indica que se debe tener precaución al utilizar los resultados. Para su uso en el mundo real, debe examinar los mapas de abundancia relativa en busca de errores antes de utilizarlos para el análisis; sin embargo, para este ejemplo, utilizaremos esta lista de especies tal cual. Cargaremos y combinaremos los porcentajes de población reproductora (para las migratorias) y residente (para las residentes) de esta lista de especies. 
 
 ::: callout-tip
 ## Tip
 
-Relative abundance estimates are impacted by detection rates, which can vary between species. As a results, when comparing eBird Status and Trends data across species, it's critical to always use the percent of population layers, which have been standardized by dividing each cell value by the total relative abundance across all cells.
+Las estimaciones de abundancia relativa se ven afectadas por las tasas de detección, que pueden variar entre especies. Por lo tanto, al comparar los datos entre especies, es fundamental utilizar siempre las capas de proporción de población, que se han estandarizado dividiendo el valor de cada celda por la abundancia relativa total de todas las celdas.
 :::
 
 ```{r}
 #| label: ebirdst-applications-pop
 # loop over the species list extracting the seasonal percent of population
-proportion_population <- list()
-for (i in seq_len(nrow(species_list))) {
+proporcion_poblacion <- list()
+for (i in seq_len(nrow(lista_especies))) {
   # load the seasonal cube for this species
-  this_species <- species_list[i, ]
+  this_species <- lista_especies[i, ]
   pop <- load_raster(this_species$species_code, 
                      path = "data/ebirdst-data", 
                      product = "proportion-population", 
@@ -470,147 +470,148 @@ for (i in seq_len(nrow(species_list))) {
   
   # subset to the layer we need: breeding or resident
   pop <- pop[[ifelse(this_species$is_resident, "resident", "breeding")]]
-  proportion_population[[this_species$species_code]] <- pop
+  proporcion_poblacion[[this_species$species_code]] <- pop
 }
 # stack the rasters into a single object
-proportion_population <- rast(proportion_population)
+proporcion_poblacion <- rast(proporcion_poblacion)
 ```
 
-The GIS data available in the workshop data package contains polygon boundaries for public protected areas in Chile, let's load them now and project to match the raster layers. For this example, we'll combine all the protected area polygons together into one feature; however, this analysis could be modified to consider how the distribution of species varies between protected areas.
+Los datos SIG disponibles en el paquete de datos del taller contienen límites poligonales de las áreas protegidas públicas de Chile. Vamos a cargarlos ahora y proyectarlos para que coincidan con las capas ráster. Para este ejemplo, combinaremos todos los polígonos de las áreas protegidas en una sola característica; sin embargo, este análisis podría modificarse para tener en cuenta cómo varía la distribución de las especies entre las áreas protegidas.
 
 ```{r}
 #| label: ebirdst-applications-protected
-protected <- read_sf("data/gis-data.gpkg",  layer = "protected_areas") %>% 
+protegido <- read_sf("data/gis-data.gpkg",  layer = "protected_areas") %>% 
   st_combine() %>% 
-  st_transform(crs = crs(proportion_population))
+  st_transform(crs = crs(proporcion_poblacion))
 ```
 
 Finally, we can use `exactextracr` to calculate the total percent of population within protected areas for each species.
 
 ```{r}
 #| label: ebirdst-applications-ee
-percent_protected <- exact_extract(proportion_population, protected, fun = "sum")
-percent_protected <- as.numeric(percent_protected[1, ])
-percent_protected <- data.frame(species_code = species_list$species_code,
-                                common_name = species_list$common_name,
-                                proportion_population = percent_protected) %>% 
-  arrange(desc(proportion_population))
-print(percent_protected)
+porcentaje_protegido <- exact_extract(proporcion_poblacion, protegido, fun = "sum")
+porcentaje_protegido <- as.numeric(porcentaje_protegido[1, ])
+porcentaje_protegido <- data.frame(species_code = lista_especies$species_code,
+                                common_name = lista_especies$common_name,
+                                proporcion_poblacion = porcentaje_protegido) %>% 
+  arrange(desc(proporcion_poblacion))
+print(porcentaje_protegido)
 
-# plot the data
-ggplot(percent_protected) +
-  aes(x = fct_reorder(common_name, proportion_population),
-      y = proportion_population) +
+# plotear los datos
+ggplot(porcentaje_protegido) +
+  aes(x = fct_reorder(common_name, proporcion_poblacion),
+      y = proporcion_poblacion) +
   geom_col() +
   scale_y_continuous(labels = scales::percent) +
-  labs(x = NULL, y = "Proportion of population in protected areas") +
+  labs(x = NULL, y = "Proporción de la población en áreas protegidas") +
   coord_flip()
 ```
 
-### Prioritization {#sec-ebirdst-applications-prioritization}
+### Priorización {#sec-ebirdst-applications-prioritization}
 
-For the final application, we'll perform a multi-species site prioritization exercise, identifying important sites for protecting the set of 10 near-endemic species we identified in the previous application. Let's start by generating a multi-species importance layer by calculating the mean percent of population across all 10 species. Since we're focused on identifying sites in Chile, we'll also crop and mask the importance layer to a boundary of Chile.
+Para el ejercicio final, realizaremos una priorización de sitios multiespecíficos, identificando sitios importantes para proteger el conjunto de 10 especies casi endémicas que identificamos en el ejercicio anterior. Comencemos por generar una capa de importancia multiespecífica calculando el porcentaje medio de población de las 10 especies. Dado que nos centramos en identificar sitios en Chile, también recortaremos y enmascararemos la capa de importancia dentro de los límites de Chile.
 
 ```{r}
 #| label: ebirdst-applications-prioritization-import
-# boundary of chile
+# límite territorio chileno
 chile <- read_sf("data/gis-data.gpkg", layer = "ne_states") %>% 
   filter(country_code == "CL") %>% 
-  st_transform(crs = crs(proportion_population))
+  st_transform(crs = crs(proporcion_poblacion))
 
-# importance: mean percent of population across species
-# fill missing values with zeros prior to averaging
-importance <- ifel(is.na(proportion_population), 0, proportion_population) %>% 
+# importancia: porcentaje promedio de proporción de la población entre especies
+# rellenar valores faltantes con ceros antes de promediar 
+importancia <- ifel(is.na(proporcion_poblacion), 0, proporcion_poblacion) %>% 
   mean(na.rm = TRUE) %>% 
-  # crop and mask importance to focus on chile
+  # recortar y enmascarar a límite chileno
   crop(chile) %>% 
   mask(chile)
 
-# plot the square root of importance since the data are right skewed
+# plotear la raíz cuadrada de la importancia, ya que los datos están sesgados hacia la derecha.
 par(mar = c(0.25, 0.25, 0.25, 0.25))
 crs <- "+proj=laea +lat_0=-40 +lon_0=-72"
-r_plot <- sqrt(importance) %>% 
+r_plot <- sqrt(importancia) %>% 
   project(crs, method = "near") %>% 
   trim()
 plot(r_plot, axes = FALSE)
 ```
 
-The absolute numbers in this map are challenging to interpret (they're the mean proportion of the population across the 10 species in each cell). Instead, the values should be interpreted in relative terms, giving the relative importance of each cell for this set of 10 species.
+Los números absolutos de este mapa son difíciles de interpretar (son la proporción media de la población de las 10 especies en cada celda). En cambio, los valores deben interpretarse en términos relativos, dando la importancia relativa de cada celda para este conjunto de 10 especies.
 
-In the previous application, we examined existing public protected areas. For the sake of comparison, let's imagine we want to identify the most important sites in Chile that cover the same area as the existing protected area network. What proportion of Chile does the current protected area network cover?
+En la aplicación anterior, examinamos las áreas protegidas públicas existentes. Para efectos comparativos, imaginemos que queremos identificar los sitios más importantes de Chile que cubren la misma superficie que la red de áreas protegidas existente. ¿Qué proporción de Chile cubre la red actual de áreas protegidas?
 
 ```{r}
 #| label: ebirdst-applications-prioritization-area
-# proportion of chile in existing protected area network
+# proporción de Chile en red existente de áreas protegidas
 area_chile <- sum(st_area(chile))
-area_protected <- st_area(protected)
-proportion_protected <- as.numeric(area_protected / area_chile)
-print(proportion_protected)
+area_protegida <- st_area(protegido)
+proporcion_protegido <- as.numeric(area_protegida / area_chile)
+print(proporcion_protegido)
 ```
 
-So, `r scales::percent(proportion_protected, 0.1)` of Chile is covered by the existing network of public protected areas. Let's identify the top `r scales::percent(proportion_protected, 0.1)` most important raster cells from the multi-species importance layer.
+Entonces, `r scales::percent(proporcion_protegido, 0.1)` de Chile está cubierto por la red existente de áreas protegidas públicas. Identifiquemos el `r scales::percent(proporcion_protegido, 0.1)` de celdas más importantes desde la capa de importancia multiespecies.
 
 ```{r}
 #| label: ebirdst-applications-prioritization-top
-# identify the quantile corresponding to the desired protection level
-q <- global(importance, fun = quantile, 
-            probs = 1 - proportion_protected, na.rm = TRUE) %>% 
+# indentificar el quantil correspondiente al nivel de protección deseado
+q <- global(importancia, fun = quantile, 
+            probs = 1 - proporcion_protegido, na.rm = TRUE) %>% 
   as.numeric()
-# identify the most importance cells
-selected_sites <- as.numeric(importance >= q)
+# identificar las celdas más importantes
+sitios_seleccionados <- as.numeric(importancia >= q)
 ```
 
-Let's compare maps of the existing protected area network and the sites selected using eBird Status and Trends.
+Comparemos loa mapas de la red existente de áreas protegidas y las seleccionadas usando Estados y Tendencias.
 
 ```{r}
 #| label: ebirdst-applications-prioritization-maps
 par(mar = c(0.25, 0.25, 0.25, 0.25))
 
-# high importance
-r_plot <- project(selected_sites, crs, method = "near") %>% 
+# importancia alta
+r_plot <- project(sitios_seleccionados, crs, method = "near") %>% 
   trim()
-protected_proj <- st_transform(protected, crs = crs) %>% 
+proy_protegido <- st_transform(protegido, crs = crs) %>% 
   st_geometry()
 plot(r_plot, axes = FALSE, legend = FALSE)
 
-# existing
-plot(st_simplify(protected_proj), 
-     col = "#00000088", border = NA,
+# existente
+plot(st_simplify(proy_protegido), 
+     col = "grey50", border = NA,
      add = TRUE)
 ```
 
-The high importance sites we identified are shown in green, while the existing protected area network is overlayed in grey. It appears the existing protected area network is mostly in southern Chile and there is limited overlap with areas of high importance to the 10 near-endemic species we chose to focus on. This is not surprising since the location of existing protected areas was not chosen specifically to protect these 10 species. Let's quantify what proportion of the population these two regions capture.
+Los sitios de alta importancia que identificamos se muestran en verde, mientras que la red de áreas protegidas existente se superpone en gris. Vemos que la red de áreas protegidas existente se encuentra principalmente en el sur de Chile y que hay una superposición limitada con las áreas de alta importancia para las 10 especies casi endémicas en las que decidimos centrarnos. Esto no es sorprendente, ya que la ubicación de las áreas protegidas existentes no se eligió específicamente para proteger estas 10 especies. Cuantifiquemos qué proporción de la población capturan estas dos regiones.
 
 ```{r}
 #| label: ebirdst-applications-prioritization-compare
-# mask the percent of population layers by the selected sites
-selected_pp <- proportion_population %>% 
-  crop(selected_sites) %>% 
-  mask(selected_sites, maskvalues = c(0, NA))
-# calculate total percent of population within proposed sites
-percent_selected <- global(selected_pp, fun = "sum", na.rm = TRUE)
-percent_selected <- data.frame(species_code = names(selected_pp),
-                               selected_percent = percent_selected[, 1])
+# enmascarar las capas de proporción de población por los sitios seleccionados
+pp_seleccionados <- proporcion_poblacion %>% 
+  crop(sitios_seleccionados) %>% 
+  mask(sitios_seleccionados, maskvalues = c(0, NA))
 
-# combine with values for existing network
-comparison <- inner_join(percent_protected, percent_selected,
+# calcular el porcentaje total de población dentro de los sitios propuestos
+porcentaje_seleccionados <- global(pp_seleccionados, fun = "sum", na.rm = TRUE)
+porcentaje_seleccionados <- data.frame(species_code = names(pp_seleccionados),
+                               porcentaje_seleccionados = porcentaje_seleccionados[, 1])
+
+# combinar con los valores de la red existente
+comparasion <- inner_join(porcentaje_protegido, porcentaje_seleccionados,
                          by = "species_code") %>% 
-  rename(existing_network = proportion_population,
-         prioritized_sites = selected_percent) %>% 
+  rename(existing_network = proporcion_poblacion,
+         prioritized_sites = porcentaje_seleccionados) %>% 
   pivot_longer(cols = c(existing_network, prioritized_sites),
                names_to = "network_type",
-               values_to = "proportion_population")
+               values_to = "proporcion_poblacion")
 
-ggplot(comparison) +
-  aes(x = fct_reorder(common_name, proportion_population, .fun = max),
-      y = proportion_population,
+ggplot(comparasion) +
+  aes(x = fct_reorder(common_name, proporcion_poblacion, .fun = max),
+      y = proporcion_poblacion,
       group = network_type,
       fill = network_type) +
   geom_col(position = "dodge") +
   scale_y_continuous(labels = scales::percent) +
   scale_fill_brewer(palette = "Set1") +
   labs(x = NULL, 
-       y = "Proportion of population in protected areas",
+       y = "Proporción de población en áreas protegidas",
        fill = NULL) +
   coord_flip() +
   theme_linedraw() +
@@ -619,4 +620,4 @@ ggplot(comparison) +
 
 ```
 
-So, for the same total area, we could capture a much larger proportion of the populations of these species if we use eBird Status data products for these species in our site prioritization. This example is, of course, overly simplistic. For example, in a real world application, different sites have different costs associated with protection and you would want to account for that during prioritization. For more complex prioritization problems, systematic conservation planning tools like the R package [`prioritizr`](https://prioritizr.net/) can be used effectively with eBird Status data products.
+Por lo tanto, para una misma superficie total, podríamos capturar una proporción mucho mayor de las poblaciones de estas especies si utilizáramos los productos de datos de eBird Status para estas especies en nuestra priorización de sitios. Por supuesto, este ejemplo es demasiado simplista. Por ejemplo, en una aplicación real, los diferentes sitios tienen diferentes costos asociados a la protección y habría que tenerlo en cuenta a la hora de establecer las prioridades. Para problemas de priorización más complejos, se pueden utilizar eficazmente herramientas de planificación sistemática de la conservación, como el paquete R [`prioritizr`](https://prioritizr.net/), junto con los productos de datos de Estados de eBird.

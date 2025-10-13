@@ -198,11 +198,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#sec-ebirdst-load-seasonal" id="toc-sec-ebirdst-load-seasonal" class="nav-link" data-scroll-target="#sec-ebirdst-load-seasonal"><span class="header-section-number">4.4.2</span> Rásters de estimaciones estacionales</a></li>
   </ul></li>
   <li><a href="#sec-ebirdst-explore" id="toc-sec-ebirdst-explore" class="nav-link" data-scroll-target="#sec-ebirdst-explore"><span class="header-section-number">4.5</span> Explorando los datos ráster</a></li>
-  <li><a href="#sec-ebirdst-applications" id="toc-sec-ebirdst-applications" class="nav-link" data-scroll-target="#sec-ebirdst-applications"><span class="header-section-number">4.6</span> Applications</a>
+  <li><a href="#sec-ebirdst-applications" id="toc-sec-ebirdst-applications" class="nav-link" data-scroll-target="#sec-ebirdst-applications"><span class="header-section-number">4.6</span> Aplicaciones de productos S&amp;T</a>
   <ul class="collapse">
-  <li><a href="#sec-ebirdst-applications-trajectories" id="toc-sec-ebirdst-applications-trajectories" class="nav-link" data-scroll-target="#sec-ebirdst-applications-trajectories"><span class="header-section-number">4.6.1</span> Trajectories</a></li>
-  <li><a href="#sec-ebirdst-applications-stats" id="toc-sec-ebirdst-applications-stats" class="nav-link" data-scroll-target="#sec-ebirdst-applications-stats"><span class="header-section-number">4.6.2</span> Regional statistics</a></li>
-  <li><a href="#sec-ebirdst-applications-prioritization" id="toc-sec-ebirdst-applications-prioritization" class="nav-link" data-scroll-target="#sec-ebirdst-applications-prioritization"><span class="header-section-number">4.6.3</span> Prioritization</a></li>
+  <li><a href="#sec-ebirdst-applications-trajectories" id="toc-sec-ebirdst-applications-trajectories" class="nav-link" data-scroll-target="#sec-ebirdst-applications-trajectories"><span class="header-section-number">4.6.1</span> Trayectorias</a></li>
+  <li><a href="#sec-ebirdst-applications-stats" id="toc-sec-ebirdst-applications-stats" class="nav-link" data-scroll-target="#sec-ebirdst-applications-stats"><span class="header-section-number">4.6.2</span> Estadísticas regionales</a></li>
+  <li><a href="#sec-ebirdst-applications-prioritization" id="toc-sec-ebirdst-applications-prioritization" class="nav-link" data-scroll-target="#sec-ebirdst-applications-prioritization"><span class="header-section-number">4.6.3</span> Priorización</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/ROC-Chile/r-para-ebird/edit/main/ebirdst.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/ROC-Chile/r-para-ebird/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -737,19 +737,19 @@ Checkpoint
 </div>
 </section>
 <section id="sec-ebirdst-applications" class="level2" data-number="4.6">
-<h2 data-number="4.6" class="anchored" data-anchor-id="sec-ebirdst-applications"><span class="header-section-number">4.6</span> Applications</h2>
-<p>The remainder of the workshop will work through three example applications using the eBird Status data products:</p>
+<h2 data-number="4.6" class="anchored" data-anchor-id="sec-ebirdst-applications"><span class="header-section-number">4.6</span> Aplicaciones de productos S&amp;T</h2>
+<p>Ahora trabajaremos algunos ejemplos de aplicaciones prácticas utilizando los productos de Estados y Tendencias.</p>
 <ol type="1">
-<li><a href="#sec-ebirdst-applications-trajectories">Trajectories</a>: chart the change in the percent of the population in a region throughout the year for a set of species.</li>
-<li><a href="#sec-ebirdst-applications-stats">Regional statistics</a>: calculate the proportion of the breeding population falling within protected areas for a set of species.</li>
-<li><a href="#sec-ebirdst-applications-prioritization">Prioritization</a>: use eBird Status data products to identify important sites for protection of a set of species.</li>
+<li><a href="#sec-ebirdst-applications-trajectories">Trayectorias</a>: visualiza el cambio en la proporción de la población de un grupo de especies en una región determinada a lo largo del año.</li>
+<li><a href="#sec-ebirdst-applications-stats">Estadísticas regionales</a>: calcula la proporción de la población reproductiva presente en áreas protegidas para un grupo de especies.</li>
+<li><a href="#sec-ebirdst-applications-prioritization">Priorización</a>: us los productos de Estados para identificas áreas de importancia para la protección de un grupo de especies.</li>
 </ol>
 <section id="sec-ebirdst-applications-trajectories" class="level3" data-number="4.6.1">
-<h3 data-number="4.6.1" class="anchored" data-anchor-id="sec-ebirdst-applications-trajectories"><span class="header-section-number">4.6.1</span> Trajectories</h3>
-<p>In this application, we’ll look at the change in for populations for two species throughout the year in Los Lagos, Chile. We’ll consider Green-backed Firecrown and Patagonian Tyrant, two migrant species that are nearly endemic to Chile (data for both species are in the workshop data package). When comparing multiple species, or a single species between different seasons, as is the case here, it’s important to consider the proportion of population rather than relative abundance to mitigate the impact of differences in detectability between seasons and speces.</p>
-<p>Let’s start by loading the medium resolution weekly proportion of population cubes for these species as well as a boundary polygon for Los Lagos.</p>
+<h3 data-number="4.6.1" class="anchored" data-anchor-id="sec-ebirdst-applications-trajectories"><span class="header-section-number">4.6.1</span> Trayectorias</h3>
+<p>En este ejercicio, analizaremos el cambio en las poblaciones de dos especies a lo largo del año en la región de Los Lagos. Consideraremos el Picaflor chico y la Viudita, dos especies migratorias que son casi endémicas de Chile. Al comparar varias especies, o una sola especie entre diferentes estaciones, como es el caso aquí, es importante tener en cuenta la proporción de la población en lugar de la abundancia relativa para mitigar el impacto de las diferencias en la detectabilidad entre estaciones y especies.</p>
+<p>Comencemos cargando los datos de proporción de población semanal de resolución media para estas especies, así como un polígono límite para Los Lagos.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># proportion of population cubes</span></span>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># datos de proporción de la población</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>pop_grbfir1 <span class="ot">&lt;-</span> <span class="fu">load_raster</span>(<span class="at">species =</span> <span class="st">"grbfir1"</span>, </span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">path =</span> <span class="st">"data/ebirdst-data/"</span>,</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">product =</span> <span class="st">"proportion-population"</span>, </span>
@@ -765,29 +765,29 @@ Checkpoint
 <span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>                       <span class="at">metric =</span> <span class="st">"median"</span>, </span>
 <span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>                       <span class="at">resolution =</span> <span class="st">"9km"</span>)</span>
 <span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="co"># los lagos boundary, projected to match the raster data</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="co"># límite de Los Lagos proyectado a la misma proyección de los datos ráster</span></span>
 <span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>los_lagos <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">"data/gis-data.gpkg"</span>, <span class="st">"ne_states"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(state <span class="sc">==</span> <span class="st">"Los Lagos"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="fu">crs</span>(pop_grbfir1)) <span class="sc">%&gt;%</span> </span>
 <span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_geometry</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now, we’ll use the R package <code>exactextractr</code> to calculate the sum of the proportions for each species within Los Lagos.</p>
+<p>Ahora utilizaremos el paquete <code>exactextractr</code> para calcular la suma de las proporciones de cada especies en Los Lagos.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sum within los lagos</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># firecrown</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>traj_grbfir1 <span class="ot">&lt;-</span> <span class="fu">exact_extract</span>(pop_grbfir1, los_lagos, <span class="at">fun =</span> <span class="st">"sum"</span>)</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>traj_grbfir1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">species =</span> <span class="st">"Green-backed Firecrown"</span>,</span>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># suma dentro de los lagos</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># picaflor chico</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>tray_grbfir1 <span class="ot">&lt;-</span> <span class="fu">exact_extract</span>(pop_grbfir1, los_lagos, <span class="at">fun =</span> <span class="st">"sum"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>tray_grbfir1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">species =</span> <span class="st">"Green-backed Firecrown"</span>,</span>
 <span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                           <span class="at">week =</span> <span class="fu">as.Date</span>(<span class="fu">names</span>(pop_grbfir1)),</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>                           <span class="at">prop_pop =</span> <span class="fu">as.numeric</span>(traj_grbfir1[<span class="dv">1</span>, ]))</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co"># tyrant</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>traj_pattyr2 <span class="ot">&lt;-</span> <span class="fu">exact_extract</span>(pop_pattyr2, los_lagos, <span class="at">fun =</span> <span class="st">"sum"</span>)</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>traj_pattyr2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">species =</span> <span class="st">"Patagonian Tyrant"</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>                           <span class="at">prop_pop =</span> <span class="fu">as.numeric</span>(tray_grbfir1[<span class="dv">1</span>, ]))</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co"># viudita</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>tray_pattyr2 <span class="ot">&lt;-</span> <span class="fu">exact_extract</span>(pop_pattyr2, los_lagos, <span class="at">fun =</span> <span class="st">"sum"</span>)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>tray_pattyr2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">species =</span> <span class="st">"Patagonian Tyrant"</span>,</span>
 <span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>                           <span class="at">week =</span> <span class="fu">as.Date</span>(<span class="fu">names</span>(pop_pattyr2)),</span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>                           <span class="at">prop_pop =</span> <span class="fu">as.numeric</span>(traj_pattyr2[<span class="dv">1</span>, ]))</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>                           <span class="at">prop_pop =</span> <span class="fu">as.numeric</span>(tray_pattyr2[<span class="dv">1</span>, ]))</span>
 <span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co"># combine</span></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>trajectories <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(traj_grbfir1, traj_pattyr2)</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(trajectories)</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co"># combinar</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>trayectorias <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(tray_grbfir1, tray_pattyr2)</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(trayectorias)</span>
 <span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                  species       week prop_pop</span></span>
 <span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 Green-backed Firecrown 2023-01-04    0.244</span></span>
 <span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Green-backed Firecrown 2023-01-11    0.230</span></span>
@@ -798,12 +798,12 @@ Checkpoint
 </div>
 <p>Finally we can plot the trajectories.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(trajectories, <span class="fu">aes</span>(<span class="at">x =</span> week, <span class="at">y =</span> prop_pop, <span class="at">color =</span> species)) <span class="sc">+</span></span>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(trayectorias, <span class="fu">aes</span>(<span class="at">x =</span> week, <span class="at">y =</span> prop_pop, <span class="at">color =</span> species)) <span class="sc">+</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Week"</span>, </span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"% of population"</span>,</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Weekly % of population trajectory in Las Lagos"</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Semana"</span>, </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"% de población"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Trayectorias de % semanal de la proporción de la población en Los Lagos"</span>,</span>
 <span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
 <span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -816,34 +816,34 @@ Checkpoint
 </div>
 </section>
 <section id="sec-ebirdst-applications-stats" class="level3" data-number="4.6.2">
-<h3 data-number="4.6.2" class="anchored" data-anchor-id="sec-ebirdst-applications-stats"><span class="header-section-number">4.6.2</span> Regional statistics</h3>
-<p>For this application, we calculate the proportion of the population within protected areas in Chile for a set of species. As an example species group, we’ll use a set of 10 species that are endemic or nearly endemic to Chile. For migratory species we’ll focus on the breeding season.</p>
+<h3 data-number="4.6.2" class="anchored" data-anchor-id="sec-ebirdst-applications-stats"><span class="header-section-number">4.6.2</span> Estadísticas regionales</h3>
+<p>Para este ejercicio calcularemos la proporción de la población dentro de areas protegidas en Chile para un grupo de especies. Como un ejemplo de grupo de especies usaremos 10 especies endémicas o casi endémicas de Chile. Para las especies que sean migratorias nos enfocaremos en la temporada reproductiva.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>species_list <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"cthhue1"</span>, <span class="st">"chipig2"</span>, <span class="st">"chimoc1"</span>, <span class="st">"grbfir1"</span>, <span class="st">"chutap1"</span>, </span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"pattyr2"</span>, <span class="st">"strwoo6"</span>, <span class="st">"chifli1"</span>, <span class="st">"thtray1"</span>, <span class="st">"auspar1"</span>)</span>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>lista_especies <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"cthhue1"</span>, <span class="st">"chipig2"</span>, <span class="st">"chimoc1"</span>, <span class="st">"crachi1"</span>, <span class="st">"chutap1"</span>, </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"slbpar1"</span>, <span class="st">"chitin1"</span>, <span class="st">"whttap1"</span>, <span class="st">"moutur1"</span>, <span class="st">"dutcan1"</span>)</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># download data for this list of species</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(species_list)){</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ebirdst_download_status</span>(species_list[i], <span class="at">path =</span> <span class="st">"data/ebirdst-data/"</span>, <span class="at">pattern =</span> <span class="st">"proportion-population_seasonal_mean_9km"</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># descargar datos para el grupo de especies</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(lista_especies)){</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ebirdst_download_status</span>(lista_especies[i], <span class="at">path =</span> <span class="st">"data/ebirdst-data/"</span>, <span class="at">pattern =</span> <span class="st">"proportion-population_seasonal_mean_9km"</span>)</span>
 <span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co"># add common names, migrant/resident status, and quality</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>species_list <span class="ot">&lt;-</span> <span class="fu">filter</span>(ebirdst_runs, species_code <span class="sc">%in%</span> species_list) <span class="sc">%&gt;%</span> </span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co"># agregar nombre común, residente/migratoria y calidad</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>lista_especies <span class="ot">&lt;-</span> <span class="fu">filter</span>(ebirdst_runs, species_code <span class="sc">%in%</span> lista_especies) <span class="sc">%&gt;%</span> </span>
 <span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">quality =</span> <span class="fu">ifelse</span>(is_resident, resident_quality, breeding_quality)) <span class="sc">%&gt;%</span> </span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(species_code, common_name, is_resident, quality)</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(species_list)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(species_code, common_name, is_resident, quality)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(lista_especies)</span>
 <span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 10 × 4</span></span>
 <span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   species_code common_name                 is_resident quality</span></span>
 <span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;        &lt;chr&gt;                       &lt;lgl&gt;       &lt;chr&gt;  </span></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 auspar1      Austral Parakeet            TRUE        3      </span></span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 chifli1      Chilean Flicker             TRUE        3      </span></span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 chimoc1      Chilean Mockingbird         TRUE        3      </span></span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 chipig2      Chilean Pigeon              FALSE       3      </span></span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 chutap1      Chucao Tapaculo             TRUE        3      </span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 chimoc1      Chilean Mockingbird         TRUE        3      </span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 chipig2      Chilean Pigeon              FALSE       3      </span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 chitin1      Chilean Tinamou             TRUE        3      </span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 chutap1      Chucao Tapaculo             TRUE        3      </span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 crachi1      Crag Chilia                 TRUE        2      </span></span>
 <span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 cthhue1      Chestnut-throated Huet-huet TRUE        2      </span></span>
 <span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>We have two migrants and 8 resident species. Notice that 0 of these species have quality ratings of 1 indicating that caution should be exercised when using the results. For real world use you should examine the relative abundance maps for errors prior to using them for analysis; however, for this example, we’ll use this species list as is. We’ll load and combine the breeding (for migrants) and resident (for residents) percent of population layers for this list of species. Data for all 10 of these species has been included in the workshop data package.</p>
+<p>Tenemos dos especies migratorias y ocho residentes. Observe que 0 de estas especies tienen una calificación de calidad de 1, lo que indica que se debe tener precaución al utilizar los resultados. Para su uso en el mundo real, debe examinar los mapas de abundancia relativa en busca de errores antes de utilizarlos para el análisis; sin embargo, para este ejemplo, utilizaremos esta lista de especies tal cual. Cargaremos y combinaremos los porcentajes de población reproductora (para las migratorias) y residente (para las residentes) de esta lista de especies.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -854,15 +854,15 @@ Tip
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Relative abundance estimates are impacted by detection rates, which can vary between species. As a results, when comparing eBird Status and Trends data across species, it’s critical to always use the percent of population layers, which have been standardized by dividing each cell value by the total relative abundance across all cells.</p>
+<p>Las estimaciones de abundancia relativa se ven afectadas por las tasas de detección, que pueden variar entre especies. Por lo tanto, al comparar los datos entre especies, es fundamental utilizar siempre las capas de proporción de población, que se han estandarizado dividiendo el valor de cada celda por la abundancia relativa total de todas las celdas.</p>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># loop over the species list extracting the seasonal percent of population</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>proportion_population <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(species_list))) {</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>proporcion_poblacion <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(lista_especies))) {</span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># load the seasonal cube for this species</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  this_species <span class="ot">&lt;-</span> species_list[i, ]</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  this_species <span class="ot">&lt;-</span> lista_especies[i, ]</span>
 <span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  pop <span class="ot">&lt;-</span> <span class="fu">load_raster</span>(this_species<span class="sc">$</span>species_code, </span>
 <span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">path =</span> <span class="st">"data/ebirdst-data"</span>, </span>
 <span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>                     <span class="at">product =</span> <span class="st">"proportion-population"</span>, </span>
@@ -871,45 +871,45 @@ Tip
 <span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># subset to the layer we need: breeding or resident</span></span>
 <span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  pop <span class="ot">&lt;-</span> pop[[<span class="fu">ifelse</span>(this_species<span class="sc">$</span>is_resident, <span class="st">"resident"</span>, <span class="st">"breeding"</span>)]]</span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  proportion_population[[this_species<span class="sc">$</span>species_code]] <span class="ot">&lt;-</span> pop</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  proporcion_poblacion[[this_species<span class="sc">$</span>species_code]] <span class="ot">&lt;-</span> pop</span>
 <span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="co"># stack the rasters into a single object</span></span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>proportion_population <span class="ot">&lt;-</span> <span class="fu">rast</span>(proportion_population)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>proporcion_poblacion <span class="ot">&lt;-</span> <span class="fu">rast</span>(proporcion_poblacion)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The GIS data available in the workshop data package contains polygon boundaries for public protected areas in Chile, let’s load them now and project to match the raster layers. For this example, we’ll combine all the protected area polygons together into one feature; however, this analysis could be modified to consider how the distribution of species varies between protected areas.</p>
+<p>Los datos SIG disponibles en el paquete de datos del taller contienen límites poligonales de las áreas protegidas públicas de Chile. Vamos a cargarlos ahora y proyectarlos para que coincidan con las capas ráster. Para este ejemplo, combinaremos todos los polígonos de las áreas protegidas en una sola característica; sin embargo, este análisis podría modificarse para tener en cuenta cómo varía la distribución de las especies entre las áreas protegidas.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>protected <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">"data/gis-data.gpkg"</span>,  <span class="at">layer =</span> <span class="st">"protected_areas"</span>) <span class="sc">%&gt;%</span> </span>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>protegido <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">"data/gis-data.gpkg"</span>,  <span class="at">layer =</span> <span class="st">"protected_areas"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_combine</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="fu">crs</span>(proportion_population))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="fu">crs</span>(proporcion_poblacion))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Finally, we can use <code>exactextracr</code> to calculate the total percent of population within protected areas for each species.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>percent_protected <span class="ot">&lt;-</span> <span class="fu">exact_extract</span>(proportion_population, protected, <span class="at">fun =</span> <span class="st">"sum"</span>)</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>percent_protected <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(percent_protected[<span class="dv">1</span>, ])</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>percent_protected <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">species_code =</span> species_list<span class="sc">$</span>species_code,</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>                                <span class="at">common_name =</span> species_list<span class="sc">$</span>common_name,</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>                                <span class="at">proportion_population =</span> percent_protected) <span class="sc">%&gt;%</span> </span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(proportion_population))</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(percent_protected)</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    species_code                 common_name proportion_population</span></span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1       pattyr2           Patagonian Tyrant               0.24373</span></span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2       thtray1       Thorn-tailed Rayadito               0.22052</span></span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3       chutap1             Chucao Tapaculo               0.16700</span></span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4       auspar1            Austral Parakeet               0.15122</span></span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5       grbfir1      Green-backed Firecrown               0.12828</span></span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6       chifli1             Chilean Flicker               0.10931</span></span>
-<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7       strwoo6          Striped Woodpecker               0.09056</span></span>
-<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8       chipig2              Chilean Pigeon               0.06149</span></span>
-<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9       cthhue1 Chestnut-throated Huet-huet               0.02409</span></span>
-<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10      chimoc1         Chilean Mockingbird               0.00794</span></span>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>porcentaje_protegido <span class="ot">&lt;-</span> <span class="fu">exact_extract</span>(proporcion_poblacion, protegido, <span class="at">fun =</span> <span class="st">"sum"</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>porcentaje_protegido <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(porcentaje_protegido[<span class="dv">1</span>, ])</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>porcentaje_protegido <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">species_code =</span> lista_especies<span class="sc">$</span>species_code,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>                                <span class="at">common_name =</span> lista_especies<span class="sc">$</span>common_name,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>                                <span class="at">proporcion_poblacion =</span> porcentaje_protegido) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(proporcion_poblacion))</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(porcentaje_protegido)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    species_code                 common_name proporcion_poblacion</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1       chutap1             Chucao Tapaculo              0.16700</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2       chipig2              Chilean Pigeon              0.06149</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3       cthhue1 Chestnut-throated Huet-huet              0.02409</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4       whttap1     White-throated Tapaculo              0.01827</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5       moutur1            Moustached Turca              0.01618</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6       dutcan1      Dusky-tailed Canastero              0.01558</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7       slbpar1     Slender-billed Parakeet              0.01450</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8       crachi1                 Crag Chilia              0.01301</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9       chimoc1         Chilean Mockingbird              0.00794</span></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10      chitin1             Chilean Tinamou              0.00696</span></span>
 <span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the data</span></span>
-<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(percent_protected) <span class="sc">+</span></span>
-<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">fct_reorder</span>(common_name, proportion_population),</span>
-<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> proportion_population) <span class="sc">+</span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a><span class="co"># plotear los datos</span></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(porcentaje_protegido) <span class="sc">+</span></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">fct_reorder</span>(common_name, proporcion_poblacion),</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> proporcion_poblacion) <span class="sc">+</span></span>
 <span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
 <span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
-<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Proportion of population in protected areas"</span>) <span class="sc">+</span></span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Proporción de la población en áreas protegidas"</span>) <span class="sc">+</span></span>
 <span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -921,19 +921,19 @@ Tip
 </div>
 </section>
 <section id="sec-ebirdst-applications-prioritization" class="level3" data-number="4.6.3">
-<h3 data-number="4.6.3" class="anchored" data-anchor-id="sec-ebirdst-applications-prioritization"><span class="header-section-number">4.6.3</span> Prioritization</h3>
-<p>For the final application, we’ll perform a multi-species site prioritization exercise, identifying important sites for protecting the set of 10 near-endemic species we identified in the previous application. Let’s start by generating a multi-species importance layer by calculating the mean percent of population across all 10 species. Since we’re focused on identifying sites in Chile, we’ll also crop and mask the importance layer to a boundary of Chile.</p>
+<h3 data-number="4.6.3" class="anchored" data-anchor-id="sec-ebirdst-applications-prioritization"><span class="header-section-number">4.6.3</span> Priorización</h3>
+<p>Para el ejercicio final, realizaremos una priorización de sitios multiespecíficos, identificando sitios importantes para proteger el conjunto de 10 especies casi endémicas que identificamos en el ejercicio anterior. Comencemos por generar una capa de importancia multiespecífica calculando el porcentaje medio de población de las 10 especies. Dado que nos centramos en identificar sitios en Chile, también recortaremos y enmascararemos la capa de importancia dentro de los límites de Chile.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># boundary of chile</span></span>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># límite territorio chileno</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>chile <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">"data/gis-data.gpkg"</span>, <span class="at">layer =</span> <span class="st">"ne_states"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(country_code <span class="sc">==</span> <span class="st">"CL"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="fu">crs</span>(proportion_population))</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="fu">crs</span>(proporcion_poblacion))</span>
 <span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># importance: mean percent of population across species</span></span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="co"># fill missing values with zeros prior to averaging</span></span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>importance <span class="ot">&lt;-</span> <span class="fu">ifel</span>(<span class="fu">is.na</span>(proportion_population), <span class="dv">0</span>, proportion_population) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># importancia: porcentaje promedio de proporción de la población entre especies</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="co"># rellenar valores faltantes con ceros antes de promediar </span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>importancia <span class="ot">&lt;-</span> <span class="fu">ifel</span>(<span class="fu">is.na</span>(proporcion_poblacion), <span class="dv">0</span>, proporcion_poblacion) <span class="sc">%&gt;%</span> </span>
 <span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># crop and mask importance to focus on chile</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># recortar y enmascarar a límite chileno</span></span>
 <span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crop</span>(chile) <span class="sc">%&gt;%</span> </span>
 <span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mask</span>(chile)</span>
 <span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -961,10 +961,10 @@ Tip
 <span id="cb30-35"><a href="#cb30-35" aria-hidden="true" tabindex="-1"></a><span class="er">=========================================</span></span>
 <span id="cb30-36"><a href="#cb30-36" aria-hidden="true" tabindex="-1"></a>                                          </span>
 <span id="cb30-37"><a href="#cb30-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-38"><a href="#cb30-38" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the square root of importance since the data are right skewed</span></span>
+<span id="cb30-38"><a href="#cb30-38" aria-hidden="true" tabindex="-1"></a><span class="co"># plotear la raíz cuadrada de la importancia, ya que los datos están sesgados hacia la derecha.</span></span>
 <span id="cb30-39"><a href="#cb30-39" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="fl">0.25</span>))</span>
 <span id="cb30-40"><a href="#cb30-40" aria-hidden="true" tabindex="-1"></a>crs <span class="ot">&lt;-</span> <span class="st">"+proj=laea +lat_0=-40 +lon_0=-72"</span></span>
-<span id="cb30-41"><a href="#cb30-41" aria-hidden="true" tabindex="-1"></a>r_plot <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(importance) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-41"><a href="#cb30-41" aria-hidden="true" tabindex="-1"></a>r_plot <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(importancia) <span class="sc">%&gt;%</span> </span>
 <span id="cb30-42"><a href="#cb30-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">project</span>(crs, <span class="at">method =</span> <span class="st">"near"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb30-43"><a href="#cb30-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">trim</span>()</span>
 <span id="cb30-44"><a href="#cb30-44" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(r_plot, <span class="at">axes =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -976,39 +976,39 @@ Tip
 </div>
 </div>
 </div>
-<p>The absolute numbers in this map are challenging to interpret (they’re the mean proportion of the population across the 10 species in each cell). Instead, the values should be interpreted in relative terms, giving the relative importance of each cell for this set of 10 species.</p>
-<p>In the previous application, we examined existing public protected areas. For the sake of comparison, let’s imagine we want to identify the most important sites in Chile that cover the same area as the existing protected area network. What proportion of Chile does the current protected area network cover?</p>
+<p>Los números absolutos de este mapa son difíciles de interpretar (son la proporción media de la población de las 10 especies en cada celda). En cambio, los valores deben interpretarse en términos relativos, dando la importancia relativa de cada celda para este conjunto de 10 especies.</p>
+<p>En la aplicación anterior, examinamos las áreas protegidas públicas existentes. Para efectos comparativos, imaginemos que queremos identificar los sitios más importantes de Chile que cubren la misma superficie que la red de áreas protegidas existente. ¿Qué proporción de Chile cubre la red actual de áreas protegidas?</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># proportion of chile in existing protected area network</span></span>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># proporción de Chile en red existente de áreas protegidas</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>area_chile <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">st_area</span>(chile))</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>area_protected <span class="ot">&lt;-</span> <span class="fu">st_area</span>(protected)</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>proportion_protected <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(area_protected <span class="sc">/</span> area_chile)</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(proportion_protected)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>area_protegida <span class="ot">&lt;-</span> <span class="fu">st_area</span>(protegido)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>proporcion_protegido <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(area_protegida <span class="sc">/</span> area_chile)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(proporcion_protegido)</span>
 <span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.208</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>So, 20.8% of Chile is covered by the existing network of public protected areas. Let’s identify the top 20.8% most important raster cells from the multi-species importance layer.</p>
+<p>Entonces, 20.8% de Chile está cubierto por la red existente de áreas protegidas públicas. Identifiquemos el 20.8% de celdas más importantes desde la capa de importancia multiespecies.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># identify the quantile corresponding to the desired protection level</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">global</span>(importance, <span class="at">fun =</span> quantile, </span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">probs =</span> <span class="dv">1</span> <span class="sc">-</span> proportion_protected, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># indentificar el quantil correspondiente al nivel de protección deseado</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">global</span>(importancia, <span class="at">fun =</span> quantile, </span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">probs =</span> <span class="dv">1</span> <span class="sc">-</span> proporcion_protegido, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.numeric</span>()</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># identify the most importance cells</span></span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>selected_sites <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(importance <span class="sc">&gt;=</span> q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># identificar las celdas más importantes</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>sitios_seleccionados <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(importancia <span class="sc">&gt;=</span> q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Let’s compare maps of the existing protected area network and the sites selected using eBird Status and Trends.</p>
+<p>Comparemos loa mapas de la red existente de áreas protegidas y las seleccionadas usando Estados y Tendencias.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="fl">0.25</span>))</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># high importance</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>r_plot <span class="ot">&lt;-</span> <span class="fu">project</span>(selected_sites, crs, <span class="at">method =</span> <span class="st">"near"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># importancia alta</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>r_plot <span class="ot">&lt;-</span> <span class="fu">project</span>(sitios_seleccionados, crs, <span class="at">method =</span> <span class="st">"near"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">trim</span>()</span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>protected_proj <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(protected, <span class="at">crs =</span> crs) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>proy_protegido <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(protegido, <span class="at">crs =</span> crs) <span class="sc">%&gt;%</span> </span>
 <span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_geometry</span>()</span>
 <span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(r_plot, <span class="at">axes =</span> <span class="cn">FALSE</span>, <span class="at">legend =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="co"># existing</span></span>
-<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_simplify</span>(protected_proj), </span>
-<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">"#00000088"</span>, <span class="at">border =</span> <span class="cn">NA</span>,</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="co"># existente</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_simplify</span>(proy_protegido), </span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">"grey50"</span>, <span class="at">border =</span> <span class="cn">NA</span>,</span>
 <span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -1018,40 +1018,41 @@ Tip
 </div>
 </div>
 </div>
-<p>The high importance sites we identified are shown in green, while the existing protected area network is overlayed in grey. It appears the existing protected area network is mostly in southern Chile and there is limited overlap with areas of high importance to the 10 near-endemic species we chose to focus on. This is not surprising since the location of existing protected areas was not chosen specifically to protect these 10 species. Let’s quantify what proportion of the population these two regions capture.</p>
+<p>Los sitios de alta importancia que identificamos se muestran en verde, mientras que la red de áreas protegidas existente se superpone en gris. Vemos que la red de áreas protegidas existente se encuentra principalmente en el sur de Chile y que hay una superposición limitada con las áreas de alta importancia para las 10 especies casi endémicas en las que decidimos centrarnos. Esto no es sorprendente, ya que la ubicación de las áreas protegidas existentes no se eligió específicamente para proteger estas 10 especies. Cuantifiquemos qué proporción de la población capturan estas dos regiones.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># mask the percent of population layers by the selected sites</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>selected_pp <span class="ot">&lt;-</span> proportion_population <span class="sc">%&gt;%</span> </span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crop</span>(selected_sites) <span class="sc">%&gt;%</span> </span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mask</span>(selected_sites, <span class="at">maskvalues =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>))</span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate total percent of population within proposed sites</span></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>percent_selected <span class="ot">&lt;-</span> <span class="fu">global</span>(selected_pp, <span class="at">fun =</span> <span class="st">"sum"</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>percent_selected <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">species_code =</span> <span class="fu">names</span>(selected_pp),</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>                               <span class="at">selected_percent =</span> percent_selected[, <span class="dv">1</span>])</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="co"># combine with values for existing network</span></span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>comparison <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(percent_protected, percent_selected,</span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>                         <span class="at">by =</span> <span class="st">"species_code"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">existing_network =</span> proportion_population,</span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">prioritized_sites =</span> selected_percent) <span class="sc">%&gt;%</span> </span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(existing_network, prioritized_sites),</span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"network_type"</span>,</span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"proportion_population"</span>)</span>
-<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(comparison) <span class="sc">+</span></span>
-<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">fct_reorder</span>(common_name, proportion_population, <span class="at">.fun =</span> max),</span>
-<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> proportion_population,</span>
-<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> network_type,</span>
-<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> network_type) <span class="sc">+</span></span>
-<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
-<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
-<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>) <span class="sc">+</span></span>
-<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, </span>
-<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Proportion of population in protected areas"</span>,</span>
-<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
-<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
-<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>() <span class="sc">+</span></span>
-<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># enmascarar las capas de proporción de población por los sitios seleccionados</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>pp_seleccionados <span class="ot">&lt;-</span> proporcion_poblacion <span class="sc">%&gt;%</span> </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crop</span>(sitios_seleccionados) <span class="sc">%&gt;%</span> </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mask</span>(sitios_seleccionados, <span class="at">maskvalues =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>))</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="co"># calcular el porcentaje total de población dentro de los sitios propuestos</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>porcentaje_seleccionados <span class="ot">&lt;-</span> <span class="fu">global</span>(pp_seleccionados, <span class="at">fun =</span> <span class="st">"sum"</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>porcentaje_seleccionados <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">species_code =</span> <span class="fu">names</span>(pp_seleccionados),</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>                               <span class="at">porcentaje_seleccionados =</span> porcentaje_seleccionados[, <span class="dv">1</span>])</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="co"># combinar con los valores de la red existente</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>comparasion <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(porcentaje_protegido, porcentaje_seleccionados,</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>                         <span class="at">by =</span> <span class="st">"species_code"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">existing_network =</span> proporcion_poblacion,</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">prioritized_sites =</span> porcentaje_seleccionados) <span class="sc">%&gt;%</span> </span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(existing_network, prioritized_sites),</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"network_type"</span>,</span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"proporcion_poblacion"</span>)</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(comparasion) <span class="sc">+</span></span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">fct_reorder</span>(common_name, proporcion_poblacion, <span class="at">.fun =</span> max),</span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> proporcion_poblacion,</span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> network_type,</span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> network_type) <span class="sc">+</span></span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>) <span class="sc">+</span></span>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, </span>
+<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Proporción de población en áreas protegidas"</span>,</span>
+<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>() <span class="sc">+</span></span>
+<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1060,7 +1061,7 @@ Tip
 </div>
 </div>
 </div>
-<p>So, for the same total area, we could capture a much larger proportion of the populations of these species if we use eBird Status data products for these species in our site prioritization. This example is, of course, overly simplistic. For example, in a real world application, different sites have different costs associated with protection and you would want to account for that during prioritization. For more complex prioritization problems, systematic conservation planning tools like the R package <a href="https://prioritizr.net/"><code>prioritizr</code></a> can be used effectively with eBird Status data products.</p>
+<p>Por lo tanto, para una misma superficie total, podríamos capturar una proporción mucho mayor de las poblaciones de estas especies si utilizáramos los productos de datos de eBird Status para estas especies en nuestra priorización de sitios. Por supuesto, este ejemplo es demasiado simplista. Por ejemplo, en una aplicación real, los diferentes sitios tienen diferentes costos asociados a la protección y habría que tenerlo en cuenta a la hora de establecer las prioridades. Para problemas de priorización más complejos, se pueden utilizar eficazmente herramientas de planificación sistemática de la conservación, como el paquete R <a href="https://prioritizr.net/"><code>prioritizr</code></a>, junto con los productos de datos de Estados de eBird.</p>
 
 
 </section>
