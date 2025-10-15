@@ -10,11 +10,13 @@ editor_options:
 
 ## Introducción {#sec-r-intro}
 
+A lo largo de los ejercicios de este curso dejaremos explicaciones de las funciones utilizadas, pero si buscas profundizar en el uso de Tidyverse te recomendamos el libro en línea [R for Data Science](#0) by [Hadley Wickham](#0).
+
 ## Tidyverse {#sec-intro-tidyverse}
 
-Throughout this workshop, we use packages from the [Tidyverse](https://www.tidyverse.org/), an opinionated collection of R packages designed for data science. Packages such as [`ggplot2`](https://ggplot2.tidyverse.org/), for data visualization, and [`dplyr`](https://dplyr.tidyverse.org/), for data manipulation, are two of the most well known Tidyverse packages; however, there are many more. We’ll try to explain any functions as they come up; however, for a good general resource on working with data in R using the Tidyverse see the free online book [R for Data Science](https://r4ds.hadley.nz/) by [Hadley Wickham](https://hadley.nz/).
+En el curso utilizaremos paquetes del [Tidyverse](#0), una colección de paquetes de R diseñados para el análisis de datos. Paquetes como [`ggplot2`](#0) (para visualización de datos) y [`dplyr`](#0) (para manipulación de datos), son algunos de los más conocidos de la colección.
 
-The one piece of the Tidyverse that we will cover up front is the pipe operator `%>%`. The pipe takes the expression to the left of it and "pipes" it into the first argument of the expression on the right.
+Uno de los elementos del Tidyverse que utilizaremos bastante a lo largo de este curso es el operador pipe `%>% (|>)`. El pipe toma la expresión a su izquierda y la "canaliza" hacia el primer argumento de la expresión a su derecha.
 
 ```{r}
 #| label: intro-tidyverse-pipe
@@ -25,18 +27,20 @@ mean(1:10)
 
 # with pipe
 1:10 %>% mean()
+1:10 |> mean()
 ```
 
-The pipe can code significantly more readable by avoiding nested function calls, reducing the need for intermediate variables, and making sequential operations read left-to-right. For example, to add a new variable to a data frame, then summarize using a grouping variable, the following are equivalent:
+El pipe hace que el código sea mucho más legible al evitar llamadas de funciones anidadas, reducir la necesidad de variables intermedias y permitir que las operaciones secuenciales se lean de izquierda a derecha. Por ejemplo, para agregar una nueva variable a una base de datos y luego resumir agrupando por otra variable, podemos hacer cualquiera de las siguientes opciones:
 
 ```{r}
 #| label: intro-tidyverse-dplyr
-# intermediate variables
+## OPCION 1 ##
+# Variables intermedias
 mtcars_kg <- mutate(mtcars, wt_kg = 454 * wt)
 mtcars_grouped <- group_by(mtcars_kg, cyl)
 summarize(mtcars_grouped, wt_kg = mean(wt_kg))
 
-# nested function calls
+# Funciones anidadas
 summarize(
   group_by(
     mutate(mtcars, wt_kg = 454 * wt),
@@ -44,18 +48,20 @@ summarize(
   ),
   wt_kg = mean(wt_kg)
 )
-
-# pipes
+## OPCION 2 ##
+# uso de pipes
 mtcars %>% 
   mutate(wt_kg = 454 * wt) %>% 
   group_by(cyl) %>% 
   summarize(wt_kg = mean(wt_kg))
 ```
 
-::: {.callout-caution icon="false"}
-## Exercise
+Como se ve en el ejercicio, el uso de pipes reduce el código evitando la creación de variables intermedias.
 
-Rewrite the following code using pipes:
+::: {.callout-caution icon="false"}
+## Ejercicio
+
+Reescribe el siguiente código usando pipes:
 
 ```{r}
 #| label: intro-tidyverse-ex
@@ -65,7 +71,7 @@ round(log(runif(10, min = 0.5)), 1)
 :::
 
 ::: {.callout-note icon="false" collapse="true"}
-## Solution
+## Solución
 
 ```{r}
 #| label: intro-tidyverse-sol
@@ -73,5 +79,132 @@ set.seed(1)
 runif(10, min = 0.5) %>% 
   log() %>% 
   round(digits = 1)
+
+runif(10, min = 0.5) |> 
+  log() |> 
+  round(digits = 1)
 ```
 :::
+
+## Software
+
+Los ejemplos del curso usan el lenguaje **R**. Si no tienes R instalado, descárgalo. Si ya lo tienes, puede que esté desactualizado: conviene actualizarlo a la versión más reciente. R se actualiza con frecuencia, y es importante contar con la versión más reciente para evitar problemas al instalar paquetes.
+
+Se recomienda usar **RStudio** si eres usuario de R. RStudio no es obligatorio para seguir esta guía, pero mejora muchísimo la experiencia. Si no lo tienes, descárgalo; si ya lo tienes, actualízalo, pues regularmente aparecen versiones nuevas con características útiles.
+
+Debido al tamaño grande del conjunto de datos de eBird, trabajar con él requiere la utilidad de línea de comandos Unix **AWK**. No necesitas usar AWK directamente, porque el paquete R `auk` se encarga de hacerlo, pero sí debes tener AWK instalado en tu computadora:
+
+-   En Linux y macOS ya suele venir AWK instalado.
+
+-   En Windows, necesitarás instalar **Cygwin**, un software libre que permite usar herramientas Unix bajo Windows. Asegúrate de instalarlo en la ubicación predeterminada (por ejemplo, `C:/cygwin/bin/gawk.exe` o `C:/cygwin64/bin/gawk.exe`) para que todo funcione correctamente. Si tienes dudas con esto, puedes volver al video introductorio, en el se muestra este paso.
+
+#### Datos GIS / cartográficos
+
+Para dar contexto espacial a los análisis que realicemos, necesitaremos datos GIS (bordes políticos, límites, etc.). **Natural Earth** es una de las mejores fuentes de datos GIS vectoriales y raster integrados de calidad profesional. Con el paquete **rnaturalearth** de R pueden acceder a esos datos fácilmente desde R.
+
+El siguiente código descarga datos cartográficos de Natural Earth y crea un archivo GeoPackage con diferentes capas geográficas de Chile.
+
+```{r}
+library(rnaturalearth)
+library(sf) 
+library(dplyr)
+
+# Definir la ruta y nombre del archivo GeoPackage donde guardaremos todo
+gpkg_file <- "data/gis-data-chile.gpkg"
+
+# Crear el directorio 'data/' si no existe
+dir.create(dirname(gpkg_file), showWarnings = FALSE, recursive = TRUE)
+
+# Descargar y procesar territorio de Chile
+  #Descargar datos de todos los países del mundo
+chile_land <- ne_download(
+  scale = 50, # scale = 50 es una escala intermedia (también existe 10 y 110)
+  category = "cultural",
+  type = "admin_0_countries_lakes", 
+  returnclass = "sf"
+) |>
+  # Filtrar solo Chile
+  filter(ADMIN == "Chile") |>
+  # Ajustar precisión para evitar problemas geométricos
+  st_set_precision(1e6) |>
+  # Unir todas las geometrías en una sola (incluyendo islas)
+  st_union()
+
+# Descargar regiones de Chile (divisiones administrativas)
+  # Descargar divisiones administrativas de nivel 1 (regiones/estados)
+chile_regions <- ne_download(
+  scale = 50,
+  category = "cultural", 
+  type = "admin_1_states_provinces",
+  returnclass = "sf"
+) |>
+  filter(iso_a2 == "CL") |>
+  # Seleccionar columnas relevantes
+  select(
+    region = name             # Nombre de la región
+  )
+
+# Descargar líneas fronterizas de Chile
+  # Primero obtenemos TODAS las líneas fronterizas del mundo
+all_country_lines <- ne_download(
+  scale = 50, 
+  category = "cultural",
+  type = "admin_0_boundary_lines_land",
+  returnclass = "sf"
+)
+
+# Identificamos qué líneas intersectan con el territorio de Chile
+lines_touching_chile <- st_intersects(
+  all_country_lines, 
+  chile_land, 
+  sparse = FALSE
+)[,1]  
+
+# Filtrar solo las líneas que tocan Chile (fronteras con Argentina, Perú, Bolivia)
+chile_country_lines <- all_country_lines[lines_touching_chile,] |>
+  st_geometry() 
+
+# Descargar líneas entre regiones
+  # Descargar líneas de divisiones administrativas nivel 1
+all_region_lines <- ne_download(
+  scale = 50,
+  category = "cultural",
+  type = "admin_1_states_provinces_lines",
+  returnclass = "sf"
+)
+
+  # Filtrar líneas que intersectan con Chile
+lines_in_chile <- st_intersects(
+  all_region_lines,
+  chile_land,
+  sparse = FALSE
+)[,1] 
+
+chile_region_lines <- all_region_lines[lines_in_chile,] |>
+  st_geometry()
+
+# Guardar todas las capas en el GeoPackage
+write_sf(chile_land, gpkg_file, "chile_territorio")
+write_sf(chile_regions, gpkg_file, "chile_regiones")
+write_sf(chile_country_lines, gpkg_file, "chile_fronteras")
+write_sf(chile_region_lines, gpkg_file, "chile_limites_regionales")
+
+```
+
+## Descarga de datos desde eBird {#sec-ebird-download}
+
+eBird data are released as two tab-separated text files: the *eBird Basic Dataset (EBD)* containing observation data and the *Sampling Event Data (SED)* containing checklist data. These files are released monthly and contain all validated bird sightings in the eBird database at the time of release. In the EBD, each row corresponds to the sighting of a single species on a checklist, including the count and any other species-level information (e.g. age, sex, species comments, etc.). In the SED, each row corresponds to a checklist, including the date, time, location, effort (e.g. distance traveled, time spent, etc.), and any additional checklist-level information (e.g. whether this is a complete checklist or not).
+
+In this workshop, we'll use [Fork-tailed Flycatcher](https://ebird.org/species/fotfly) observations from Rio Grande do Sul, Brazil as an example. We'll start by downloading the corresponding eBird observation (EBD) and checklist (SED) data by visiting the [eBird Basic Dataset](https://ebird.org/data/download/ebd) download page and filling out the Custom Download form to request Fork-tailed Flycatcher observations from Rio Grande do Sul. **Make sure you check the box "Include sampling event data"**, which will include the SED in the data download in addition to the EBD.
+
+![](images/ebird-data_download.png)
+
+::: callout-tip
+## Tip
+
+The eBird database contains a massive amount of data! When requesting eBird data to download it's important to narrow the request to as small a subset of the data as possible. For example, if we request all Fork-tailed Flycatcher observations globally, the dataset may be too large to work with in R. Instead, we've only requested data for a single state in Brazil.
+:::
+
+Once the data are ready, you will receive an email with a download link. The downloaded data will be in a compressed .zip format, and should be unarchived. The resulting directory will contain a two text files: one for the EBD (e.g. `ebd_BR-RS_fotfly_smp_relJun-2023.txt`) containing all the Fork-tailed flycatcher observations from Rio Grande do Sul, and one for the SED (e.g. `ebd_BR-RS_fotfly_smp_relJun-2023_sampling.txt`) containing all checklists from Rio Grande do Sul, The `relJune-2023` component of the file name describes which version of the EBD this dataset came from; in this case it's the June 2023 release.
+
+If you would prefer to directly download the exact dataset used in this workshop, download the [data package for this workshop](index.qmd#sec-intro-data).
