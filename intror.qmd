@@ -201,7 +201,7 @@ Una vez que se te haya otorgado acceso al EBD, podrás descargar ya sea el conju
 
 Los datos de eBird se organizan en **checklist**, estos listados representan observaciones de un único evento de observación de aves, como una caminata de 1 km por un parque o 15 minutos observando comederos en tu jardín. Cada listado incluye las especies observadas, el número de individuos vistos de cada especie, la ubicación y hora de las observaciones, información sobre el tipo de muestreo realizado, y medidas del esfuerzo invertido durante la recolección de datos. La siguiente imagen muestra una lista típica de eBird tal como se ve [en el sitio web de eBird](#0):
 
-![](images/ebird-checklist.png){width="859"}
+![](images/ebird-checklist.png){fig-align="center" width="515"}
 
 Hay tres características clave que distinguen a eBird de muchos otros proyectos de ciencia ciudadana y que facilitan análisis ecológicos robustos. Primero, los observadores especifican el protocolo de muestreo utilizado, ya sea en tránsito, estacionario, incidental (es decir, si las observaciones se recolectaron cuando observar aves no era la actividad principal). Segundo, además de la información usual sobre cuándo y dónde se hicieron las observaciones, los observadores registran información de esfuerzo especificando cuánto tiempo buscaron, qué distancia recorrieron y el número total de observadores en su grupo. Recolectar estos datos facilita análisis robustos al permitir a los investigadores controlar la variación en el proceso de observación ([La Sorte et al. 2018](references.html#ref-lasorteOpportunitiesChallengesBig2018); [Kelling et al. 2018](references.html#ref-kellingFindingSignalNoise2018)). Finalmente, se pide a los observadores que indiquen si están reportando todas las aves que pudieron detectar e identificar. Las listas con todas las especies reportadas, conocidas como **listas completas**, permiten a los investigadores inferir conteos de cero individuos para las especies que no fueron reportadas. Si las listas no son completas, no es posible determinar si la ausencia de una especie en la lista fue una no detección o el resultado de que el participante no registró la especie.
 
@@ -233,7 +233,7 @@ Los datos de observación y lista se publican como archivos de texto separados p
 
 Comenzaremos descargando los datos de observación (EBD) y de lista (SED) de eBird correspondientes visitando la página de descarga del [eBird Basic Dataset](#0) y completando el formulario de Descarga Personalizada. Asegúrate de marcar la casilla "**Include sampling event data**", que incluirá el SED en la descarga de datos además del EBD.
 
-![](images/ebird-descarga.png){width="636"}
+![](images/ebird-descarga.png){fig-align="center" width="382"}
 
 Una vez que los datos estén listos, recibirás un correo electrónico con un enlace de descarga. Los datos descargados estarán en formato comprimido .zip y deberán descomprimirse. El directorio resultante contendrá dos archivos de texto: uno para el EBD (por ejemplo, `ebd_CL-LL_smp_relAug-2025.txt`) que contiene todas las observaciones del país y uno para el SED (por ejemplo, `ebd_CL-LL_smp_relAug-2025_sampling.txt`) que contiene todas las listas de la región de Los Lagos. El componente `relAug-2025` del nombre de los archivos describe qué versión del EBD es este conjunto de datos; en este caso, es la versión de agosto de este año.
 
