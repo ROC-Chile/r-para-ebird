@@ -16,7 +16,7 @@ A lo largo de los ejercicios de este curso dejaremos explicaciones de las funcio
 
 En el curso utilizaremos paquetes del [Tidyverse](https://tidyverse.org/), una colección de paquetes de R diseñados para el análisis de datos. Paquetes como [`ggplot2`](https://ggplot2.tidyverse.org/) (para visualización de datos) y [`dplyr`](https://dplyr.tidyverse.org/) (para manipulación de datos), son algunos de los más conocidos de la colección.
 
-Uno de los elementos del Tidyverse que utilizaremos bastante a lo largo de este curso es el operador pipe `%>% (|>)`. El pipe toma la expresión a su izquierda y la "canaliza" hacia el primer argumento de la expresión a su derecha.
+Uno de los elementos del Tidyverse que utilizaremos bastante a lo largo de este curso es el operador pipe `%>% (|>)`. El pipe toma la expresión a su izquierda y la "canaliza" hacia el primer argumento de la expresión a su derecha.
 
 ```{r}
 #| label: intro-tidyverse-pipe
@@ -193,7 +193,7 @@ write_sf(chile_region_lines, gpkg_file, "chile_limites_regionales")
 
 # Datos de eBird
 
-### Acceso a datos de eBird
+## Acceso a datos de eBird
 
 El acceso a la base de datos de eBird se proporciona a través del [eBird Basic Dataset (EBD)](https://science.ebird.org/en/use-ebird-data/download-ebird-data-products) como archivos de texto separados por tabulaciones. Para acceder al EBD, comienza [creando una cuenta de eBird e iniciando sesión](https://secure.birds.cornell.edu/cassso/account/create). Luego visita la [página de Acceso a Datos de eBird](https://ebird.org/data/download) y completa el formulario de solicitud de datos. El acceso a los datos de eBird es gratuito para la mayoría de los usos; sin embargo, necesitarás solicitar acceso para poder descargar el EBD. Completar el formulario de solicitud de acceso permite a eBird hacer seguimiento del número de personas que usan los datos y obtener información sobre las aplicaciones para las cuales se utilizan los datos.
 
@@ -201,13 +201,13 @@ Una vez que se te haya otorgado acceso al EBD, podrás descargar ya sea el conju
 
 Los datos de eBird se organizan en **checklist**, estos listados representan observaciones de un único evento de observación de aves, como una caminata de 1 km por un parque o 15 minutos observando comederos en tu jardín. Cada listado incluye las especies observadas, el número de individuos vistos de cada especie, la ubicación y hora de las observaciones, información sobre el tipo de muestreo realizado, y medidas del esfuerzo invertido durante la recolección de datos. La siguiente imagen muestra una lista típica de eBird tal como se ve [en el sitio web de eBird](#0):
 
-![](images/clipboard-3204990961.png)
+![](images/ebird-checklist.png){fig-align="center" width="515"}
 
 Hay tres características clave que distinguen a eBird de muchos otros proyectos de ciencia ciudadana y que facilitan análisis ecológicos robustos. Primero, los observadores especifican el protocolo de muestreo utilizado, ya sea en tránsito, estacionario, incidental (es decir, si las observaciones se recolectaron cuando observar aves no era la actividad principal). Segundo, además de la información usual sobre cuándo y dónde se hicieron las observaciones, los observadores registran información de esfuerzo especificando cuánto tiempo buscaron, qué distancia recorrieron y el número total de observadores en su grupo. Recolectar estos datos facilita análisis robustos al permitir a los investigadores controlar la variación en el proceso de observación ([La Sorte et al. 2018](references.html#ref-lasorteOpportunitiesChallengesBig2018); [Kelling et al. 2018](references.html#ref-kellingFindingSignalNoise2018)). Finalmente, se pide a los observadores que indiquen si están reportando todas las aves que pudieron detectar e identificar. Las listas con todas las especies reportadas, conocidas como **listas completas**, permiten a los investigadores inferir conteos de cero individuos para las especies que no fueron reportadas. Si las listas no son completas, no es posible determinar si la ausencia de una especie en la lista fue una no detección o el resultado de que el participante no registró la especie.
 
 Los proyectos de ciencia ciudadana ocurren en un espectro, desde aquellos con estructuras de muestreo predefinidas que se asemejan más a diseños tradicionales de muestreo (como el [Breeding Bird Survey](https://www.pwrc.usgs.gov/bbs/) en Estados Unidos), hasta aquellos que no están estructurados y recolectan observaciones de manera oportunista (como [iNaturalist](https://www.inaturalist.org/)). Nos referimos a eBird como un proyecto **semi-estructurado** ([Kelling et al. 2018](#0)), con protocolos flexibles y fáciles de seguir que atraen a muchos participantes, pero que también recolectan datos sobre el proceso de observación y permiten inferir no detecciones en listas completas.
 
-### Desafíos asociados con datos de eBird
+## Desafíos asociados con datos de eBird
 
 A pesar de las fortalezas de los datos de eBird, las observaciones de especies recolectadas a través de proyectos de ciencia ciudadana presentan una serie de desafíos que no se encuentran en datos científicos convencionales. Los siguientes son algunos de los principales desafíos asociados con estos datos; desafíos que serán abordados a lo largo de esta guía:
 
@@ -225,7 +225,7 @@ A pesar de las fortalezas de los datos de eBird, las observaciones de especies r
 
 El resto de esta guía demostrará cómo abordar estos desafíos usando datos reales de eBird para producir estimaciones confiables de distribuciones de especies. En general, tomaremos un enfoque de dos frentes para lidiar con datos no estructurados y maximizar el valor de los datos de ciencia ciudadana: **imponer más estructura en los datos mediante filtrado** e **incluir variables predictoras que describan el proceso de observación** en nuestros modelos para controlar la variación restante.
 
-### Descarga de datos
+## Descarga de datos
 
 Los datos de eBird se distribuyen típicamente en dos partes: **datos de observación** y **datos de lista**. En el conjunto de datos de observación, cada fila corresponde al avistamiento de una única especie en una lista, incluyendo el conteo y cualquier otra información a nivel de especie (por ejemplo, edad, sexo, comentarios sobre la especie, etc.). En el conjunto de datos de lista, cada fila corresponde a una lista, incluyendo la fecha, hora, ubicación, esfuerzo (por ejemplo, distancia recorrida, tiempo invertido, etc.) y cualquier información adicional a nivel de lista (por ejemplo, si es una lista completa o no). Estos dos conjuntos de datos pueden unirse usando un identificador único de lista (a veces referido como identificador de evento de muestreo).
 
@@ -233,6 +233,8 @@ Los datos de observación y lista se publican como archivos de texto separados p
 
 Comenzaremos descargando los datos de observación (EBD) y de lista (SED) de eBird correspondientes visitando la página de descarga del [eBird Basic Dataset](#0) y completando el formulario de Descarga Personalizada. Asegúrate de marcar la casilla "**Include sampling event data**", que incluirá el SED en la descarga de datos además del EBD.
 
-![](images/clipboard-2087482304.png)Una vez que los datos estén listos, recibirás un correo electrónico con un enlace de descarga. Los datos descargados estarán en formato comprimido .zip y deberán descomprimirse. El directorio resultante contendrá dos archivos de texto: uno para el EBD (por ejemplo, `ebd_CL_smp_relAug-2025.txt`) que contiene todas las observaciones del país y uno para el SED (por ejemplo, `ebd_CL_smp_relAug-2025_sampling.txt`) que contiene todas las listas del país. El componente `relAug-2025` del nombre de los archivos describe qué versión del EBD es este conjunto de datos; en este caso, es la versión de agosto de este año.
+![](images/ebird-descarga.png){fig-align="center" width="382"}
+
+Una vez que los datos estén listos, recibirás un correo electrónico con un enlace de descarga. Los datos descargados estarán en formato comprimido .zip y deberán descomprimirse. El directorio resultante contendrá dos archivos de texto: uno para el EBD (por ejemplo, `ebd_CL-LL_smp_relAug-2025.txt`) que contiene todas las observaciones del país y uno para el SED (por ejemplo, `ebd_CL-LL_smp_relAug-2025_sampling.txt`) que contiene todas las listas de la región de Los Lagos. El componente `relAug-2025` del nombre de los archivos describe qué versión del EBD es este conjunto de datos; en este caso, es la versión de agosto de este año.
 
 Dado que el EBD se actualiza mensualmente, probablemente recibirás una versión diferente de los datos que la versión de agosto de 2025 usada a lo largo del resto de esta lección. Siempre que actualices los nombres de los archivos descargados en consecuencia en tus códigos, la diferencia en versiones no será un problema. Sin embargo, si quieres descargar y usar exactamente los mismos archivos usados en esta lección, puedes [descargar el archivo zip del EBD correspondiente](https://github.com/ROC-Chile/r-para-ebird/).

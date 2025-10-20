@@ -8,29 +8,14 @@ editor_options:
 
 # Best Practices for using eBird Data {#sec-ebird}
 
+En este capítulo, destacaremos algunos de los desafíos asociados con el uso de datos de eBird. Luego demostraremos cómo descargar datos de eBird para una región y especie determinadas. A continuación, mostraremos cómo importar los datos en R, aplicar filtros y usar listas completas para producir datos de detección/no detección adecuados para modelar la distribución y abundancia de especies. Finalmente, realizaremos algunos pasos de pre-procesamiento necesarios para asegurar el análisis apropiado de los datos.\
+Usamos los términos **detección** y **no detección** en lugar de los términos más comunes **presencia** y **ausencia** a lo largo de esta guía para reflejar el hecho de que un conteo inferido de cero no necesariamente significa que una especie está ausente, solo que no fue detectada en la lista en cuestión.
+
 ## Introduction {#sec-ebird-intro}
 
 eBird data are collected and organized around the concept of a checklist, representing observations from a single birding event, such as a 1 km walk through a park or 15 minutes observing bird feeders in your backyard. All eBird checklists contains a list of species observed and the location and time of the observations. For a subset of checklists, the observer will also provide counts of the number of individuals seen of each species, specify the amount of effort expended while collecting these data, and confirm that they are submitting a complete checklist of all the birds they were able to identify. The data provided by the checklists such as these are often referred to as **semi-structured citizen science data**. Importantly, complete checklists enable data users to infer counts of zero individuals for the species that were not reported. If checklists are not complete, it's not possible to ascertain whether the absence of a species on a list was a non-detection or the result of a participant not recording the species.
 
 Let's compare two eBird checklists: an [incidental observation with missing counts](https://ebird.org/checklist/S136805959) and a [complete traveling count](https://ebird.org/checklist/S136805666). Both checklists can be useful, but only the second checklist provides the type of semi-structured data required for more rigorous applications.
-
-## Downloading data {#sec-ebird-download}
-
-eBird data are released as two tab-separated text files: the *eBird Basic Dataset (EBD)* containing observation data and the *Sampling Event Data (SED)* containing checklist data. These files are released monthly and contain all validated bird sightings in the eBird database at the time of release. In the EBD, each row corresponds to the sighting of a single species on a checklist, including the count and any other species-level information (e.g. age, sex, species comments, etc.). In the SED, each row corresponds to a checklist, including the date, time, location, effort (e.g. distance traveled, time spent, etc.), and any additional checklist-level information (e.g. whether this is a complete checklist or not).
-
-In this workshop, we'll use [Fork-tailed Flycatcher](https://ebird.org/species/fotfly) observations from Rio Grande do Sul, Brazil as an example. We'll start by downloading the corresponding eBird observation (EBD) and checklist (SED) data by visiting the [eBird Basic Dataset](https://ebird.org/data/download/ebd) download page and filling out the Custom Download form to request Fork-tailed Flycatcher observations from Rio Grande do Sul. **Make sure you check the box "Include sampling event data"**, which will include the SED in the data download in addition to the EBD.
-
-![](images/ebird-data_download.png)
-
-::: callout-tip
-## Tip
-
-The eBird database contains a massive amount of data! When requesting eBird data to download it's important to narrow the request to as small a subset of the data as possible. For example, if we request all Fork-tailed Flycatcher observations globally, the dataset may be too large to work with in R. Instead, we've only requested data for a single state in Brazil.
-:::
-
-Once the data are ready, you will receive an email with a download link. The downloaded data will be in a compressed .zip format, and should be unarchived. The resulting directory will contain a two text files: one for the EBD (e.g. `ebd_BR-RS_fotfly_smp_relJun-2023.txt`) containing all the Fork-tailed flycatcher observations from Rio Grande do Sul, and one for the SED (e.g. `ebd_BR-RS_fotfly_smp_relJun-2023_sampling.txt`) containing all checklists from Rio Grande do Sul, The `relJune-2023` component of the file name describes which version of the EBD this dataset came from; in this case it's the June 2023 release.
-
-If you would prefer to directly download the exact dataset used in this workshop, download the [data package for this workshop](index.qmd#sec-intro-data).
 
 ## Importing eBird data into R {#sec-ebird-import}
 
@@ -46,7 +31,11 @@ library(ggplot2)
 library(lubridate)
 library(sf)
 
+
 f_sed <- "data/ebd_CL-LL_smp_relAug-2025_sampling.txt"
+
+f_sed <- "ebd_CL_smp_relAug-2025/ebd_CL_smp_relAug-2025_sampling.txt"
+
 checklists <- read_sampling(f_sed, unique = FALSE)
 glimpse(checklists)
 ```
@@ -87,7 +76,11 @@ Next, let's import the observation data.
 
 ```{r}
 #| label: ebird-import-ebd
+
 f_ebd <- "data/ebd_CL-LL_smp_relAug-2025.txt"
+
+f_ebd <- "ebd_CL_smp_relAug-2025/ebd_CL_smp_relAug-2025.txt"
+
 observations <- read_ebd(f_ebd, unique = FALSE, rollup = FALSE)
 glimpse(observations)
 ```
@@ -412,4 +405,183 @@ legend("bottomright", bty = "n",
        pch = 19)
 box()
 title("Fork-tailed Flycatcher eBird Observations (2013-2022)")
+```
+
+## Código para extraer datos del eBird Basic Dataset (EBD) para sitios prioritarios
+
+Este código permite extraer datos del EBD y resumir la información registrada para un área geográfica de interés utilizando un polígono.
+
+Para correr este código se requieren de tres archivos.
+
+1.  El [eBird Basic Dasaset](https://ebird.org/science/use-ebird-data/download-ebird-data-products) (EBD) que se puede solicitar en el siguiente [link](https://ebird.org/data/download?_gl=1*efb2q5*_ga*MTQxMzEzODEzMi4xNjc5NTA3MTA3*_ga_QR4NVXZ8BM*MTY5MjYyNTc0MC4xNTMuMS4xNjkyNjI1NzU4LjQyLjAuMA..&_ga=2.200421294.1401622184.1692625740-1413138132.1679507107). La base de datos es gratuita, solo es necesario hacer la solicitud a través de la página.
+
+2.  El [polígono](https://github.com/ROC-Chile/extraccion_datos_eBird_sitios_prioritarios/blob/main/Bahia%20Coquimbo.kml) del área de interés, que en este caso es un Important Bird Area (IBA) de la Bahía de Coquimbo, Chile. El paquete "sf" utilizado acepta archivos en formato .shp o .kml
+
+3.  **Opcional** Un [archivo](https://github.com/ROC-Chile/extraccion_datos_eBird_sitios_prioritarios/blob/main/Lista%20aves%20de%20chile.csv) con nombres locales y categorías de conservación de las especies. En este caso, un archivo con el listado de aves de Chile y su categoría de conservación.
+
+Este ejemplo fue desarrollado por la [(ROC)](http://www.redobservadores.cl/) como una herrmienta para hacer uso de la base de datos abierta de eBird para obtener información importante de sitios prioritarios para la conservación de aves de Chile. Sin embargo, también se puede utilizar de forma general para obtener datos de aves de cualquier área geógráfica de interés.
+
+*Recuerda que si usas Windows debes tener [(Cygwin)](https://www.cygwin.com/) instalado en tu computador* [(TUTORIAL)](https://cornelllabofornithology.github.io/auk/).
+
+**Funcionalidades aún por desarrollar:**
+
+-   Columna que indica en cuantos de los ultimos 5 años hubo por lo menos un registro de la especie
+
+-   Columna de tasa relativa de encuentro
+
+-   Función para especificar un buffer que agranda el perimetro del polígono, para incluir listas adjacentes al área de interés
+
+```{r}
+#SCRIPT PARA EXTRAER DATOS DE eBIRD PARA SITIOS DE INTERÉS
+
+#activar paquetes (instalar en su computador previamente)
+library(auk)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(sf)
+library(tibble)
+library(tidyr)
+library(readr)
+
+#importar los datos de observaciones
+f_ebd <- "ebd_CL_smp_relJul-2023.txt" #especificar el pathway para llegar al lugar donde está almacenado en su computador 
+obs <- read_ebd(f_ebd)
+
+#convertir los "X" a NA y transformar conteos a números enteros
+obs$observation_count <- if_else(obs$observation_count == "X", NA_character_, obs$observation_count) %>% 
+  as.integer()
+  
+#leer el shape file o .kml para el polígono del IBA
+#evitar archivos .kmz
+poly <- read_sf("Aconcagua.kml") #insertar nombre de archivo propio
+
+#leer planilla con categoría de conservacion de las especies
+cat <- read.csv("Lista aves de chile.csv")
+cat <- cat %>% select(nombre_cientifico,nombre_comun,categoria_IUCN,categoria_MMA,status)
+
+#filtrar la base de datos para retener solo las observaciones que cumplan los criterios que uno establezca
+#en este caso solo queremos retener listas con distancias recorridas menores a 10km y de una duracion menor a 6 horas
+obs_fil <- obs %>%
+  # 2. definir filtros
+  filter(protocol_name %in% c("Traveling", "Stationary"),
+         duration_minutes < 6 * 60,
+         effort_distance_km < 10 | protocol_name == "Stationary",
+         exotic_code == "N") 
+
+#seleccionar solo las columnas necesarias para reducir tamaño del dataframe
+obs_lim <- obs_fil %>%
+  select(sampling_event_identifier,
+         taxonomic_order,
+         common_name,
+         scientific_name,
+         observation_count,
+         breeding_category,
+         latitude,
+         longitude,
+         observation_date)
+
+# cambiar jerarquía de categorias de códigos reproductivos a una jerarquía numérica
+obs_lim <- obs_lim %>%
+  mutate(breeding_category = recode(breeding_category,'C1'=1,'C2'=2,'C3'=3,'C4'=4),
+         breeding_category = as.integer(as.character(breeding_category)))
+
+# Transformaciones del polígono
+# transformar objeto a formato shape file
+ebd_sf <- obs_lim %>% 
+  select(longitude, latitude) %>% 
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
+
+# transformar poligono para tener el mismo crs
+poly_ll <- st_transform(poly, crs = st_crs(ebd_sf))
+
+# opcionalmente se puede incluir un buffer alrededor del polígono para incluir datos de listas que pudieran haber empezado fuera del polígono
+poly_ll_buffer <- st_buffer(poly_ll, dist = 1000) # en este caso agregamos un buffer the 1km
+
+# identificar puntos dentro del poligono
+in_poly <- st_within(ebd_sf, poly_ll_buffer, sparse = FALSE)
+
+# Filtrado final de los datos para obtener solo los datos que caen dentro del polígono
+ebd_in_poly <- obs_lim[in_poly[, 1], ]
+
+
+## CREAR TABLA RESUMEN DE DATOS
+#lista de especies registradas, nombre común, científico y orden taxono
+especie <-   ebd_in_poly %>% 
+  distinct(common_name,scientific_name,taxonomic_order) %>% 
+  arrange(common_name) %>%
+  distinct(common_name, .keep_all = TRUE)
+
+#lista de especies registradas durante el último año y máximos para ese año
+registro_último_año <-  ebd_in_poly %>% 
+  filter(year(observation_date) == year(max(observation_date))) %>% 
+  group_by(common_name) %>% 
+  arrange(desc(observation_count)) %>%  # Ordenar en orden descendente de conteo
+  summarise(conteo_max_último_año = max(observation_count, na.rm=TRUE),checklist.x = first(sampling_event_identifier),
+            conteo_max_último_año = replace(conteo_max_último_año, conteo_max_último_año == -Inf, 0)) %>%
+  mutate(registro_último_año = TRUE)
+
+#conteo máximo histórico para cada especie registrada en el polígono
+conteo_max_h <- ebd_in_poly %>% 
+  group_by(common_name) %>%
+  arrange(desc(observation_count)) %>%
+  slice(1) %>%  # Tomar solo la primera fila (máximo conteo)
+  summarise(conteo_max_h = max(observation_count, na.rm=TRUE),
+            año_max_h = max(year(observation_date)), 
+            checklist.y = first(sampling_event_identifier))
+
+#promedio de conteo en los registros de los últimos 5 años
+prom_conteo_5_años <- ebd_in_poly %>% 
+  filter(year(observation_date) >= (year(max(observation_date)) - 4)) %>% 
+  group_by(common_name) %>% 
+  summarise(prom_conteos_5_años = round(mean(observation_count, na.rm=TRUE)))
+
+#código reproductivo más alto registrado para cada especie en el polígono
+cod_rep <- ebd_in_poly %>% 
+  group_by(common_name) %>% 
+  summarise(cod_rep = max(breeding_category, na.rm = TRUE),
+            cod_rep = replace(cod_rep, cod_rep == -Inf, 0))
+
+#crear tabla resumen                                                  
+tabla_datos <- left_join(especie,registro_último_año, by = "common_name") %>%
+  left_join(.,conteo_max_h, by = "common_name") %>%
+  left_join(.,prom_conteo_5_años, by = "common_name") %>%
+  left_join(.,cod_rep, by = "common_name") %>%
+  left_join(., cat, by = c("scientific_name" = "nombre_cientifico")) %>% 
+  group_by(common_name) %>%
+  select("nombre_comun","common_name","scientific_name","registro_último_año","conteo_max_último_año","checklist.x","conteo_max_h","año_max_h","checklist.y","prom_conteos_5_años","cod_rep","categoria_MMA","categoria_IUCN","taxonomic_order","status")
+  slice(1) #remueve las filas de especie repetidas por tener subespecie
+
+#ordenar la tabla según orden taxonómico, reemplazar NAs y números infinitos por 0
+tabla_datos <- tabla_datos %>%
+  arrange(taxonomic_order) %>% #ordenar la tabla de acuerdo a orden taxonómico
+  mutate_all(function(x) ifelse(is.infinite(x), 0, x)) %>% #reemplaza numeros infinitos por 0, cuando todos los registros de la especie fueron ingresados como 'X' 
+  select(-taxonomic_order)%>% #quita la columna de numero taxonomico
+  rename(nombre_inglés = common_name, nombre_cientifico = scientific_name) #cambia el nombre de la columna para que todos estén en castellano
+
+#remplaza NA con 0 en columnas numéricas
+tabla_datos <- tabla_datos %>%
+  mutate(conteo_max_último_año = ifelse(is.na(conteo_max_último_año), 0, conteo_max_último_año),
+         prom_conteos_5_años = ifelse(is.na(prom_conteos_5_años), 0, prom_conteos_5_años))
+
+#remplaza NA con 0 en columna de characteres
+tabla_datos$registro_último_año <- replace(tabla_datos$registro_último_año, is.na(tabla_datos$registro_último_año),FALSE)
+
+# EXPORTAR LA TABLA COMO .CSV
+write_csv(tabla_datos, "datos eBird Aconcagua.csv")
+
+
+############ HERRAMIENTAS ADICIONALES ################
+
+##GRAFICAR LA UBICACIÓN DE LOS DATOS DENTRO DEL POLÍGONO
+#seleccionar filas 159 - 167 y ejecutar para crear mapa
+par(mar = c(0, 0, 0, 0))
+plot(poly %>% st_geometry(), col = "white", border = NA)
+plot(ebd_sf[in_poly[, 1], ], 
+     col = "grey30", pch = 19, cex = 0.5, 
+     add = TRUE)
+legend("top", 
+       legend = "Ubicación datos eBird dentro del poligono",
+       pch = 19,
+       bty = "n")
 ```
