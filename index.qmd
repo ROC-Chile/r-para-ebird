@@ -8,7 +8,7 @@ editor_options:
 
 # Introducción {.unnumbered}
 
-Esta página contiene el material utilizado durante el **Curso Roc: Análisis de datos de eBird en R.**
+Esta página contiene el material utilizado durante el **Curso Roc: Análisis de datos de eBird utilizando R.**
 
 El curso consta de 4 módulos:
 
@@ -41,7 +41,7 @@ remotes::install_github("ebird/ebird-best-practices")
 ```
 
 5.  Asegúrate de que todos los paquetes estén actualizados a sus versiones más recientes haciendo clic en el botón Actualizar de la pestaña Paquetes en RStudio.
-6.  Descarga el [paquete de datos](https://drive.google.com/file/d/1y7MXbiqGzwJpyIsDDwA8ErqNVueGgecF/view?usp=sharing) que utiliazremos en este curso.
+6.  Descarga el [paquete de datos](https://drive.google.com/drive/folders/1GgarYMegw1CLf35AKu89EHQyXqoBbuiJ?usp=share_link) que utilizaremos en este curso.
 
 ## Tutorial de configuración {#sec-tutorial-config}
 
