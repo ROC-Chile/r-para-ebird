@@ -327,7 +327,7 @@ zf_filtered <- zf %>%
   filter(year(observation_date) >= 2013, year(observation_date) <= 2022,
          protocol_name %in% c("Traveling", "Stationary"),
          duration_minutes < 6 * 60,
-         effort_distance_km < 10 | protocol_type == "Stationary")
+         effort_distance_km < 10 | protocol_name == "Stationary")
 nrow(zf)
 nrow(zf_filtered)
 ```
