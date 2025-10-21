@@ -7,9 +7,6 @@ book:
   chapters:
     - index.qmd
     - intror.qmd
-    - ebird.qmd
-    - distabund.qmd
-    - ebirdst.qmd
   editor:
     mode: source
 

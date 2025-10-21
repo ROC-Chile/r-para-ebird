@@ -3,7 +3,7 @@ output: html_document
 editor:
     mode: source
 editor_options: 
-  chunk_output_type: console
+  chunk_output_po: console
 ---
 
 # Best Practices for using eBird Data {#sec-ebird}
@@ -93,8 +93,6 @@ Next, let's import the observation data.
 #| label: ebird-import-ebd
 
 f_ebd <- "data/ebd_CL-LL_smp_relAug-2025.txt"
-
-f_ebd <- "ebd_CL_smp_relAug-2025/ebd_CL_smp_relAug-2025.txt"
 
 observations <- read_ebd(f_ebd, unique = FALSE, rollup = FALSE)
 glimpse(observations)
@@ -243,7 +241,7 @@ zf_filtered <- zf %>%
   filter(year(observation_date) >= 2021, year(observation_date) <= 2025,
          protocol_name %in% c("Traveling", "Stationary"),
          duration_minutes < 6 * 60,
-         effort_distance_km < 10 | protocol_type == "Stationary")
+         effort_distance_km < 10 | protocol_name == "Stationary")
 nrow(zf)
 nrow(zf_filtered)
 ```
@@ -258,7 +256,7 @@ checklists_zf <- zf_filtered %>%
   select(checklist_id, 
          latitude, longitude,
          observation_date, time_observations_started,
-         protocol_type,
+         protocol_name,
          duration_minutes, effort_distance_km, number_observers,
          observation_count, species_observed)
 ```
