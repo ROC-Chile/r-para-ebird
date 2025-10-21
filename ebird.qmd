@@ -17,6 +17,24 @@ eBird data are collected and organized around the concept of a checklist, repres
 
 Let's compare two eBird checklists: an [incidental observation with missing counts](https://ebird.org/checklist/S136805959) and a [complete traveling count](https://ebird.org/checklist/S136805666). Both checklists can be useful, but only the second checklist provides the type of semi-structured data required for more rigorous applications.
 
+## Desafíos asociados con datos de eBird
+
+A pesar de las fortalezas de los datos de eBird, las observaciones de especies recolectadas a través de proyectos de ciencia ciudadana presentan una serie de desafíos que no se encuentran en datos científicos convencionales. Los siguientes son algunos de los principales desafíos asociados con estos datos; desafíos que serán abordados a lo largo de esta guía:
+
+-   **Sesgo taxonómico**: los participantes a menudo tienen preferencias por ciertas especies, lo que puede llevar a un registro preferencial de algunas especies sobre otras ([Greenwood 2007](references.html#ref-greenwoodCitizensScienceBird2007); [Tulloch and Szabo 2012](#0)). Restringir los análisis a listas completas mitiga en gran medida este problema.
+
+-   **Sesgo espacial**: la mayoría de los participantes en proyectos de ciencia ciudadana muestrean cerca de sus hogares ([Luck et al. 2004](references.html#ref-luckAlleviatingSpatialConflict2004)), en áreas de fácil acceso como bordes de carreteras ([Kadmon, Farber, and Danin 2004](references.html#ref-kadmonEffectRoadsideBias2004)), o en áreas y hábitats de alta biodiversidad conocida ([Prendergast et al. 1993](references.html#ref-prendergastCorrectingVariationRecording1993)). Un método simple para reducir el sesgo espacial es crear una grilla sobre la región de interés y muestrear un número determinado de listas desde cada celda de la grilla.
+
+-   **Sesgo temporal**: los participantes muestrean preferentemente cuando están disponibles, como los fines de semana ([Courter et al. 2013](references.html#ref-courterWeekendBiasCitizen2013)), y en épocas del año cuando esperan observar más aves; notablemente, en Estados Unidos hay un gran aumento en envíos de eBird durante la migración de primavera ([Sullivan et al. 2014](references.html#ref-sullivanEBirdEnterpriseIntegrated2014)). Además, eBird ha aumentado constantemente en popularidad con el tiempo, lo que lleva a un fuerte sesgo hacia más datos en años recientes. Para abordar el sesgo de fin de semana, recomendamos usar una escala temporal de una semana o varias semanas para la mayoría de los análisis. Los sesgos temporales a escalas más largas pueden abordarse submuestreando los datos para producir una distribución temporal más uniforme.
+
+-   **Desbalance de clases**: las especies de aves que son raras o difíciles de detectar pueden tener datos con alto desbalance de clases, con muchas más listas con no detecciones que con detecciones. Para estas especies, un modelo de distribución que predice que la especie está ausente en todas partes tendrá alta precisión, pero ningún valor ecológico. Seguiremos los métodos para abordar el desbalance de clases propuestos por Robinson et al. ([2018](references.html#ref-robinsonUsingCitizenScience2018)), muestreando los datos para aumentar artificialmente la prevalencia de detecciones antes del modelado.
+
+-   **Precisión espacial**: la ubicación espacial de una lista de eBird se proporciona como un único punto latitud-longitud; sin embargo, esto puede no ser preciso por dos razones principales. Primero, para listas en tránsito, esta ubicación representa solo un punto en el recorrido. Segundo, las listas de eBird a menudo se asignan a un hotspot (una ubicación común para todos los observadores que visitan un sitio popular) en lugar de su ubicación verdadera. Por estas razones, no es apropiado alinear las ubicaciones de eBird con variables de hábitat muy precisas, y recomendamos resumir variables dentro de un vecindario alrededor de la ubicación de la lista.
+
+-   **Variación en detectabilidad/esfuerzo**: la detectabilidad describe la probabilidad de que una especie este presente en un área y sea detectada e identificada. La detectabilidad varía según la estación, hábitat y especie ([Johnston et al. 2014](references.html#ref-johnstonSpeciesTraitsExplain2014), [2018](references.html#ref-johnstonEstimatesObserverExpertise2018)). Además, los datos de eBird se recolectan con alta variación en esfuerzo, hora del día, número de observadores y condiciones externas como el clima, todo lo cual puede afectar la detectabilidad de las especies ([Ellis and Taylor 2018](references.html#ref-ellisEffectsWeatherTime2018); [Oliveira et al. 2018](references.html#ref-oliveiraObservationDiurnalSoaring2018)). Por lo tanto, la detectabilidad es particularmente importante de considerar al comparar entre estaciones, hábitats o especies. Dado que eBird usa un protocolo semi-estructurado que recolecta datos sobre el proceso de observación, podremos controlar una mayor proporción de esta variación en nuestros análisis.
+
+El resto de esta guía demostrará cómo abordar estos desafíos usando datos reales de eBird para producir estimaciones confiables de distribuciones de especies. En general, tomaremos un enfoque de dos frentes para lidiar con datos no estructurados y maximizar el valor de los datos de ciencia ciudadana: **imponer más estructura en los datos mediante filtrado** e **incluir variables predictoras que describan el proceso de observación** en nuestros modelos para controlar la variación restante.
+
 ## Importing eBird data into R {#sec-ebird-import}
 
 The previous step left us with two tab separated text files, one for the EBD (i.e. observation data) and one for the SED (i.e. checklist data). Start a new RStudio project and put the downloaded text files in the `data/` sub-directory of the project directory.
@@ -30,7 +48,6 @@ library(dplyr)
 library(ggplot2)
 library(lubridate)
 library(sf)
-
 
 f_sed <- "data/ebd_CL-LL_smp_relAug-2025_sampling.txt"
 
@@ -76,6 +93,8 @@ Next, let's import the observation data.
 #| label: ebird-import-ebd
 
 f_ebd <- "data/ebd_CL-LL_smp_relAug-2025.txt"
+
+f_ebd <- "ebd_CL_smp_relAug-2025/ebd_CL_smp_relAug-2025.txt"
 
 observations <- read_ebd(f_ebd, unique = FALSE, rollup = FALSE)
 glimpse(observations)
@@ -146,13 +165,15 @@ The function [`auk_rollup()`](https://cornelllabofornithology.github.io/auk/refe
 ```{r}
 #| label: ebird-import-rollup
 observations_rollup <- auk_rollup(observations)
+
 # only one checklist is affected by this
 observations %>% 
-  filter(sampling_event_identifier == "S210636232") %>% 
+  filter(sampling_event_identifier == "S99335111") %>% 
   select(sampling_event_identifier, common_name, subspecies_common_name, 
          observation_count)
+
 observations_rollup %>% 
-  filter(sampling_event_identifier == "S210636232") %>% 
+  filter(sampling_event_identifier == "S99335111") %>% 
   select(sampling_event_identifier, common_name,
          observation_count)
 ```
@@ -175,10 +196,12 @@ We refer to the process of producing detection/non-detection data as "zero-filli
 checklists <- read_sampling(f_sed) %>% 
   # subset to complete checklists
   filter(all_species_reported)
+
 # import observation data
 observations <- read_ebd(f_ebd) %>% 
   # subset to complete checklists
   filter(all_species_reported)
+
 # zero-fill to produce detection/non-detection data
 zf <- auk_zerofill(observations, checklists, collapse = TRUE)
 glimpse(zf)
@@ -220,7 +243,7 @@ zf_filtered <- zf %>%
   filter(year(observation_date) >= 2021, year(observation_date) <= 2025,
          protocol_name %in% c("Traveling", "Stationary"),
          duration_minutes < 6 * 60,
-         effort_distance_km < 10 | protocol_name == "Stationary")
+         effort_distance_km < 10 | protocol_type == "Stationary")
 nrow(zf)
 nrow(zf_filtered)
 ```
@@ -235,7 +258,7 @@ checklists_zf <- zf_filtered %>%
   select(checklist_id, 
          latitude, longitude,
          observation_date, time_observations_started,
-         protocol_name,
+         protocol_type,
          duration_minutes, effort_distance_km, number_observers,
          observation_count, species_observed)
 ```
