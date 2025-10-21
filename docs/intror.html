@@ -8,7 +8,7 @@
 
 <meta name="author" content="Erik Sandvig, Marion Díaz, Vicente Pantoja, Matthew Strimas-Mackey, Tom Auer">
 
-<title>1&nbsp; Introducción al entorno R en el contexto de eBird – Curso ROC: Análisis de datos de eBird en R</title>
+<title>1&nbsp; Introducción al entorno R en el contexto de eBird – Curso ROC: Análisis de datos de eBird utilizando R</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,7 +65,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./ebird.html" rel="next">
 <link href="./index.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -131,7 +130,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">Curso ROC: Análisis de datos de eBird en R</a> 
+      <a href="./">Curso ROC: Análisis de datos de eBird utilizando R</a> 
         <div class="sidebar-tools-main">
     <a href="https://github.com/ROC-Chile/r-para-ebird" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
 </div>
@@ -154,24 +153,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="./intror.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introducción al entorno R en el contexto de eBird</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./ebird.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Best Practices for using eBird Data</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./distabund.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Modelamiento de distribución y abundancia relativa</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./ebirdst.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Productos de Estados y Tendencias de eBird</span></span></a>
   </div>
 </li>
     </ul>
@@ -367,7 +348,7 @@ Solución
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Unir todas las geometrías en una sola (incluyendo islas)</span></span>
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_union</span>()</span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Reading layer `ne_50m_admin_0_countries_lakes' from data source </span></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   `/private/var/folders/hl/htdls_lx1rlfx23h9wwv62xm0000gn/T/Rtmps9JECO/ne_50m_admin_0_countries_lakes.shp' </span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   `/private/var/folders/hl/htdls_lx1rlfx23h9wwv62xm0000gn/T/RtmpXR5YCT/ne_50m_admin_0_countries_lakes.shp' </span></span>
 <span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   using driver `ESRI Shapefile'</span></span>
 <span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Simple feature collection with 242 features and 168 fields</span></span>
 <span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Geometry type: MULTIPOLYGON</span></span>
@@ -389,7 +370,7 @@ Solución
 <span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">region =</span> name             <span class="co"># Nombre de la región</span></span>
 <span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Reading layer `ne_50m_admin_1_states_provinces' from data source </span></span>
-<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   `/private/var/folders/hl/htdls_lx1rlfx23h9wwv62xm0000gn/T/Rtmps9JECO/ne_50m_admin_1_states_provinces.shp' </span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   `/private/var/folders/hl/htdls_lx1rlfx23h9wwv62xm0000gn/T/RtmpXR5YCT/ne_50m_admin_1_states_provinces.shp' </span></span>
 <span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   using driver `ESRI Shapefile'</span></span>
 <span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Simple feature collection with 294 features and 121 fields</span></span>
 <span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Geometry type: MULTIPOLYGON</span></span>
@@ -406,7 +387,7 @@ Solución
 <span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>  <span class="at">returnclass =</span> <span class="st">"sf"</span></span>
 <span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Reading layer `ne_50m_admin_0_boundary_lines_land' from data source </span></span>
-<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   `/private/var/folders/hl/htdls_lx1rlfx23h9wwv62xm0000gn/T/Rtmps9JECO/ne_50m_admin_0_boundary_lines_land.shp' </span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   `/private/var/folders/hl/htdls_lx1rlfx23h9wwv62xm0000gn/T/RtmpXR5YCT/ne_50m_admin_0_boundary_lines_land.shp' </span></span>
 <span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   using driver `ESRI Shapefile'</span></span>
 <span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Simple feature collection with 390 features and 39 fields</span></span>
 <span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Geometry type: MULTILINESTRING</span></span>
@@ -434,7 +415,7 @@ Solución
 <span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>  <span class="at">returnclass =</span> <span class="st">"sf"</span></span>
 <span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Reading layer `ne_50m_admin_1_states_provinces_lines' from data source </span></span>
-<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   `/private/var/folders/hl/htdls_lx1rlfx23h9wwv62xm0000gn/T/Rtmps9JECO/ne_50m_admin_1_states_provinces_lines.shp' </span></span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   `/private/var/folders/hl/htdls_lx1rlfx23h9wwv62xm0000gn/T/RtmpXR5YCT/ne_50m_admin_1_states_provinces_lines.shp' </span></span>
 <span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   using driver `ESRI Shapefile'</span></span>
 <span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Simple feature collection with 581 features and 43 fields</span></span>
 <span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Geometry type: MULTILINESTRING</span></span>
@@ -916,16 +897,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./ebird.html" class="pagination-link" aria-label="Best Practices for using eBird Data">
-        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Best Practices for using eBird Data</span></span> <i class="bi bi-arrow-right-short"></i>
-      </a>
   </div>
 </nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
     <div class="nav-footer-left">
-<p>Curso ROC: Análisis de datos de eBird en R</p>
+<p>Curso ROC: Análisis de datos de eBird utilizando R</p>
 </div>   
     <div class="nav-footer-center">
       &nbsp;

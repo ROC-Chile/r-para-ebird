@@ -1,0 +1,623 @@
+---
+output: html_document
+editor:
+    mode: source
+editor_options: 
+  chunk_output_type: console
+---
+
+# Productos de Estados y Tendencias de eBird {#sec-ebirdst}
+
+El proyecto Estados y Tendencias utiliza modelos de machine learning de ciclo anual completo que combinan datos de eBird con datos de teledetección y toman en cuenta las variaciones en el comportamiento y el esfuerzo de los observadores para producir estimaciones semanales de alta resolución de los límites de distribución, la tasa de ocurrencia y la abundancia relativa de las especies de aves. La última versión, con estimaciones hasta el año 2023, incluye resultados para 2981 especies en todo el mundo, de las cuales 471 han sido registradas en Chile. Las visualizaciones interactivas de estas especies están disponibles en el [sitio web de eBird Estados y Tendencias](https://science.ebird.org/es/status-and-trends) y los productos de datos de Estados y Tendencias de eBird están disponibles a través del paquete de R [`ebirdst`](https://ebird.github.io/ebirdst/).
+
+En este modulo nos familiarizaremos con los productos de datos de Estados y Tendencias de eBird y el paquete R `ebirdst`, desarrollado específicamente para trabajar con estos datos. Presentaremos la gama de datos disponibles y, a continuación, les mostraremos cómo descargar estos productos de datos y cargarlos en R para su posterior análisis. Luego, trabajaremos con una serie de ejemplos de aplicaciones prácticas. Comencemos cargando los paquetes que utilizaremos a lo largo de este taller.
+
+![© Tamara Catalán Bermudez, Macaulay Library (#327967101)](images/grbfir1_327967101.jpg)
+
+```{r}
+#| label: ebirdst-packages
+library(dplyr)
+library(ebirdst)
+library(exactextractr)
+library(forcats)
+library(ggplot2)
+library(readr)
+library(sf)
+library(stringr)
+library(terra)
+library(tidyr)
+```
+
+## Data access {#sec-ebirdst-access}
+
+El acceso a los productos de Estados y Tendencias de eBird se obtiene mediante un formulario de solicitud de acceso disponible en: <https://ebird.org/st/request>. Las condiciones de uso se han diseñado para ser bastante permisivas en muchos casos, especialmente en lo que respecta al uso académico y de investigación. Después de leer las [Condiciones de uso de los productos de estado y tendencias de eBird](https://ebird.org/science/status-and-trends/st-data-access-terms-of-use/) y rellenar el [Formulario de solicitud de acceso](https://ebird.org/st/request), se le proporcionará una clave de acceso alfanumérica. Para almacenar la clave de acceso de modo que R y el paquete `ebirdst` puedan acceder a ella, ejecute lo siguiente (sustituyendo `"XXXXXXXXX"` por su clave real):
+
+```{r}
+#| label: ebirdst-access-key
+#| eval: true
+set_ebirdst_access_key("fvlcg6pt15cs", overwrite = TRUE)
+```
+
+A continuación, **reinicie R** inmediatamente. Esto guardará la clave de acceso como variable de entorno EBIRDST_KEY en su archivo .Renviron, de modo que pueda acceder a ella desde su sesión de R.
+
+::: callout-important
+## Checkpoint
+
+Para asegurarte de que tu clave de acceso a los datos funciona, intenta ejecutar el siguiente código, que descargará un único archivo pequeño. Si no funciona, habla con el instructor o envíanos un correo para buscar una solución al problema.
+
+```{r}
+#| label: ebirdst-access-sol
+#| eval: true
+dir.create("data/ebirdst-data", recursive = TRUE, showWarnings = FALSE) 
+
+ebirdst_download_status("grbfir1", pattern = "abundance_median_3km", path = "data/ebirdst-data/", force = TRUE)
+```
+:::
+
+## Especies con Estados y Tendencias {#sec-ebirdst-species}
+
+El objeto `ebirdst_runs` es un data frame que enumera todas las especies disponibles:
+
+```{r species}
+#| label: ebirdst-species-runs
+glimpse(ebirdst_runs)
+```
+
+Desde RStudio también puedes utilizar `View()` para explorar de forma interactiva la base de datos. También puedes consultar la página de [especies en Estados y Tendencias](https://science.ebird.org/en/status-and-trends/species) para ver la lista completa de especies disponibles. En esta página puedes filtrar por región, por ejemplo, para ver solo aquellas especies con alguna parte de su área de distribución [dentro de Chile](https://science.ebird.org/en/status-and-trends/species?regionCode=CL).
+
+### Revisión de expertos {#sec-ebirdst-review}
+
+Todas las especies pasan por un proceso de revisión por parte de expertos humanos antes de ser publicadas. El marco de datos «ebirdst_runs» también contiene información de este proceso de revisión. Los revisores evalúan cada una de las cuatro estaciones: reproducción, no reproducción, migración previa a la reproducción y migración posterior a la reproducción. Las especies residentes (es decir, no migratorias) se identifican con el valor «TRUE» en la columna `resident` column of `ebirdst_runs`, y estas especies se evalúan a lo largo de todo el año en lugar de por temporadas. «ebirdst_runs» contiene dos datos importantes para cada estación: una calificación de **calidad (quality)**  y **fechas estacionales (seasonal dates)**.
+
+Las seasonal dates definen las semanas que comprenden cada estación; las estimaciones de abundancia relativa para estas semanas se promedian para producir los mapas de abundancia relativa estacional en el sitio de Estados y Tendencias. Las fechas de la temporada reproductiva y no reproductiva se definen para cada especie como las semanas durante esas estaciones en las que la población de la especie no se desplaza. Por esta razón, estas estaciones también se describen como períodos estacionarios. Los períodos de migración se definen como los períodos de movimiento entre las temporadas estacionarias no reproductivas y reproductivas. Cabe señalar que, para muchas especies, estos períodos migratorios incluyen no solo el movimiento desde las zonas de reproducción a las zonas no reproductivas, sino también la dispersión posterior a la reproducción, la migración por muda y otros movimientos.
+
+Los revisores también examinan las estimaciones del modelo para cada temporada con el fin de evaluar el grado de extrapolación u omisión presente en el modelo, y asignan una calificación de **calidad** asociada que va de 0 (calidad más baja) a 3 (calidad más alta). La extrapolación se refiere a los casos en los que el modelo predice la presencia de una especie cuando se sabe que está ausente, mientras que la omisión se refiere a los casos en los que el modelo no predice la presencia de una especie cuando se sabe que está presente.
+
+Una calificación de 0 implica que esta temporada no ha superado la revisión y que los resultados del modelo no deben utilizarse en absoluto para este período. Las calificaciones de 1 a 3 corresponden a un gradiente de mayor a menor extrapolación y/u omisión, y a menudo utilizamos una analogía con los semáforos para referirnos a ellas:
+
+1.  [**Luz roja (1)**]{style="color:#f20a02"}: baja calidad, extrapolación y/u omisión extensas y ruido, pero al menos algunas regiones tienen estimaciones precisas; se puede utilizar con precaución en determinadas regiones.
+2.  [**Luz amarilla (2)**]{style="color:#f2ea49"}: calidad media, cierta extrapolación y/u omisión; utilizar con precaución.
+3.  [**Luz verde (3)**]{style="color:#00cc25"}: calidad alta, muy poca o ninguna extrapolación y/u omisión; estas temporadas se pueden utilizar con seguridad.
+
+::: {.callout-caution icon="false"}
+## Ejercicio
+
+Elije una especie que te interese. Identifica las fechas estacionales y la calificacion de calidad.
+:::
+
+::: {.callout-note icon="false" collapse="true"}
+## Solución
+
+El Picaflor chico está catalogado como migratorio, con una calificación de calidad de 2 en las cuatro estaciones, lo que sugiere que hay alguna extrapolación u omisión.
+
+```{r}
+#| label: ebirdst-review-sol
+ebirdst_runs %>% 
+  filter(scientific_name == "Sephanoides sephaniodes") %>% 
+  glimpse()
+```
+:::
+
+## Descarga de datos {#sec-ebirdst-download}
+
+La función `ebirdst_download_status()` descarga datos de una sola especie a partir del nombre de la especie (nombre común, nombre científico o código de especie). Por ejemplo, para descargar los datos del Picaflor chico, utilice:
+
+```{r}
+#| label: ebirdst-download-fake
+#| eval: false
+path <- ebirdst_download_status(species = "Sephanoides sephaniodes", path = "data/ebirdst-data")
+path
+```
+
+```{r}
+#| label: ebirdst-download-path
+#| echo: false
+path <- get_species_path("Sephanoides sephaniodes", path = "data/ebirdst-data")
+path
+```
+
+La función identificará automáticamente una ubicación adecuada para almacenar los datos descargados y devolverá esa ruta, que hemos capturado en la variable `path`. Podemos ver qué archivos se han descargado con:
+
+```{r}
+#| label: ebirdst-download-list
+list.files(path, recursive = TRUE)
+```
+
+Dentro de este directorio de paquetes de datos, los archivos están organizados según la siguiente estructura:
+
+- `weekly/`: un directorio que contiene estimaciones semanales de ocurrencia, conteo, abundancia relativa y proporción de población en una cuadrícula regular en formato GeoTIFF con tres resoluciones. Ver más abajo para obtener más detalles.
+- `seasonal/`: un directorio que contiene estimaciones estacionales de ocurrencia, conteo, abundancia relativa y proporción de población en una cuadrícula regular en formato GeoTIFF con tres resoluciones. Estas se derivan de los datos ráster semanales correspondientes. Las fechas que definen los límites de cada estación se establecen en función de cada especie por un revisor experto familiarizado con la misma. Estas fechas están disponibles en el marco de datos ebirdst_runs. Solo se incluyen las estaciones que han superado el proceso de revisión por expertos. Ver más abajo para obtener más detalles.
+- `ranges/`: un directorio que contiene GeoPackages que almacenan polígonos de límites de distribución. Ver más abajo para obtener más detalles.
+- `config.json`: parámetros específicos de la ejecución, principalmente para uso interno, pero que también contienen parámetros útiles para cartografiar los datos de abundancia.
+
+::: callout-tip
+## Tip
+
+Los datos espaciales se dividen en dos grandes categorías: datos ráster y datos vectoriales. Los datos **ráster** representan los datos espaciales como una cuadrícula regular de celdas con un valor o conjunto de valores asignados a cada una. Los datos **vectoriales** representan los datos espaciales como puntos, líneas o polígonos discretos. En los productos de datos de eBird Status, los datos ráster se distribuyen como GeoTIFF, mientras que los datos vectoriales se distribuyen como GeoPackages.
+:::
+
+Para una especie cuyos datos ya se han descargado, puede utilizar `get_species_path("Sephanoides sephaniodes")` para identificar la ruta de acceso a los datos.
+
+### Descarga de archivos específicos {#sec-ebirdst-download-specific}
+
+El paquete completo de datos de cada especie contiene un gran número de archivos, muchos de los cuales pueden ser innecesarios para su aplicación. Puede utilizar el argumento `dry_run = TRUE` en `ebirdst_download()` para obtener una lista de los archivos disponibles sin descargarlos.
+
+```{r}
+#| label: ebirdst-download-specific-dryrun
+ebirdst_download_status("Sephanoides sephaniodes", dry_run = TRUE)
+```
+
+Una vez identificados los archivos que desea, puede utilizar el argumento `pattern` para descargar solo esos archivos. Por ejemplo, imaginemos que solo queremos los archivos `abundance`:
+
+```{r}
+#| label: ebirdst-download-specific-pattern
+#| eval: false
+ebirdst_download_status("Sephanoides sephaniodes", pattern = "abundance", path = "data/ebirdst-data/")
+```
+
+## Cargando datos en R {#sec-ebirdst-load}
+
+En este curso, nos centraremos en los productos de datos ráster, que se pueden cargar en R utilizando la función `load_raster()` de `ebirdst`. En R, utilizaremos el paquete `terra` para trabajar con datos ráster. Los productos de datos ráster se dividen en dos grandes categorías que proporcionan estimaciones semanales y estacionales.
+
+### Estimaciones semanales ráster {#sec-ebirdst-load-weekly}
+
+Los productos básicos de datos ráster son las estimaciones semanales de presencia, conteo, abundancia relativa y proporción de población. Todas las estimaciones son el valor medio esperado para un listado con desplazamiento de eBird de 1 km y 1 hora realizado por un observador experto en el momento óptimo del día y en las condiciones meteorológicas óptimas para observar la especie en cuestión.
+
+- **Ocurrencia** `occurrence`: la probabilidad esperada de encontrar una especie.
+- **Conteo** `count`: el conteo esperado de una especie, condicionado a su ocurrencia en la ubicación dada.
+- **Abundancia relativa** `abundance`: la abundancia relativa esperada de una especie, calculada como el producto de la probabilidad de ocurrencia y el conteo condicionado a la ocurrencia. Además de la abundancia relativa mediana, se proporcionan intervalos de confianza (IC) superiores e inferiores, definidos en el decil 10 y el decil 90 de la abundancia relativa, respectivamente.
+- **Proporción de población** `proportion-population`: la proporción de la abundancia relativa total dentro de cada celda. Se trata de un producto derivado que se calcula dividiendo cada valor de celda de abundancia relativa del ráster por la suma de todos los valores de celda.
+
+Todas las predicciones se realizan en una cuadrícula global estándar de 2,96 km x 2,96 km; sin embargo, también se proporcionan archivos GeoTIFF de menor resolución, que suelen ser mucho más rápidos de manejar. Las tres resoluciones son:
+
+- Alta resolución (`3km`): datos con una resolución nativa de 2,96 km.
+- Resolución media (`9km`): datos `3km` agregados por un factor de 3 en cada dirección, lo que da como resultado una resolución de 8,89 km.
+- Baja resolución (`27km`): datos `3km` agregados por un factor de 9 en cada dirección, lo que da como resultado una resolución de 26,7 km.
+
+Los archivos semanales utilizan la siguiente convención de nomenclatura:
+
+`weekly/<species_code>_<product>_<metric>_<resolution>_<year>.tif`
+
+donde `metric` suele ser `median`, excepto en los IC de abundancia relativa, que utilizan `lower` y `upper`. La función `load_raster()` se utiliza para cargar estos datos en R y toma argumentos para `product`, `metric` y `resolution`. Por ejemplo, para cargar la abundancia relativa mediana de alta resolución, utilice:
+
+```{r}
+#| label: ebirdst-load-weekly-abd
+abd_median_3km <- load_raster(species = "grbfir1", 
+                              path = "data/ebirdst-data/", 
+                              product = "abundance", 
+                              period = "weekly", 
+                              metric = "median", 
+                              resolution = "3km")
+print(abd_median_3km)
+```
+
+A menudo nos referimos a estos objetos ráster como `cubos semanales` (por ejemplo, el `cubo de abundancia semanal`). Obsérvese que los cubos contienen 52 capas, que corresponden a las semanas del año. Los nombres de las capas son las fechas asociadas al punto medio de cada semana.
+
+```{r}
+#| label: ebirdst-load-weekly-parse
+as.Date(names(abd_median_3km))
+```
+
+Como otro ejemplo, podríamos cargar los intervalos de confianza de abundancia superior e inferior de baja resolución.
+
+```{r}
+#| label: ebirdst-load-weekly-ci
+abd_lower_27km <- load_raster(species = "grbfir1", 
+                              path = "data/ebirdst-data/",
+                              product = "abundance", 
+                              metric = "lower", 
+                              period = "weekly",
+                              resolution = "27km")
+
+abd_upper_27km <- load_raster(species = "grbfir1", 
+                              path = "data/ebirdst-data/",
+                              product = "abundance", 
+                              metric = "upper", 
+                              period = "weekly",
+                              resolution = "27km")
+```
+
+::: {.callout-caution icon="false"}
+## Ejercicio
+
+Intente cargar el cubo del porcentaje medio semanal de la población con una resolución media.
+:::
+
+::: {.callout-note icon="false" collapse="true"}
+## Solución
+
+```{r}
+#| label: ebirdst-load-weekly-sol
+pct_pop <- load_raster(species = "grbfir1", 
+                       path = "data/ebirdst-data/",
+                       product = "proportion-population", 
+                       metric = "median", 
+                       resolution = "9km")
+print(pct_pop)
+```
+:::
+
+### Rásters de estimaciones estacionales {#sec-ebirdst-load-seasonal}
+
+Los rásters de estimaciones estacionales se proporcionan para el mismo conjunto de productos y con las mismas tres resoluciones que las estimaciones semanales. Se obtienen a partir de los datos semanales tomando la media o el máximo por celda a lo largo de las semanas de cada estación. Recuerde que las fechas límite estacionales están disponibles en `ebirdst_runs`; no se proporcionan datos para las estaciones con una puntuación de calidad de 0.
+
+Los GeoTIFF estacionales utilizan la siguiente convención de nomenclatura:
+
+`seasonal/<species_code>_<product>_seasonal_<metric>_<resolution>_<year>.tif`
+
+donde `metric` es `mean` o `max`. La función `load_raster(period = "seasonal")` se utiliza para cargar estos datos en R y toma argumentos para `product`, `metric` y `resolution`. Por ejemplo, para cargar la abundancia relativa estacional media de baja resolución, utilice:
+```{r}
+#| label: ebirdst-load-seasonal-abd
+abd_seasonal_mean <- load_raster(species = "grbfir1", 
+                                 path = "data/ebirdst-data/",
+                                 product = "abundance", 
+                                 period = "seasonal", 
+                                 metric = "mean", 
+                                 resolution = "27km")
+print(abd_seasonal_mean)
+```
+
+Observe que hay cuatro capas en este ráster que corresponden a las cuatro estaciones.
+
+```{r}
+#| label: ebirdst-load-seasonal-seasons
+names(abd_seasonal_mean)
+```
+
+Por último, para mayor comodidad, los productos de datos incluyen rásteres anuales que resumen la media o el máximo de todas las semanas que caen dentro de una estación que ha superado el proceso de revisión por expertos. Se puede acceder a ellos de forma similar a los productos estacionales, solo que con «period = "full-year"» en lugar de «period = "week"». Por ejemplo, estas capas se pueden utilizar en la planificación de la conservación para evaluar los sitios más importantes en todo el área de distribución y el ciclo anual completo de una especie.
+
+```{r}
+abd_fy_max <- load_raster(species = "grbfir1",  
+                          path = "data/ebirdst-data/", 
+                          product = "abundance", 
+                          period = "full-year", 
+                          metric = "max", 
+                          resolution = "3km")
+```
+
+## Explorando los datos ráster {#sec-ebirdst-explore}
+
+Carguemos los ráster de abundancia relativa semanal y estacional de baja resolución y utilicémoslos para demostrar algunas operaciones ráster básicas con los datos.
+
+```{r}
+#| label: ebirdst-explore-load
+abd_weekly <- load_raster(species = "grbfir1",  
+                          path = "data/ebirdst-data/",
+                          product = "abundance", 
+                          resolution = "27km")
+
+abd_seasonal <- load_raster(species = "grbfir1",  
+                            path = "data/ebirdst-data/", 
+                            product = "abundance", 
+                            period = "seasonal", 
+                            resolution = "27km")
+```
+
+Estos ráster se pueden dividir fácilmente en subconjuntos de una sola semana o temporada.
+
+```{r}
+#| label: ebirdst-explore-subset
+# week of may 17
+abd_weekly[["2023-05-17"]]
+
+# breeding season
+abd_seasonal[["breeding"]]
+```
+
+También podemos dividir el ráster semanal en un rango de semanas. Por ejemplo, dividamos solo las estimaciones de las semanas de mayo y luego calculemos el promedio de todas las semanas.
+
+```{r}
+#| label: ebirdst-explore-mean
+# determine qué fechas podemos incluir
+week_dates <- as.Date(names(abd_weekly))
+start_date <- as.Date("2023-05-01")
+end_date <- as.Date("2023-05-31")
+week_in_may <- week_dates >= start_date & week_dates <= end_date
+
+# subset a las semanas de mayo
+abd_weekly_may <- abd_weekly[[week_in_may]]
+
+# promedio semanal
+mean(abd_weekly_may, na.rm = TRUE)
+```
+
+Crear un mapa sencillo con los datos producirá resultados inesperados. Por ejemplo, vamos a trazar un mapa de la abundancia relativa durante la temporada de reproducción del Picaflro chico.
+
+```{r}
+#| label: ebirdst-explore-map
+plot(abd_seasonal[["breeding"]])
+```
+
+Recuerda que todos los productos de datos de eBird Status se proporcionan para todo el mundo, independientemente del área de distribución de las especies. Además, tenga en cuenta que algunas zonas, como la mayor parte de la cuenca del Amazonas, tienen valores faltantes, lo que indica que no se disponía de datos suficientes para hacer una predicción en la región. Otras zonas, como América del Norte, contaban con datos suficientes para predecir que la especie está ausente. Probemos a utilizar los datos SIG incluidos en el paquete de datos del curso para recortar el ráster a la región de Los Lagos y crear un mapa más significativo.
+
+```{r}
+#| label: ebirdst-explore-chilemap
+# Límite de Los Lagos, proyectado para coincidir con los datos ráster.
+los_lagos <- read_sf("data/gis-data.gpkg",  layer = "ne_states") %>% 
+  filter(state == "Los Lagos") %>% 
+  st_transform(crs = crs(abd_seasonal)) %>% 
+  st_geometry()
+
+# Recortar datos ráster a Chile
+abd_breeding_ll <- crop(abd_seasonal[["breeding"]], los_lagos)
+
+# mapear
+plot(abd_breeding_ll)
+plot(los_lagos, add = TRUE)
+```
+
+::: callout-important
+## Checkpoint
+
+Hagamos una pausa antes de continuar con algunas aplicaciones más realistas de los productos de datos de eBird Status. Asegúrate de que te sientes cómodo cargando los datos en R y realizando algunas de las operaciones básicas.
+:::
+
+## Aplicaciones de productos S&T {#sec-ebirdst-applications}
+
+Ahora trabajaremos algunos ejemplos de aplicaciones prácticas utilizando los productos de Estados y Tendencias.
+
+1.  [Trayectorias](#sec-ebirdst-applications-trajectories): visualiza el cambio en la proporción de la población de un grupo de especies en una región determinada a lo largo del año.
+2.  [Estadísticas regionales](#sec-ebirdst-applications-stats): calcula la proporción de la población reproductiva presente en áreas protegidas para un grupo de especies.
+3.  [Priorización](#sec-ebirdst-applications-prioritization): us los productos de Estados para identificas áreas de importancia para la protección de un grupo de especies.
+
+### Trayectorias {#sec-ebirdst-applications-trajectories}
+
+En este ejercicio, analizaremos el cambio en las poblaciones de dos especies a lo largo del año en la región de Los Lagos. Consideraremos el Picaflor chico y la Viudita, dos especies migratorias que son casi endémicas de Chile. Al comparar varias especies, o una sola especie entre diferentes estaciones, como es el caso aquí, es importante tener en cuenta la proporción de la población en lugar de la abundancia relativa para mitigar el impacto de las diferencias en la detectabilidad entre estaciones y especies.
+
+Comencemos cargando los datos de proporción de población semanal de resolución media para estas especies, así como un polígono límite para Los Lagos.
+
+```{r}
+#| label: ebirdst-applications-trajectories-data
+# datos de proporción de la población
+pop_grbfir1 <- load_raster(species = "grbfir1", 
+                       path = "data/ebirdst-data/",
+                       product = "proportion-population", 
+                       metric = "median", 
+                       resolution = "9km")
+
+
+ebirdst_download_status("Patagonian Tyrant", path = "data/ebirdst-data/")
+
+pop_pattyr2 <- load_raster(species = "pattyr2", 
+                       path = "data/ebirdst-data/",
+                       product = "proportion-population", 
+                       metric = "median", 
+                       resolution = "9km")
+
+# límite de Los Lagos proyectado a la misma proyección de los datos ráster
+los_lagos <- read_sf("data/gis-data.gpkg", "ne_states") %>% 
+  filter(state == "Los Lagos") %>% 
+  st_transform(crs = crs(pop_grbfir1)) %>% 
+  st_geometry()
+```
+
+Ahora utilizaremos el paquete `exactextractr` para calcular la suma de las proporciones de cada especies en Los Lagos.
+
+```{r}
+#| label: ebirdst-applications-trajectories-summarize
+# suma dentro de los lagos
+# picaflor chico
+tray_grbfir1 <- exact_extract(pop_grbfir1, los_lagos, fun = "sum")
+tray_grbfir1 <- data.frame(species = "Green-backed Firecrown",
+                           week = as.Date(names(pop_grbfir1)),
+                           prop_pop = as.numeric(tray_grbfir1[1, ]))
+# viudita
+tray_pattyr2 <- exact_extract(pop_pattyr2, los_lagos, fun = "sum")
+tray_pattyr2 <- data.frame(species = "Patagonian Tyrant",
+                           week = as.Date(names(pop_pattyr2)),
+                           prop_pop = as.numeric(tray_pattyr2[1, ]))
+
+# combinar
+trayectorias <- bind_rows(tray_grbfir1, tray_pattyr2)
+head(trayectorias)
+```
+
+Finally we can plot the trajectories.
+
+```{r}
+#| label: ebirdst-applications-trajectories-plot
+ggplot(trayectorias, aes(x = week, y = prop_pop, color = species)) +
+  geom_line() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Semana", 
+       y = "% de población",
+       title = "Trayectorias de % semanal de la proporción de la población en Los Lagos",
+       color = NULL) +
+  theme(legend.position = "bottom")
+```
+
+### Estadísticas regionales {#sec-ebirdst-applications-stats}
+
+Para este ejercicio calcularemos la proporción de la población dentro de areas protegidas en Chile para un grupo de especies. Como un ejemplo de grupo de especies usaremos 10 especies endémicas o casi endémicas de Chile. Para las especies que sean migratorias nos enfocaremos en la temporada reproductiva.
+
+```{r}
+#| label: ebirdst-applications-stats
+lista_especies <- c("cthhue1", "chipig2", "chimoc1", "crachi1", "chutap1", 
+                  "slbpar1", "chitin1", "whttap1", "moutur1", "dutcan1")
+
+# descargar datos para el grupo de especies
+for (i in 1:length(lista_especies)){
+  ebirdst_download_status(lista_especies[i], path = "data/ebirdst-data/", pattern = "proportion-population_seasonal_mean_9km")
+}
+
+# agregar nombre común, residente/migratoria y calidad
+lista_especies <- filter(ebirdst_runs, species_code %in% lista_especies) %>% 
+  mutate(quality = ifelse(is_resident, resident_quality, breeding_quality)) %>% 
+  dplyr::select(species_code, common_name, is_resident, quality)
+print(lista_especies)
+```
+
+Tenemos dos especies migratorias y ocho residentes. Observe que `r sum(lista_especies$quality == 1)` de estas especies tienen una calificación de calidad de 1, lo que indica que se debe tener precaución al utilizar los resultados. Para su uso en el mundo real, debe examinar los mapas de abundancia relativa en busca de errores antes de utilizarlos para el análisis; sin embargo, para este ejemplo, utilizaremos esta lista de especies tal cual. Cargaremos y combinaremos los porcentajes de población reproductora (para las migratorias) y residente (para las residentes) de esta lista de especies. 
+
+::: callout-tip
+## Tip
+
+Las estimaciones de abundancia relativa se ven afectadas por las tasas de detección, que pueden variar entre especies. Por lo tanto, al comparar los datos entre especies, es fundamental utilizar siempre las capas de proporción de población, que se han estandarizado dividiendo el valor de cada celda por la abundancia relativa total de todas las celdas.
+:::
+
+```{r}
+#| label: ebirdst-applications-pop
+# loop over the species list extracting the seasonal percent of population
+proporcion_poblacion <- list()
+for (i in seq_len(nrow(lista_especies))) {
+  # load the seasonal cube for this species
+  this_species <- lista_especies[i, ]
+  pop <- load_raster(this_species$species_code, 
+                     path = "data/ebirdst-data", 
+                     product = "proportion-population", 
+                     period = "seasonal",
+                     resolution = "9km")
+  
+  # subset to the layer we need: breeding or resident
+  pop <- pop[[ifelse(this_species$is_resident, "resident", "breeding")]]
+  proporcion_poblacion[[this_species$species_code]] <- pop
+}
+# stack the rasters into a single object
+proporcion_poblacion <- rast(proporcion_poblacion)
+```
+
+Los datos SIG disponibles en el paquete de datos del taller contienen límites poligonales de las áreas protegidas públicas de Chile. Vamos a cargarlos ahora y proyectarlos para que coincidan con las capas ráster. Para este ejemplo, combinaremos todos los polígonos de las áreas protegidas en una sola característica; sin embargo, este análisis podría modificarse para tener en cuenta cómo varía la distribución de las especies entre las áreas protegidas.
+
+```{r}
+#| label: ebirdst-applications-protected
+protegido <- read_sf("data/gis-data.gpkg",  layer = "protected_areas") %>% 
+  st_combine() %>% 
+  st_transform(crs = crs(proporcion_poblacion))
+```
+
+Finally, we can use `exactextracr` to calculate the total percent of population within protected areas for each species.
+
+```{r}
+#| label: ebirdst-applications-ee
+porcentaje_protegido <- exact_extract(proporcion_poblacion, protegido, fun = "sum")
+porcentaje_protegido <- as.numeric(porcentaje_protegido[1, ])
+porcentaje_protegido <- data.frame(species_code = lista_especies$species_code,
+                                common_name = lista_especies$common_name,
+                                proporcion_poblacion = porcentaje_protegido) %>% 
+  arrange(desc(proporcion_poblacion))
+print(porcentaje_protegido)
+
+# plotear los datos
+ggplot(porcentaje_protegido) +
+  aes(x = fct_reorder(common_name, proporcion_poblacion),
+      y = proporcion_poblacion) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = NULL, y = "Proporción de la población en áreas protegidas") +
+  coord_flip()
+```
+
+### Priorización {#sec-ebirdst-applications-prioritization}
+
+Para el ejercicio final, realizaremos una priorización de sitios multiespecíficos, identificando sitios importantes para proteger el conjunto de 10 especies casi endémicas que identificamos en el ejercicio anterior. Comencemos por generar una capa de importancia multiespecífica calculando el porcentaje medio de población de las 10 especies. Dado que nos centramos en identificar sitios en Chile, también recortaremos y enmascararemos la capa de importancia dentro de los límites de Chile.
+
+```{r}
+#| label: ebirdst-applications-prioritization-import
+# límite territorio chileno
+chile <- read_sf("data/gis-data.gpkg", layer = "ne_states") %>% 
+  filter(country_code == "CL") %>% 
+  st_transform(crs = crs(proporcion_poblacion))
+
+# importancia: porcentaje promedio de proporción de la población entre especies
+# rellenar valores faltantes con ceros antes de promediar 
+importancia <- ifel(is.na(proporcion_poblacion), 0, proporcion_poblacion) %>% 
+  mean(na.rm = TRUE) %>% 
+  # recortar y enmascarar a límite chileno
+  crop(chile) %>% 
+  mask(chile)
+
+# plotear la raíz cuadrada de la importancia, ya que los datos están sesgados hacia la derecha.
+par(mar = c(0.25, 0.25, 0.25, 0.25))
+crs <- "+proj=laea +lat_0=-40 +lon_0=-72"
+r_plot <- sqrt(importancia) %>% 
+  project(crs, method = "near") %>% 
+  trim()
+plot(r_plot, axes = FALSE)
+```
+
+Los números absolutos de este mapa son difíciles de interpretar (son la proporción media de la población de las 10 especies en cada celda). En cambio, los valores deben interpretarse en términos relativos, dando la importancia relativa de cada celda para este conjunto de 10 especies.
+
+En la aplicación anterior, examinamos las áreas protegidas públicas existentes. Para efectos comparativos, imaginemos que queremos identificar los sitios más importantes de Chile que cubren la misma superficie que la red de áreas protegidas existente. ¿Qué proporción de Chile cubre la red actual de áreas protegidas?
+
+```{r}
+#| label: ebirdst-applications-prioritization-area
+# proporción de Chile en red existente de áreas protegidas
+area_chile <- sum(st_area(chile))
+area_protegida <- st_area(protegido)
+proporcion_protegido <- as.numeric(area_protegida / area_chile)
+print(proporcion_protegido)
+```
+
+Entonces, `r scales::percent(proporcion_protegido, 0.1)` de Chile está cubierto por la red existente de áreas protegidas públicas. Identifiquemos el `r scales::percent(proporcion_protegido, 0.1)` de celdas más importantes desde la capa de importancia multiespecies.
+
+```{r}
+#| label: ebirdst-applications-prioritization-top
+# indentificar el quantil correspondiente al nivel de protección deseado
+q <- global(importancia, fun = quantile, 
+            probs = 1 - proporcion_protegido, na.rm = TRUE) %>% 
+  as.numeric()
+# identificar las celdas más importantes
+sitios_seleccionados <- as.numeric(importancia >= q)
+```
+
+Comparemos loa mapas de la red existente de áreas protegidas y las seleccionadas usando Estados y Tendencias.
+
+```{r}
+#| label: ebirdst-applications-prioritization-maps
+par(mar = c(0.25, 0.25, 0.25, 0.25))
+
+# importancia alta
+r_plot <- project(sitios_seleccionados, crs, method = "near") %>% 
+  trim()
+proy_protegido <- st_transform(protegido, crs = crs) %>% 
+  st_geometry()
+plot(r_plot, axes = FALSE, legend = FALSE)
+
+# existente
+plot(st_simplify(proy_protegido), 
+     col = "grey50", border = NA,
+     add = TRUE)
+```
+
+Los sitios de alta importancia que identificamos se muestran en verde, mientras que la red de áreas protegidas existente se superpone en gris. Vemos que la red de áreas protegidas existente se encuentra principalmente en el sur de Chile y que hay una superposición limitada con las áreas de alta importancia para las 10 especies casi endémicas en las que decidimos centrarnos. Esto no es sorprendente, ya que la ubicación de las áreas protegidas existentes no se eligió específicamente para proteger estas 10 especies. Cuantifiquemos qué proporción de la población capturan estas dos regiones.
+
+```{r}
+#| label: ebirdst-applications-prioritization-compare
+# enmascarar las capas de proporción de población por los sitios seleccionados
+pp_seleccionados <- proporcion_poblacion %>% 
+  crop(sitios_seleccionados) %>% 
+  mask(sitios_seleccionados, maskvalues = c(0, NA))
+
+# calcular el porcentaje total de población dentro de los sitios propuestos
+porcentaje_seleccionados <- global(pp_seleccionados, fun = "sum", na.rm = TRUE)
+porcentaje_seleccionados <- data.frame(species_code = names(pp_seleccionados),
+                               porcentaje_seleccionados = porcentaje_seleccionados[, 1])
+
+# combinar con los valores de la red existente
+comparasion <- inner_join(porcentaje_protegido, porcentaje_seleccionados,
+                         by = "species_code") %>% 
+  rename(existing_network = proporcion_poblacion,
+         prioritized_sites = porcentaje_seleccionados) %>% 
+  pivot_longer(cols = c(existing_network, prioritized_sites),
+               names_to = "network_type",
+               values_to = "proporcion_poblacion")
+
+ggplot(comparasion) +
+  aes(x = fct_reorder(common_name, proporcion_poblacion, .fun = max),
+      y = proporcion_poblacion,
+      group = network_type,
+      fill = network_type) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set1") +
+  labs(x = NULL, 
+       y = "Proporción de población en áreas protegidas",
+       fill = NULL) +
+  coord_flip() +
+  theme_linedraw() +
+  theme(legend.position = "bottom")
+
+
+```
+
+Por lo tanto, para una misma superficie total, podríamos capturar una proporción mucho mayor de las poblaciones de estas especies si utilizáramos los productos de datos de eBird Status para estas especies en nuestra priorización de sitios. Por supuesto, este ejemplo es demasiado simplista. Por ejemplo, en una aplicación real, los diferentes sitios tienen diferentes costos asociados a la protección y habría que tenerlo en cuenta a la hora de establecer las prioridades. Para problemas de priorización más complejos, se pueden utilizar eficazmente herramientas de planificación sistemática de la conservación, como el paquete R [`prioritizr`](https://prioritizr.net/), junto con los productos de datos de Estados de eBird.

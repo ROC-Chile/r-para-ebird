@@ -1,0 +1,11 @@
+---
+output: html_document
+editor:
+    mode: source
+editor_options: 
+  chunk_output_type: console
+---
+
+# Modelamiento de distribución y abundancia relativa {#sec-abund}
+
+## Introduction {#sec-abund-intro}

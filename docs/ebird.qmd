@@ -1,0 +1,604 @@
+---
+output: html_document
+editor:
+    mode: source
+editor_options: 
+  chunk_output_po: console
+---
+
+# Best Practices for using eBird Data {#sec-ebird}
+
+En este capítulo, destacaremos algunos de los desafíos asociados con el uso de datos de eBird. Luego demostraremos cómo descargar datos de eBird para una región y especie determinadas. A continuación, mostraremos cómo importar los datos en R, aplicar filtros y usar listas completas para producir datos de detección/no detección adecuados para modelar la distribución y abundancia de especies. Finalmente, realizaremos algunos pasos de pre-procesamiento necesarios para asegurar el análisis apropiado de los datos.\
+Usamos los términos **detección** y **no detección** en lugar de los términos más comunes **presencia** y **ausencia** a lo largo de esta guía para reflejar el hecho de que un conteo inferido de cero no necesariamente significa que una especie está ausente, solo que no fue detectada en la lista en cuestión.
+
+## Introduction {#sec-ebird-intro}
+
+eBird data are collected and organized around the concept of a checklist, representing observations from a single birding event, such as a 1 km walk through a park or 15 minutes observing bird feeders in your backyard. All eBird checklists contains a list of species observed and the location and time of the observations. For a subset of checklists, the observer will also provide counts of the number of individuals seen of each species, specify the amount of effort expended while collecting these data, and confirm that they are submitting a complete checklist of all the birds they were able to identify. The data provided by the checklists such as these are often referred to as **semi-structured citizen science data**. Importantly, complete checklists enable data users to infer counts of zero individuals for the species that were not reported. If checklists are not complete, it's not possible to ascertain whether the absence of a species on a list was a non-detection or the result of a participant not recording the species.
+
+Let's compare two eBird checklists: an [incidental observation with missing counts](https://ebird.org/checklist/S136805959) and a [complete traveling count](https://ebird.org/checklist/S136805666). Both checklists can be useful, but only the second checklist provides the type of semi-structured data required for more rigorous applications.
+
+## Desafíos asociados con datos de eBird
+
+A pesar de las fortalezas de los datos de eBird, las observaciones de especies recolectadas a través de proyectos de ciencia ciudadana presentan una serie de desafíos que no se encuentran en datos científicos convencionales. Los siguientes son algunos de los principales desafíos asociados con estos datos; desafíos que serán abordados a lo largo de esta guía:
+
+-   **Sesgo taxonómico**: los participantes a menudo tienen preferencias por ciertas especies, lo que puede llevar a un registro preferencial de algunas especies sobre otras ([Greenwood 2007](references.html#ref-greenwoodCitizensScienceBird2007); [Tulloch and Szabo 2012](#0)). Restringir los análisis a listas completas mitiga en gran medida este problema.
+
+-   **Sesgo espacial**: la mayoría de los participantes en proyectos de ciencia ciudadana muestrean cerca de sus hogares ([Luck et al. 2004](references.html#ref-luckAlleviatingSpatialConflict2004)), en áreas de fácil acceso como bordes de carreteras ([Kadmon, Farber, and Danin 2004](references.html#ref-kadmonEffectRoadsideBias2004)), o en áreas y hábitats de alta biodiversidad conocida ([Prendergast et al. 1993](references.html#ref-prendergastCorrectingVariationRecording1993)). Un método simple para reducir el sesgo espacial es crear una grilla sobre la región de interés y muestrear un número determinado de listas desde cada celda de la grilla.
+
+-   **Sesgo temporal**: los participantes muestrean preferentemente cuando están disponibles, como los fines de semana ([Courter et al. 2013](references.html#ref-courterWeekendBiasCitizen2013)), y en épocas del año cuando esperan observar más aves; notablemente, en Estados Unidos hay un gran aumento en envíos de eBird durante la migración de primavera ([Sullivan et al. 2014](references.html#ref-sullivanEBirdEnterpriseIntegrated2014)). Además, eBird ha aumentado constantemente en popularidad con el tiempo, lo que lleva a un fuerte sesgo hacia más datos en años recientes. Para abordar el sesgo de fin de semana, recomendamos usar una escala temporal de una semana o varias semanas para la mayoría de los análisis. Los sesgos temporales a escalas más largas pueden abordarse submuestreando los datos para producir una distribución temporal más uniforme.
+
+-   **Desbalance de clases**: las especies de aves que son raras o difíciles de detectar pueden tener datos con alto desbalance de clases, con muchas más listas con no detecciones que con detecciones. Para estas especies, un modelo de distribución que predice que la especie está ausente en todas partes tendrá alta precisión, pero ningún valor ecológico. Seguiremos los métodos para abordar el desbalance de clases propuestos por Robinson et al. ([2018](references.html#ref-robinsonUsingCitizenScience2018)), muestreando los datos para aumentar artificialmente la prevalencia de detecciones antes del modelado.
+
+-   **Precisión espacial**: la ubicación espacial de una lista de eBird se proporciona como un único punto latitud-longitud; sin embargo, esto puede no ser preciso por dos razones principales. Primero, para listas en tránsito, esta ubicación representa solo un punto en el recorrido. Segundo, las listas de eBird a menudo se asignan a un hotspot (una ubicación común para todos los observadores que visitan un sitio popular) en lugar de su ubicación verdadera. Por estas razones, no es apropiado alinear las ubicaciones de eBird con variables de hábitat muy precisas, y recomendamos resumir variables dentro de un vecindario alrededor de la ubicación de la lista.
+
+-   **Variación en detectabilidad/esfuerzo**: la detectabilidad describe la probabilidad de que una especie este presente en un área y sea detectada e identificada. La detectabilidad varía según la estación, hábitat y especie ([Johnston et al. 2014](references.html#ref-johnstonSpeciesTraitsExplain2014), [2018](references.html#ref-johnstonEstimatesObserverExpertise2018)). Además, los datos de eBird se recolectan con alta variación en esfuerzo, hora del día, número de observadores y condiciones externas como el clima, todo lo cual puede afectar la detectabilidad de las especies ([Ellis and Taylor 2018](references.html#ref-ellisEffectsWeatherTime2018); [Oliveira et al. 2018](references.html#ref-oliveiraObservationDiurnalSoaring2018)). Por lo tanto, la detectabilidad es particularmente importante de considerar al comparar entre estaciones, hábitats o especies. Dado que eBird usa un protocolo semi-estructurado que recolecta datos sobre el proceso de observación, podremos controlar una mayor proporción de esta variación en nuestros análisis.
+
+El resto de esta guía demostrará cómo abordar estos desafíos usando datos reales de eBird para producir estimaciones confiables de distribuciones de especies. En general, tomaremos un enfoque de dos frentes para lidiar con datos no estructurados y maximizar el valor de los datos de ciencia ciudadana: **imponer más estructura en los datos mediante filtrado** e **incluir variables predictoras que describan el proceso de observación** en nuestros modelos para controlar la variación restante.
+
+## Importing eBird data into R {#sec-ebird-import}
+
+The previous step left us with two tab separated text files, one for the EBD (i.e. observation data) and one for the SED (i.e. checklist data). Start a new RStudio project and put the downloaded text files in the `data/` sub-directory of the project directory.
+
+The `auk` R package is specifically designed for working with eBird data. It includes the functions [`read_ebd()`](https://cornelllabofornithology.github.io/auk/reference/read_ebd.html) and [`read_sampling()`](https://cornelllabofornithology.github.io/auk/reference/read_ebd.html) for importing the EBD and SED, respectively, into R. First let's import the checklist data (SED).
+
+```{r}
+#| label: ebird-import-sed
+library(auk)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(sf)
+
+f_sed <- "data/ebd_CL-LL_smp_relAug-2025_sampling.txt"
+
+checklists <- read_sampling(f_sed, unique = FALSE)
+glimpse(checklists)
+```
+
+::: callout-important
+## Checkpoint
+
+Take some time to explore the variables in the checklist dataset. If you're unsure about any of the variables, consult the metadata document that came with the data download (`eBird_Basic_Dataset_Metadata_v1.14.pdf`).
+:::
+
+For some applications, only the checklist data are required. For example, the checklist data can be used to investigate the spatial and temporal distribution of eBird data within a region. This dataset can also be used to explore how much variation there is in the observation effort variables and identify checklists that have low spatial or temporal precision.
+
+::: {.callout-caution icon="false"}
+## Exercise
+
+Make a histogram of the distribution of distance traveling for traveling protocol checklists.
+:::
+
+::: {.callout-note icon="false" collapse="true"}
+## Solution
+
+Nearly 90% of checklists are less than 10km in length; however, some checklists are as long as 80km in length. Long traveling checklists have lower spatial precision so they should generally be removed prior to analysis.
+
+```{r}
+#| label: ebird-import-distance-sol
+checklists_traveling <- filter(checklists, protocol_name == "Traveling")
+ggplot(checklists_traveling) +
+  aes(x = effort_distance_km) +
+  geom_histogram(binwidth = 5) +
+  scale_y_continuous(limits = c(0, NA), labels = scales::comma) +
+  labs(x = "Distance traveled [km]",
+       y = "# of eBird checklists",
+       title = "Distribution of distance traveled on eBird checklists")
+```
+:::
+
+Next, let's import the observation data.
+
+```{r}
+#| label: ebird-import-ebd
+
+f_ebd <- "data/ebd_CL-LL_smp_relAug-2025.txt"
+
+observations <- read_ebd(f_ebd, unique = FALSE, rollup = FALSE)
+glimpse(observations)
+```
+
+::: callout-important
+## Checkpoint
+
+Take some time to explore the variables in the observation dataset. Notice that the EBD duplicates many of the checklist-level variables from the SED.
+:::
+
+When we read the data into R, we used `unique = FALSE` and `rollup = FALSE`. By default the read functions in `auk` perform two important pre-processing steps: **combining duplicate shared checklists** and **taxonomic rollup**. We intentionally turned off this functionality for the purposes of demonstration.
+
+### Shared checklists {#sec-ebird-import-shared}
+
+eBird allows users to [share checklists](https://support.ebird.org/en/support/solutions/articles/48000625567-checklist-sharing-and-group-accounts#anchorShareChecklists) with other eBirders in their group, for example [this checklist](https://ebird.org/checklist/S95914477) is shared by 10 observers. These checklists can be identified by looking at the `group_identifier` variable, which assigns an ID connecting all checklists in the group.
+
+```{r}
+#| label: ebird-import-shared-example
+checklists %>% 
+  filter(!is.na(group_identifier)) %>% 
+  arrange(group_identifier) %>% 
+  select(sampling_event_identifier, group_identifier)
+```
+
+Checklists with the same `group_identifier` provide duplicate information on the same birding event in the eBird database. For most analyses, it's important to collapse these shared checklists down into a single checklist. This can be accomplished with the function [`auk_unique()`](https://cornelllabofornithology.github.io/auk/reference/auk_unique.html), which retains only one independent copy of each checklist.
+
+```{r}
+#| label: ebird-import-shared-unique
+checklists_unique <- auk_unique(checklists, checklists_only = TRUE)
+nrow(checklists)
+nrow(checklists_unique)
+```
+
+Notice that a new variable, `checklist_id`, was created that is set to `group_identifier` for shared checklists and `sampling_event_identifier` for non-shared checklists.
+
+```{r}
+#| label: ebird-import-shared-group
+head(checklists_unique$checklist_id)
+tail(checklists_unique$checklist_id)
+```
+
+::: callout-tip
+## Tip
+
+Curious what checklists and observers contributed to a shared checklist after it has been collapsed? The `sampling_event_identifier` and `observer_id` contain comma-separated lists of all checklists and observers that went into the shared checklists.
+
+```{r}
+#| label: ebird-import-shared-tip
+checklists_unique %>% 
+  filter(checklist_id == "G7626514") %>% 
+  select(checklist_id, group_identifier, sampling_event_identifier, observer_id)
+```
+:::
+
+### Taxonomic rollup {#sec-ebird-import-rollup}
+
+eBird observations can be made at levels below species (e.g. subspecies) or above species (e.g. a bird that was identified as a duck, but the species could not be determined); however, for most uses we'll want observations at the species level. This is especially true if we want to produce detection/non-detection data from complete checklists because "complete" only applies at the species level.
+
+::: callout-tip
+## Tip
+
+In the example dataset used for this workshop, these taxonomic issues don't apply. We have requested Fork-tailed Flycatcher observations, so we haven't received any observations for taxa above species, and Fork-tailed Flycatcher only has a single subspecies within Rio Grande do Sul. However, in many other situations, these taxonomic issues can be important. For example, [this checklist](https://ebird.org/checklist/S100099262) has 10 Yellow-rumped Warblers, 5 each of two Yellow-rumped Warbler subspecies, and one hybrid between the two subspecies. `auk_rollup()` will combine all four of these observations into a single Yellow-rumped Warbler observation.
+:::
+
+The function [`auk_rollup()`](https://cornelllabofornithology.github.io/auk/reference/auk_rollup.html) drops all observations not identifiable to a species and rolls up all observations reported below species to the species level.
+
+```{r}
+#| label: ebird-import-rollup
+observations_rollup <- auk_rollup(observations)
+
+# only one checklist is affected by this
+observations %>% 
+  filter(sampling_event_identifier == "S99335111") %>% 
+  select(sampling_event_identifier, common_name, subspecies_common_name, 
+         observation_count)
+
+observations_rollup %>% 
+  filter(sampling_event_identifier == "S99335111") %>% 
+  select(sampling_event_identifier, common_name,
+         observation_count)
+```
+
+::: callout-tip
+## Tip
+
+If multiple taxa on a single checklist roll up to the same species, `auk_rollup()` attempts to combine them intelligently. If each observation has a count, those counts are added together, but if any of the observations is missing a count (i.e. the count is "X") the combined observation is also assigned an "X". In the [example checklist](https://ebird.org/checklist/S100099262) from the previous tip, with four taxa all rolling up to Yellow-rumped Warbler, `auk_rollup()` will add the four counts together to get 21 Yellow-rumped Warblers (10 + 5 + 5 + 1).
+:::
+
+## Generating detection/non-detection data {#sec-ebird-zf}
+
+Complete eBird checklists are extremely valuable because, for all species that weren't reported, we can infer counts of 0. This allows us to convert eBird from presence only data to detection/non-detection data, which allows for much more robust analyses. Note that we don't use the term presence/absence data here because a non-detection doesn't necessarily imply the species was absent, only that the observer didn't detect and identify it.
+
+We refer to the process of producing detection/non-detection data as "zero-filling" the eBird data because we're filling in the missing zeros. We'll read the eBird data into R again, filter to only complete checklists, then use the function [`auk_zerofill()`](https://cornelllabofornithology.github.io/auk/reference/auk_zerofill.html) to generate detection/non-detection data. Note that shared checklists are combined and taxonomic rollup is performed by default when using the `read_*()` functions from `auk`.
+
+```{r}
+#| label: ebird-zf-zf
+# import checklist data
+checklists <- read_sampling(f_sed) %>% 
+  # subset to complete checklists
+  filter(all_species_reported)
+
+# import observation data
+observations <- read_ebd(f_ebd) %>% 
+  # subset to complete checklists
+  filter(all_species_reported)
+
+# zero-fill to produce detection/non-detection data
+zf <- auk_zerofill(observations, checklists, collapse = TRUE)
+glimpse(zf)
+```
+
+The `observation_count` variable has true counts as well as "X"s, which indicate that the species was detected but the number of individuals was not counted. `auk_zerofill()` adds a new binary column, `species_observed`, indicating whether or not the species was detected.
+
+```{r}
+#| label: ebird-zf-x
+select(zf, observation_count, species_observed) %>% 
+  head(10)
+```
+
+Let's convert the "X"s to NAs and transform `observation_count` to an integer variable.
+
+```{r}
+#| label: ebird-zf-nox
+zf$observation_count <- if_else(zf$observation_count == "X", 
+                                NA_character_, zf$observation_count) %>% 
+  as.integer()
+select(zf, observation_count, species_observed) %>% 
+  head(10)
+```
+
+## Filtering data {#sec-ebird-filtering}
+
+Now that you have a detection/non-detection dataset, it's likely that you want to do something with it. For example, you may want to make a map, identify priority areas for a species, or train a species distribution model. Regardless of the specific application, it's likely that some amount of filtering of the data is required first. Some of the ways you may want to filter eBird data include:
+
+-   **Temporal filtering**: filter the data to a specific range of years or to a specific time of year.
+-   **Spatial filtering**: filter the data to focus on a specific region, e.g. a protected area.
+-   **Increasing precision**: some eBird checklists are quite long in distance or duration leading to spatial or temporal imprecision. By removing longer checklists we can increase the spatial precision of the dataset.
+-   **Reducing variation in effort**: unlike structured scientific surveys, data can be submitted to eBird using a variety of protocols and there is significant variation in effort between checklists in the eBird dataset. Variation in protocol and effort leads to variation in detectability (more effort generally leads to higher detectability). We can choose to impose more structure on the eBird dataset by filtering to reduce variation in protocol and effort.
+
+The specific filtering you apply will depend on how you intend to use the eBird data. However, for the sake of this example, let's filter the eBird data to only traveling and stationary checklists from 2013-2022 that are less than 6 hours in duration and 10 km in length.
+
+```{r}
+#| label: ebird-filtering-filter
+zf_filtered <- zf %>% 
+  filter(year(observation_date) >= 2021, year(observation_date) <= 2025,
+         protocol_name %in% c("Traveling", "Stationary"),
+         duration_minutes < 6 * 60,
+         effort_distance_km < 10 | protocol_name == "Stationary")
+nrow(zf)
+nrow(zf_filtered)
+```
+
+We reduced the number of checklists by `r scales::comma(nrow(zf) - nrow(zf_filtered))`, but the checklists remaining are of higher quality.
+
+Finally, many of the columns in this data frame are unnecessary or redundant, so we'll select only the columns we need.
+
+```{r}
+#| label: ebird-filtering-select
+checklists_zf <- zf_filtered %>% 
+  select(checklist_id, 
+         latitude, longitude,
+         observation_date, time_observations_started,
+         protocol_name,
+         duration_minutes, effort_distance_km, number_observers,
+         observation_count, species_observed)
+```
+
+## Applications {#sec-ebird-applications}
+
+### Detection frequency {#sec-ebird-applications-freq}
+
+The simplest thing we can do with these eBird observations is estimate the frequency of detection of Fork-tailed Flycatcher within Rio Grande do Sul. This is the proportion of eBird checklists in the region that detected the species. `species_observed` is a binary `TRUE/FALSE` column indicating if a species was detected and R treats `TRUE` as 1 and `FALSE` as 0, so we can take the average of this column to get the detection frequency.
+
+```{r}
+#| label: ebird-applications-freq-total
+mean(checklists_zf$species_observed)
+```
+
+So, Fork-tailed Flycatcher is fairly common within this region with `r scales::percent(mean(checklists_zf$species_observed))` of checklists detecting the species. Detection frequency can be used to compare the prevalence of a species between regions or over time. For example, Fork-tailed Flycatcher is migratory, so let's look at how detection frequency changes over the months of the year.
+
+```{r}
+#| label: ebird-applications-freq-monthly
+monthly_detection <- checklists_zf %>% 
+  mutate(month = month(observation_date)) %>% 
+  group_by(month) %>% 
+  summarize(detection_frequency = mean(species_observed))
+
+# plot monthly detection frequency
+ggplot(monthly_detection) +
+  aes(x = month, y = detection_frequency) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = 1:12) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Month of year",
+       y = "Detection frequency",
+       title = "Monthly detection frequency for Fork-tailed Flycatcher",
+       subtitle = "Rio Grande do Sul, Brazil")
+```
+
+Based on this chart, Fork-tailed Flycatcher appears to arrive in Rio Grande do Sul in September and depart in February.
+
+::: {.callout-caution icon="false"}
+## Exercise
+
+Use a similar technique to calculate and plot the monthly number of eBird checklists in Rio Grande do Sul. Are there differences between months? If so, what does this tell you about using number of detections from presence-only as a measure of prevalence?
+:::
+
+::: {.callout-note icon="false" collapse="true"}
+## Solution
+
+There is significant variability in checklist submissions per month, with twice as many checklists in February as October. If we were to look at the monthly number of detections from presence-only data we would expect more detections in months with more checklists even if the prevalence of Fork-tailed Flycatcher is the same.
+
+```{r}
+#| label: ebird-applications-freq-sol
+monthly_checklists <- count(checklists_zf, month = month(observation_date))
+
+# plot monthly number of checklists
+ggplot(monthly_checklists) +
+  aes(x = month, y = n) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = 1:12) +
+  scale_y_continuous(limits = c(0, NA), labels = scales::comma) +
+  labs(x = "Month of year",
+       y = "# of eBird checklists",
+       title = "Monthly eBird checklist submissions in Rio Grande do Sul")
+```
+:::
+
+### Converting to spatial format {#sec-ebird-applications-spatial}
+
+Many applications of eBird data require converting the data into an explicitly spatial format, for example, to make a map or subset the observations to only those within a polygon for a protected area. The R package [`sf`](https://r-spatial.github.io/sf/) can be use to represent spatial points, lines, and polygons in R. We can convert the data frame of checklists to an `sf` object using the latitude and longitude.
+
+```{r}
+#| label: ebird-applications-spatial-convert
+checklists_sf <- st_as_sf(checklists_zf, coords = c("longitude", "latitude"),
+                          # 4326 is the code for an unprojected lon/lat
+                          # coordiante reference system
+                          crs = 4326)
+print(checklists_sf)
+```
+
+Imagine that we're only interested in observations from within 50 km of Gramado, Brazil (29.375°S, 50.876°W). We can use `sf` to generate a circle of radium 50 km centered on Gramado, then subset observations to only those falling within the circle.
+
+```{r}
+#| label: ebird-applications-spatial-pto-montt
+pto_montt <- st_sfc(st_point(c(-72.929, -41.480)), crs = 4326)
+# 50km = 50,000m
+pto_montt_circle <- st_buffer(pto_montt, dist = 50000)
+checklists_pto_montt <- checklists_sf[pto_montt_circle, ]
+```
+
+We could now, for example, calculate the detection frequency in the area around Gramado.
+
+```{r}
+#| label: ebird-applications-spatial-freq
+mean(checklists_pto_montt$species_observed)
+```
+
+Finally, in many cases, it may be more convenient to work with eBird data outside of R in a GIS such as [QGIS](https://qgis.org/en/site/), a free and open source GIS. We can export the Fork-tailed Flycatcher observations to a GeoPackage using `sf`.
+
+```{r}
+#| label: ebird-applications-spatial-export
+#| eval: false
+#write_sf(checklists_sf, "data/fotfly-ebird_br-rs.gpkg",
+ #        layer = "fotfly_observations")
+```
+
+::: callout-tip
+## Tip
+
+The [GeoPackage](https://www.geopackage.org/) is a modern, open source alternative to the shapefile format for storing spatial data. GeoPackages avoid many of the problems and limitations associated with shapefiles, and they are much more efficient than shapefiles. The online ArcGIS documentation provides [instructions for how to open a GeoPackage in ArcGIS](https://desktop.arcgis.com/en/arcmap/latest/manage-data/databases/connect-sqlite.htm).
+:::
+
+### Mapping {#sec-ebird-applications-mapping}
+
+Now that we have the data in a spatial format, we can produce a map of the Fork-tailed Flycatcher detection/non-detection data. For complex, highly customized maps, we recommend using a GIS such as QGIS that's specifically designed for cartography. However, it is possible to make a quick, simple map in R.
+
+We'll start by loading polygons defining coutry and state borders, which will provide contextual information for our map. These polygons come from [Natural Earth](https://www.naturalearthdata.com/downloads/), and excellent source of global, attribution free spatial data. The R package `rnaturalearth` provides access to Natural Earth data within R; however, for convenience we've provided the necessary layers in the file `data/gis-data.gpkg` included in the [data package](index.qmd#sec-intro-data) for this workshop. We'll also project everything to an equal area projection center on Rio Grande do Sul.
+
+```{r}
+#| label: ebird-applications-mapping-ne
+crs <- st_crs("+proj=laea +lat_0=-30 +lon_0=-50")
+
+# polygons from natural earth
+ne_land <- read_sf("data/gis-data.gpkg", "ne_land") %>% 
+  st_transform(crs = crs)
+ne_country_lines <- read_sf("data/gis-data.gpkg", "ne_country_lines") %>% 
+  st_transform(crs = crs)
+rgds_boundary <- read_sf("data/gis-data.gpkg", "ne_states") %>% 
+  filter(state_code == "CL-LL") %>% 
+  st_transform(crs = crs)
+
+# transform ebird data to equal area projection
+checklists_proj <- st_transform(checklists_sf, crs = crs)
+```
+
+Now we can make a map of observations of Fork-tailed Flycatcher in Rio Grande do Sul. We build up the map in layers, first creating a basemap with the Natural Earth polygons, then plotting the eBird detection and non-detection data on top. When building up a map in layes like this, it's often useful to first plot a blank version the main dataset you intend to map to define the spatial extent of the map, then layer everything else on top, finishing with plotting the data a second time so it appears as the top layer.
+
+```{r}
+#| label: ebird-applications-mapping-map
+par(mar = c(0.25, 0.25, 2, 0.25))
+
+# start with a blank plot of the data to define the spatial extent of the map
+plot(st_geometry(checklists_proj), col = NA)
+
+# contextual gis data
+plot(ne_land, col = "#dddddd", border = "#888888", lwd = 0.5, add = TRUE)
+plot(rgds_boundary, col = "#cccccc", border = NA, add = TRUE)
+plot(ne_country_lines, col = "#ffffff", lwd = 1.5, add = TRUE)
+
+# ebird observations
+# not detected
+plot(filter(checklists_proj, !species_observed),
+     pch = 19, cex = 0.2, col = alpha("#555555", 0.5),
+     add = TRUE)
+# detected
+plot(filter(checklists_proj, species_observed),
+     pch = 19, cex = 0.3, col = alpha("#4daf4a", 1),
+     add = TRUE)
+# legend
+legend("bottomright", bty = "n",
+       col = c("#555555", "#4daf4a"),
+       legend = c("eBird checklists", "Fork-tailed Flycatcher sightings"),
+       pch = 19)
+box()
+title("Fork-tailed Flycatcher eBird Observations (2013-2022)")
+```
+
+## Código para extraer datos del eBird Basic Dataset (EBD) para sitios prioritarios
+
+Este código permite extraer datos del EBD y resumir la información registrada para un área geográfica de interés utilizando un polígono.
+
+Para correr este código se requieren de tres archivos.
+
+1.  El [eBird Basic Dasaset](https://ebird.org/science/use-ebird-data/download-ebird-data-products) (EBD) que se puede solicitar en el siguiente [link](https://ebird.org/data/download?_gl=1*efb2q5*_ga*MTQxMzEzODEzMi4xNjc5NTA3MTA3*_ga_QR4NVXZ8BM*MTY5MjYyNTc0MC4xNTMuMS4xNjkyNjI1NzU4LjQyLjAuMA..&_ga=2.200421294.1401622184.1692625740-1413138132.1679507107). La base de datos es gratuita, solo es necesario hacer la solicitud a través de la página.
+
+2.  El [polígono](https://github.com/ROC-Chile/extraccion_datos_eBird_sitios_prioritarios/blob/main/Bahia%20Coquimbo.kml) del área de interés, que en este caso es un Important Bird Area (IBA) de la Bahía de Coquimbo, Chile. El paquete "sf" utilizado acepta archivos en formato .shp o .kml
+
+3.  **Opcional** Un [archivo](https://github.com/ROC-Chile/extraccion_datos_eBird_sitios_prioritarios/blob/main/Lista%20aves%20de%20chile.csv) con nombres locales y categorías de conservación de las especies. En este caso, un archivo con el listado de aves de Chile y su categoría de conservación.
+
+Este ejemplo fue desarrollado por la [(ROC)](http://www.redobservadores.cl/) como una herrmienta para hacer uso de la base de datos abierta de eBird para obtener información importante de sitios prioritarios para la conservación de aves de Chile. Sin embargo, también se puede utilizar de forma general para obtener datos de aves de cualquier área geógráfica de interés.
+
+*Recuerda que si usas Windows debes tener [(Cygwin)](https://www.cygwin.com/) instalado en tu computador* [(TUTORIAL)](https://cornelllabofornithology.github.io/auk/).
+
+**Funcionalidades aún por desarrollar:**
+
+-   Columna que indica en cuantos de los ultimos 5 años hubo por lo menos un registro de la especie
+
+-   Columna de tasa relativa de encuentro
+
+-   Función para especificar un buffer que agranda el perimetro del polígono, para incluir listas adjacentes al área de interés
+
+```{r}
+#SCRIPT PARA EXTRAER DATOS DE eBIRD PARA SITIOS DE INTERÉS
+
+#activar paquetes (instalar en su computador previamente)
+library(auk)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(sf)
+library(tibble)
+library(tidyr)
+library(readr)
+
+#importar los datos de observaciones
+f_ebd <- "ebd_CL_smp_relJul-2023.txt" #especificar el pathway para llegar al lugar donde está almacenado en su computador 
+obs <- read_ebd(f_ebd)
+
+#convertir los "X" a NA y transformar conteos a números enteros
+obs$observation_count <- if_else(obs$observation_count == "X", NA_character_, obs$observation_count) %>% 
+  as.integer()
+  
+#leer el shape file o .kml para el polígono del IBA
+#evitar archivos .kmz
+poly <- read_sf("Aconcagua.kml") #insertar nombre de archivo propio
+
+#leer planilla con categoría de conservacion de las especies
+cat <- read.csv("Lista aves de chile.csv")
+cat <- cat %>% select(nombre_cientifico,nombre_comun,categoria_IUCN,categoria_MMA,status)
+
+#filtrar la base de datos para retener solo las observaciones que cumplan los criterios que uno establezca
+#en este caso solo queremos retener listas con distancias recorridas menores a 10km y de una duracion menor a 6 horas
+obs_fil <- obs %>%
+  # 2. definir filtros
+  filter(protocol_name %in% c("Traveling", "Stationary"),
+         duration_minutes < 6 * 60,
+         effort_distance_km < 10 | protocol_name == "Stationary",
+         exotic_code == "N") 
+
+#seleccionar solo las columnas necesarias para reducir tamaño del dataframe
+obs_lim <- obs_fil %>%
+  select(sampling_event_identifier,
+         taxonomic_order,
+         common_name,
+         scientific_name,
+         observation_count,
+         breeding_category,
+         latitude,
+         longitude,
+         observation_date)
+
+# cambiar jerarquía de categorias de códigos reproductivos a una jerarquía numérica
+obs_lim <- obs_lim %>%
+  mutate(breeding_category = recode(breeding_category,'C1'=1,'C2'=2,'C3'=3,'C4'=4),
+         breeding_category = as.integer(as.character(breeding_category)))
+
+# Transformaciones del polígono
+# transformar objeto a formato shape file
+ebd_sf <- obs_lim %>% 
+  select(longitude, latitude) %>% 
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
+
+# transformar poligono para tener el mismo crs
+poly_ll <- st_transform(poly, crs = st_crs(ebd_sf))
+
+# opcionalmente se puede incluir un buffer alrededor del polígono para incluir datos de listas que pudieran haber empezado fuera del polígono
+poly_ll_buffer <- st_buffer(poly_ll, dist = 1000) # en este caso agregamos un buffer the 1km
+
+# identificar puntos dentro del poligono
+in_poly <- st_within(ebd_sf, poly_ll_buffer, sparse = FALSE)
+
+# Filtrado final de los datos para obtener solo los datos que caen dentro del polígono
+ebd_in_poly <- obs_lim[in_poly[, 1], ]
+
+
+## CREAR TABLA RESUMEN DE DATOS
+#lista de especies registradas, nombre común, científico y orden taxono
+especie <-   ebd_in_poly %>% 
+  distinct(common_name,scientific_name,taxonomic_order) %>% 
+  arrange(common_name) %>%
+  distinct(common_name, .keep_all = TRUE)
+
+#lista de especies registradas durante el último año y máximos para ese año
+registro_último_año <-  ebd_in_poly %>% 
+  filter(year(observation_date) == year(max(observation_date))) %>% 
+  group_by(common_name) %>% 
+  arrange(desc(observation_count)) %>%  # Ordenar en orden descendente de conteo
+  summarise(conteo_max_último_año = max(observation_count, na.rm=TRUE),checklist.x = first(sampling_event_identifier),
+            conteo_max_último_año = replace(conteo_max_último_año, conteo_max_último_año == -Inf, 0)) %>%
+  mutate(registro_último_año = TRUE)
+
+#conteo máximo histórico para cada especie registrada en el polígono
+conteo_max_h <- ebd_in_poly %>% 
+  group_by(common_name) %>%
+  arrange(desc(observation_count)) %>%
+  slice(1) %>%  # Tomar solo la primera fila (máximo conteo)
+  summarise(conteo_max_h = max(observation_count, na.rm=TRUE),
+            año_max_h = max(year(observation_date)), 
+            checklist.y = first(sampling_event_identifier))
+
+#promedio de conteo en los registros de los últimos 5 años
+prom_conteo_5_años <- ebd_in_poly %>% 
+  filter(year(observation_date) >= (year(max(observation_date)) - 4)) %>% 
+  group_by(common_name) %>% 
+  summarise(prom_conteos_5_años = round(mean(observation_count, na.rm=TRUE)))
+
+#código reproductivo más alto registrado para cada especie en el polígono
+cod_rep <- ebd_in_poly %>% 
+  group_by(common_name) %>% 
+  summarise(cod_rep = max(breeding_category, na.rm = TRUE),
+            cod_rep = replace(cod_rep, cod_rep == -Inf, 0))
+
+#crear tabla resumen                                                  
+tabla_datos <- left_join(especie,registro_último_año, by = "common_name") %>%
+  left_join(.,conteo_max_h, by = "common_name") %>%
+  left_join(.,prom_conteo_5_años, by = "common_name") %>%
+  left_join(.,cod_rep, by = "common_name") %>%
+  left_join(., cat, by = c("scientific_name" = "nombre_cientifico")) %>% 
+  group_by(common_name) %>%
+  select("nombre_comun","common_name","scientific_name","registro_último_año","conteo_max_último_año","checklist.x","conteo_max_h","año_max_h","checklist.y","prom_conteos_5_años","cod_rep","categoria_MMA","categoria_IUCN","taxonomic_order","status")
+  slice(1) #remueve las filas de especie repetidas por tener subespecie
+
+#ordenar la tabla según orden taxonómico, reemplazar NAs y números infinitos por 0
+tabla_datos <- tabla_datos %>%
+  arrange(taxonomic_order) %>% #ordenar la tabla de acuerdo a orden taxonómico
+  mutate_all(function(x) ifelse(is.infinite(x), 0, x)) %>% #reemplaza numeros infinitos por 0, cuando todos los registros de la especie fueron ingresados como 'X' 
+  select(-taxonomic_order)%>% #quita la columna de numero taxonomico
+  rename(nombre_inglés = common_name, nombre_cientifico = scientific_name) #cambia el nombre de la columna para que todos estén en castellano
+
+#remplaza NA con 0 en columnas numéricas
+tabla_datos <- tabla_datos %>%
+  mutate(conteo_max_último_año = ifelse(is.na(conteo_max_último_año), 0, conteo_max_último_año),
+         prom_conteos_5_años = ifelse(is.na(prom_conteos_5_años), 0, prom_conteos_5_años))
+
+#remplaza NA con 0 en columna de characteres
+tabla_datos$registro_último_año <- replace(tabla_datos$registro_último_año, is.na(tabla_datos$registro_último_año),FALSE)
+
+# EXPORTAR LA TABLA COMO .CSV
+write_csv(tabla_datos, "datos eBird Aconcagua.csv")
+
+
+############ HERRAMIENTAS ADICIONALES ################
+
+##GRAFICAR LA UBICACIÓN DE LOS DATOS DENTRO DEL POLÍGONO
+#seleccionar filas 159 - 167 y ejecutar para crear mapa
+par(mar = c(0, 0, 0, 0))
+plot(poly %>% st_geometry(), col = "white", border = NA)
+plot(ebd_sf[in_poly[, 1], ], 
+     col = "grey30", pch = 19, cex = 0.5, 
+     add = TRUE)
+legend("top", 
+       legend = "Ubicación datos eBird dentro del poligono",
+       pch = 19,
+       bty = "n")
+```
