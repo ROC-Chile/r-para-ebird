@@ -118,7 +118,7 @@ dir.create(dirname(gpkg_file), showWarnings = FALSE, recursive = TRUE)
 # Descargar y procesar territorio de Chile
   #Descargar datos de todos los países del mundo
 chile_land <- ne_download(
-  scale = 50, # scale = 50 es una escala intermedia (también existe 10 y 110)
+  scale = 10, # scale = 10 (también existe 50 y 110)
   category = "cultural",
   type = "admin_0_countries_lakes", 
   returnclass = "sf"
@@ -133,7 +133,7 @@ chile_land <- ne_download(
 # Descargar regiones de Chile (divisiones administrativas)
   # Descargar divisiones administrativas de nivel 1 (regiones/estados)
 chile_regions <- ne_download(
-  scale = 50,
+  scale = 10,
   category = "cultural", 
   type = "admin_1_states_provinces",
   returnclass = "sf"
@@ -147,7 +147,7 @@ chile_regions <- ne_download(
 # Descargar líneas fronterizas de Chile
   # Primero obtenemos TODAS las líneas fronterizas del mundo
 all_country_lines <- ne_download(
-  scale = 50, 
+  scale = 10, 
   category = "cultural",
   type = "admin_0_boundary_lines_land",
   returnclass = "sf"
@@ -167,7 +167,7 @@ chile_country_lines <- all_country_lines[lines_touching_chile,] |>
 # Descargar líneas entre regiones
   # Descargar líneas de divisiones administrativas nivel 1
 all_region_lines <- ne_download(
-  scale = 50,
+  scale = 10,
   category = "cultural",
   type = "admin_1_states_provinces_lines",
   returnclass = "sf"
@@ -188,7 +188,6 @@ write_sf(chile_land, gpkg_file, "chile_territorio")
 write_sf(chile_regions, gpkg_file, "chile_regiones")
 write_sf(chile_country_lines, gpkg_file, "chile_fronteras")
 write_sf(chile_region_lines, gpkg_file, "chile_limites_regionales")
-
 ```
 
 # Datos de eBird
