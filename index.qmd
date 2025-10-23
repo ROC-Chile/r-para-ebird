@@ -14,7 +14,7 @@ El curso consta de 4 módulos:
 
 1\. [Introducción al entorno R en el contexto de eBird](intror.qmd)
 
-2\. **Buenas prácticas para el uso de datos de eBird**: introduction to the eBird Basic Dataset (EBD), challenges associated with using eBird data for analysis, and best practices for preparing eBird data for modeling.
+2\. [Buenas prácticas para el uso de datos de eBird](ebird.qmd): introduction to the eBird Basic Dataset (EBD), challenges associated with using eBird data for analysis, and best practices for preparing eBird data for modeling.
 
 3\. **Modelamiento de distribución y abundancia relativa**: tasas de encuentro, abundancia relativa y ejemplos y aplicaciones prácticas usando distribución y abundancia.
 
