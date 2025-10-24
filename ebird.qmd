@@ -89,7 +89,7 @@ Ahora, importemos los datos de observación (EBD).
 ```{r}
 #| label: ebird-import-ebd
 f_ebd <- "data/ebd_CL-LL_chutap1_smp_relSep-2025.txt" #Aquí debemos ajustar el nombre del archivo si trabajaremos con una descarga personal
-observations <- read_ebd(f_ebd, unique = FALSE, rollup = FALSE) # leemos el archivo y generamos un objeto que contenga toda la información de las listas
+observations <- read_ebd(f_ebd, unique = FALSE, rollup = FALSE) # leemos el archivo y generamos un objeto que contenga toda la información de las observaciones
 glimpse(observations) # resumen rápido del objeto generado
 ```
 
@@ -161,7 +161,7 @@ Para este ejercicio trabajaremos con el tijeral, por lo que antes de realizar el
 ```{r}
 #| label: ebird-import-rollup
 ft_ebd <- "data/ebd_CL_pmtspi1_smp_relSep-2025.txt"
-tijeral <- read_ebd(f_ebd, unique = FALSE, rollup = FALSE) 
+tijeral <- read_ebd(ft_ebd, unique = FALSE, rollup = FALSE) 
 
 observations_rollup <- auk_rollup(tijeral)
 # uno de los ejemplos, revisamos la lista antes del rollup y comparamos con como queda la información luego del rollup. 
@@ -230,8 +230,6 @@ Ahora que tienes un conjunto de datos de detección/no detección, es probable q
 -   **Aumento de la precisión**: algunas listas de eBird son bastante largas en distancia o duración, lo que lleva a imprecisión espacial o temporal. Al eliminar listas más largas podemos aumentar la precisión espacial del conjunto de datos.
 -   **Reducción de la variación en el esfuerzo**: a diferencia de los estudios científicos estructurados, los datos se pueden enviar a eBird usando una variedad de protocolos y hay una variación significativa en el esfuerzo entre listas en el conjunto de datos de eBird. La variación en el protocolo y el esfuerzo conduce a variación en la detectabilidad (más esfuerzo generalmente conduce a mayor detectabilidad). Podemos elegir imponer más estructura en el conjunto de datos de eBird filtrando para reducir la variación en protocolo y esfuerzo.
 
-The specific filtering you apply will depend on how you intend to use the eBird data. However, for the sake of this example, let's filter the eBird data to only traveling and stationary checklists from 2013-2022 that are less than 6 hours in duration and 10 km in length.
-
 El filtrado específico que apliques dependerá de cómo pretendas usar los datos de eBird. Sin embargo, para este ejemplo, filtremos los datos de eBird solo a listas con desplazamiento y estacionarias de 2013-2025 que sean de menos de 6 horas de duración y 10 km de longitud.
 
 ```{r}
@@ -271,8 +269,6 @@ Lo más simple que podemos hacer con estas observaciones de eBird es estimar la 
 mean(checklists_zf$species_observed)
 ```
 
-So, Fork-tailed Flycatcher is fairly common within this region with `r scales::percent(mean(checklists_zf$species_observed))` of checklists detecting the species. Detection frequency can be used to compare the prevalence of a species between regions or over time. For example, Fork-tailed Flycatcher is migratory, so let's look at how detection frequency changes over the months of the year.
-
 Entonces, el chucao es bastante común dentro de esta región, con un `r round(mean(checklists_zf$species_observed), 2)`% de las listas detectando la especie. La frecuencia de detección se puede usar para comparar la prevalencia de una especie entre regiones o a lo largo del tiempo. Veamos cómo cambia la frecuencia de detección a lo largo de los meses del año.
 
 ```{r}
@@ -294,8 +290,6 @@ ggplot(monthly_detection) +
        title = "Frecuencia de detección mensual del chucao",
        subtitle = "Los Lagos, Chile")
 ```
-
-Based on this chart, Fork-tailed Flycatcher appears to arrive in Rio Grande do Sul in September and depart in February.
 
 Basándose en este gráfico, el chucao parece ser más detectado entre diciembre y marzo.
 
