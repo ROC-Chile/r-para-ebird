@@ -37,7 +37,7 @@ El acceso a los productos de Estados y Tendencias de eBird se obtiene mediante u
 ```{r}
 #| label: ebirdst-access-key
 #| eval: true
-set_ebirdst_access_key("XXXXXXXXX", overwrite = TRUE)
+set_ebirdst_access_key("fvlcg6pt15cs", overwrite = TRUE)
 ```
 
 A continuación, **reinicie R** inmediatamente. Esto guardará la clave de acceso como variable de entorno EBIRDST_KEY en su archivo .Renviron, de modo que pueda acceder a ella desde su sesión de R.
@@ -74,7 +74,11 @@ aves_chile <- read.csv2("data/lista aves de chile.csv")
 str(aves_chile)
 
 ebirdst_runs_chile <- ebirdst_runs %>% 
-  filter(scientific_name %in% aves_chile$nombre_cientifico)
+  filter(scientific_name %in% aves_chile$nombre_cientifico) %>% 
+ left_join(
+    aves_chile %>% select(nombre_cientifico, nombre_comun),
+    by = c("scientific_name" = "nombre_cientifico")
+  )
 
 glimpse(ebirdst_runs_chile)
 ```
@@ -647,7 +651,7 @@ ebirdst_runs indica qué especies tienen estimaciones de tendencias con la colum
 #| label: ebirdst-trends
 trends_runs <- ebirdst_runs |> 
   filter(has_trends) |> 
-  select(species_code, common_name,
+  select(species_code, common_name, scientific_name,
          trends_season, trends_region,
          trends_start_year, trends_end_year,
          trends_start_date, trends_end_date,
@@ -727,28 +731,27 @@ trends_circles <- trends_circles |>
 Finalmente podemos crear un mapa de tendencias para esta especie.
 
 ```{r}
-# natural earth boundaries
+# límites de natural earth
 countries <- ne_countries(returnclass = "sf", continent = "South America") |> 
   st_geometry() |> 
   st_transform(st_crs(trends_circles))
-states <- ne_states(iso_a2 = c("US", "CA", "MX")) |> 
+states <- ne_states(iso_a2 = c("CL", "AR", "UR", "BR", "PE", "BL")) |> 
   st_geometry() |> 
   st_transform(st_crs(trends_circles))
 
-# set the plotting extent
+# asignar la extensión del plot
 plot(st_geometry(trends_circles), border = NA, col = NA)
-# add basemap
+# agregar basemap
 plot(countries, col = "#cfcfcf", border = "#888888", add = TRUE)
-# add trends
+# agregar trends
 plot(st_geometry(trends_circles),
      col = trends_circles$color, border = NA,
      axes = FALSE, bty = "n", reset = FALSE, add = TRUE)
-# add boundaries
+# agregar límites
 lines(vect(countries), col = "#ffffff", lwd = 3)
 lines(vect(states), col =  "#ffffff", lwd = 1.5, xpd = TRUE)
 
-# add legend using the fields package
-# label the bottom, middle, and top
+# agregar leyenda con el paquete fields
 label_breaks <- seq(0, 1, length.out = length(legend_breaks))
 image.plot(zlim = c(0, 1), breaks = label_breaks, col = legend_colors,
            smallplot = c(0.90, 0.93, 0.15, 0.85),
@@ -758,7 +761,160 @@ image.plot(zlim = c(0, 1), breaks = label_breaks, col = legend_colors,
                             col.axis = "black", fg = NA,
                             cex.axis = 0.7, lwd.ticks = 0,
                             line = -0.75),
-           legend.args = list(text = "Abundance Trend [% change]",
+           legend.args = list(text = "Tendencia de Abundancia [% cambio]",
                               side = 2, line = 0.25))
+```
+
+## Raster
+
+Las estimaciones de tendencias tabulares se pueden convertir fácilmente a formato raster para su uso con el paquete terra utilizando la función 'rasterize_trends()'. Cualquiera de las columnas de tendencias se puede seleccionar utilizando el argumento 'layers' y convertir en capas en el objeto raster resultante.
+
+```{r}
+# Rasterizar la tendencia porcentual anual con límites de confianza (predeterminado).
+ppy_raster <- rasterize_trends(trends_golo)
+print(ppy_raster)
+
+# Rasterizar la estimación de la tendencia acumulada.
+trends_raster <- rasterize_trends(trends_golo, layers = "abd_trend")
+print(trends_raster)
+```
+
+Estos objetos ráster se pueden exportar a archivos GeoTIFF para su uso en un SIG como QGIS o ArcGIS con
+
+```{r}
+writeRaster(trends_raster, filename = "ebird-tendencias_golo_2022.tif")
+```
+
+A partir de los datos ráster se puede crear un mapa sencillo. Por ejemplo, crearemos un mapa con el porcentaje de cambio anual en la abundancia relativa de la golondrina chilena. Tenga en cuenta que este mapa es ligeramente diferente de los mapas de tendencias que aparecen en el sitio web Status and Trends, que muestran la tendencia acumulada en lugar de la tendencia anual.
+
+```{r}
+# definir los breaks y paletas similares a los del sitio web de estado y tendencias
+breaks <- seq(-4, 4)
+breaks[1] <- -Inf
+breaks[length(breaks)] <- Inf
+pal <- ebirdst_palettes(length(breaks) - 1, type = "trends")
+
+# hacer un mapa simple
+plot(ppy_raster[["abd_ppy"]], 
+     col = pal, breaks =  breaks,
+     main = "Tendencia reproductiva Golondrina Chilena 2014-2021 [% cambio por año]",
+     cex.main = 0.75,
+     axes = FALSE)
+```
+
+# 
+
+```{r}
+trends_golo_folds <- load_trends("chiswa1", fold_estimates = TRUE)
+print(trends_golo_folds)
+```
+
+# Tendencias regionales
+Las estimaciones de tendencias permite resumir a nivel de regiones. Dado que la abundancia relativa de una especie varía a lo largo de su área de distribución, necesitamos ponderar el cálculo de la tendencia media por la abundancia relativa (abd en el marco de datos de tendencias). Para cuantificar la incertidumbre en la tendencia regional, podemos utilizar los datos a nivel de pliegue para producir 100 estimaciones distintas de la tendencia regional y, luego, calcular la mediana y los intervalos de confianza del 80 %. A modo de ejemplo, calculemos las tendencias medias anuales a nivel regional en porcentaje de abundancia relativa para la golondrina chilena en Chile.
+
+```{r}
+# limites de las regiones
+regiones <- ne_states(iso_a2 = "CL", returnclass = "sf") |>
+  transmute(state = iso_3166_2)
+
+# Convertir las estimaciones de tendencias a nivel de pliegue al formato sf.
+trends_golo_sf <-  st_as_sf(trends_golo_folds, 
+                              coords = c("longitude", "latitude"), 
+                              crs = 4326)
+
+# Unir regiones a los datos de tendencias a nivel de plegado
+trends_golo_sf <- st_join(trends_golo_sf, regiones, left = FALSE)
+
+# Tendencia media ponderada por abundancia por región y pliegue
+trends_region_folds <- trends_golo_sf |>
+  st_drop_geometry() |>
+  group_by(state, fold) |>
+  summarize(abd_ppy = sum(abd * abd_ppy) / sum(abd),
+            .groups = "drop")
+
+# Resumir por pliegues para cada region
+trends_region <- trends_region_folds |> 
+  group_by(state) |>
+  summarise(abd_ppy_median = median(abd_ppy, na.rm = TRUE),
+            abd_ppy_lower = quantile(abd_ppy, 0.10, na.rm = TRUE),
+            abd_ppy_upper = quantile(abd_ppy, 0.90, na.rm = TRUE),
+            .groups = "drop") |> 
+  arrange(abd_ppy_median)
+```
+
+Podemos unir estas tendencias regionales con los límites de las regiones de Chile y crear un mapa con ggplot2.
+
+```{r}
+trends_region_sf <- left_join(regiones, trends_region, by = "state")
+ggplot(trends_region_sf) +
+  geom_sf(aes(fill = abd_ppy_median)) +
+  scale_fill_distiller(palette = "Reds", 
+                       limits = c(NA, 0),
+                       na.value = "grey80") +
+  guides(fill = guide_colorbar(title.position = "top", barwidth = 15)) +
+  labs(title = "Tendencias reproductivas regionales de la Golondrina Chilena 2014-2022",
+       fill = "Tendencia en abundancia relativa [% cambio / año]") +
+  theme_bw() +
+  theme(legend.position = "bottom",
+        legend.title = element_text(hjust = 0.5),
+        plot.title = element_text(hjust = 0.5))
+```
+
+# Tendencias multi-especie
+
+En algunos casos, puede que nos interese conocer la tendencia de toda una comunidad de aves, lo cual se puede estimar calculando la tendencia media por celda en un conjunto de especies. Por ejemplo, los productos de datos de tendencias de eBird contienen estimaciones de tendencias para tres especies que se reproducen en la artemisa: el gorrión de Brewer, el gorrión de la artemisa y el cuitlacoche de la artemisa. Podemos calcular una tendencia promedio para este grupo de especies, lo que nos proporcionará una estimación de la tendencia en la comunidad de aves de la artemisa. Primero, veamos la información del modelo para asegurarnos de que todas las especies se modelan para la misma región, estación y rango de años.
+
+```{r}
+patos <- c("Pato jergón grande", "Pato jergón chico", "Pato gargantillo", "Pato capuchino", "Pato cuchara", "Pato colorado")
+
+ebirdst_runs_chile |> 
+  filter(nombre_comun %in% patos)
+
+# obtengamos los codigos de especie para estas especies
+codigo_patos <- ebirdst_runs_chile |> 
+  filter(nombre_comun %in% patos) |>
+  select("species_code") 
+```
+
+Todo parece estar bien, así que podemos proceder a comparar las tendencias de estas especies. A continuación, debemos descargar los datos de tendencias de estas especies. Tenga en cuenta que, dado que ya hemos descargado los datos del cuitlacoche sabio anteriormente, no se volverán a descargar aquí.
+
+```{r}
+ebirdst_download_trends(codigo_patos[[1]]$species_code)
+```
+
+Ahora podemos cargar las tendencias y calcular la media por celda.
+
+```{r}
+trends_patos_especies <- load_trends(codigo_patos[[1]]$species_code)
+
+# calculate mean trend for each cell
+trends_patos <- trends_patos_especies |> 
+  group_by(srd_id, latitude, longitude) |> 
+  summarize(n_species = n(),
+            abd_ppy = mean(abd_ppy, na.rm = TRUE),
+            .groups = "drop")
+print(trends_patos)
+```
+
+Por último, hagamos un mapa de estas tendencias de la artemisa, centrándonos solo en aquellas celdas en las que se dan las tres especies.
+
+```{r}
+# convert the points to sf format
+all_species <- trends_patos |> 
+  filter(n_species == length(codigo_patos[[1]]$species_code)) |> 
+  st_as_sf(coords = c("longitude", "latitude"),
+           crs = 4326)
+
+# make a map
+ggplot(all_species) +
+  geom_sf(aes(color = abd_ppy), size = 2) +
+  scale_color_gradient2(low = "#CB181D", high = "#2171B5",
+                        limits = c(-4, 4), 
+                        oob = scales::oob_squish) +
+  guides(color = guide_colorbar(title.position = "left", barheight = 15)) +
+  labs(title = "Tendencias patos (2012-2022)",
+       color = "Relative abundance trend [% change / year]") +
+  theme_bw() +
+  theme(legend.title = element_text(angle = 90))
 ```
 
