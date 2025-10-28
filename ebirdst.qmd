@@ -26,6 +26,8 @@ library(sf)
 library(stringr)
 library(terra)
 library(tidyr)
+library(fields)
+library(rnaturalearth)
 ```
 
 ## Data access {#sec-ebirdst-access}
@@ -35,7 +37,7 @@ El acceso a los productos de Estados y Tendencias de eBird se obtiene mediante u
 ```{r}
 #| label: ebirdst-access-key
 #| eval: true
-set_ebirdst_access_key("fvlcg6pt15cs", overwrite = TRUE)
+set_ebirdst_access_key("XXXXXXXXX", overwrite = TRUE)
 ```
 
 A continuación, **reinicie R** inmediatamente. Esto guardará la clave de acceso como variable de entorno EBIRDST_KEY en su archivo .Renviron, de modo que pueda acceder a ella desde su sesión de R.
@@ -64,6 +66,18 @@ glimpse(ebirdst_runs)
 ```
 
 Desde RStudio también puedes utilizar `View()` para explorar de forma interactiva la base de datos. También puedes consultar la página de [especies en Estados y Tendencias](https://science.ebird.org/en/status-and-trends/species) para ver la lista completa de especies disponibles. En esta página puedes filtrar por región, por ejemplo, para ver solo aquellas especies con alguna parte de su área de distribución [dentro de Chile](https://science.ebird.org/en/status-and-trends/species?regionCode=CL).
+
+En el paquete de datos proveemos una lista de las aves de Chile, el cual podemos utilizar para filtrar el objeto "ebirdst_runs" para obtener la lista de especies con productos de S&T encontrados en el país.
+```{r speciesn Chile}
+#| label: ebirdst-species-runs-Chile
+aves_chile <- read.csv2("data/lista aves de chile.csv")
+str(aves_chile)
+
+ebirdst_runs_chile <- ebirdst_runs %>% 
+  filter(scientific_name %in% aves_chile$nombre_cientifico)
+
+glimpse(ebirdst_runs_chile)
+```
 
 ### Revisión de expertos {#sec-ebirdst-review}
 
@@ -621,3 +635,130 @@ ggplot(comparasion) +
 ```
 
 Por lo tanto, para una misma superficie total, podríamos capturar una proporción mucho mayor de las poblaciones de estas especies si utilizáramos los productos de datos de eBird Status para estas especies en nuestra priorización de sitios. Por supuesto, este ejemplo es demasiado simplista. Por ejemplo, en una aplicación real, los diferentes sitios tienen diferentes costos asociados a la protección y habría que tenerlo en cuenta a la hora de establecer las prioridades. Para problemas de priorización más complejos, se pueden utilizar eficazmente herramientas de planificación sistemática de la conservación, como el paquete R [`prioritizr`](https://prioritizr.net/), junto con los productos de datos de Estados de eBird.
+
+
+# Tendencias {#sec-tendencias}
+
+Los productos de datos de tendencias de eBird proporcionan estimaciones de las tendencias en la abundancia relativa basadas en los datos de eBird. Las estimaciones de las tendencias se realizan en una grilla de 27 x 27 km para una sola temporada por especie (reproductora, no reproductora o residente). Para obtener más detalles sobre la metodología utilizada para estimar estas tendencias, consulte este [artículo](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.14186).
+
+ebirdst_runs indica qué especies tienen estimaciones de tendencias con la columna has_trends. Podemos filtrar el marco de datos y seleccionar solo aquellas columnas relevantes para las tendencias.
+
+```{r}
+#| label: ebirdst-trends
+trends_runs <- ebirdst_runs |> 
+  filter(has_trends) |> 
+  select(species_code, common_name,
+         trends_season, trends_region,
+         trends_start_year, trends_end_year,
+         trends_start_date, trends_end_date,
+         rsquared, beta0, trends_version_year)
+glimpse(trends_runs)
+```
+
+Se proporciona información sobre el modelo de tendencias para cada especie, incluidas dos métricas de rendimiento predictivo (rsquared y beta0) que se basan en una comparación de las tendencias reales y estimadas para un conjunto de simulaciones (véase Fink et al. 2023 para más detalles). Las columnas del marco de datos trends_runs son las siguientes:
+
+- rsquared: Valor R cuadrado que compara las tendencias reales y estimadas a partir de las simulaciones.
+- beta0: La intersección de un modelo lineal que ajusta las tendencias reales frente a las estimadas (reales ~ estimadas) para las simulaciones. Los valores positivos de beta0 indican que los modelos están subestimando sistemáticamente la tendencia simulada para esta especie.
+
+Los datos de tendencias se pueden descargar para una o más especies utilizando ebirdst_download_trends(), donde el primer argumento es un vector de nombres comunes, nombres científicos o códigos de especies. Al igual que con los productos de datos de estado, los datos de tendencias se descargarán en un directorio centralizado y la gestión y el acceso a los archivos se realizará a través de ebirdst. Por ejemplo, descarguemos los datos de tendencias de la temporada de reproducción de la golondrina chilena.
+
+```{r}
+#| label: ebirdst-download-trends
+ebirdst_download_trends("Tachycineta leucopyga")
+```
+
+Una vez descargados los datos de tendencias de un conjunto de especies estos se pueden cargar en R utilizando la función load_trends(). Por ejemplo, podemos cargar las estimaciones de tendencias de la golondrina chilena que acabamos de descargar con:
+
+```{r}
+#| label: ebirdst-trends-species
+trends_golo <- load_trends("Tachycineta leucopyga")
+```
+
+Cada fila corresponde a la estimación de la tendencia para una celda de 27 km por 27 km, identificada por la columna srd_id y con el centro de la celda dado por las coordenadas de longitud y latitud. Las columnas que comienzan con 'abd_ppy' proporcionan estimaciones del porcentaje anual de la tendencia en la abundancia relativa y los intervalos de confianza del 80 %, mientras que las que comienzan con 'abd_trend' proporcionan estimaciones de la tendencia acumulativa en la abundancia relativa y los intervalos de confianza del 80 % durante el periodo de tiempo. La columna 'abd' proporciona la estimación de la abundancia relativa para la mitad del periodo de tiempo de la tendencia (por ejemplo, 2014 para una tendencia de 2007-2021). Las columnas 'start_year/end_year' y 'start_date/end_date' proporcionan información redundante a la disponible en ebirdst_runs. Concretamente, para la golondrina chilena tenemos:
+
+```{r}
+#| label: ebirdst-trends-runs
+trends_runs |> 
+  filter(common_name == "Chilean Swallow") |> 
+  select(trends_start_year, trends_end_year,
+         trends_start_date, trends_end_date)
+```
+
+## Conversión a formatos espaciales
+
+Los datos de tendencias de eBird se almacenan en formato tabular, donde cada fila proporciona la estimación de la tendencia para una sola celda 27 km por 27 km. Para cada celda de la grilla, se proporcionan las coordenadas (longitud y latitud) del centro de la celda. Para muchas aplicaciones, un formato explícitamente espacial es más útil y estas coordenadas se pueden utilizar para convertir el formato tabular a un formato vectorial o ráster.
+
+## Vector (puntos)
+Los datos de tendencias tabulares se pueden convertir en características vectoriales de puntos para su uso con el paquete sf utilizando la función sf st_as_sf().
+
+```{r}
+#| label: ebirdst-trends-vector
+trends_sf <- st_as_sf(trends_golo, 
+                      coords = c("longitude", "latitude"), 
+                      crs = 4326)
+print(trends_sf)
+```
+
+## Vector (círculos escalados según la abundancia)
+Para generar mapas similares a los del sitio web eBird Status and Trends, la función 'vectorize_trends()' convertirá las tendencias tabulares en círculos espaciales con áreas aproximadamente proporcionales a la abundancia relativa en cada celda de 27 km por 27 km. Para generar círculos que no estén sesgados, es importante proporcionar el sistema de referencia de coordenadas en el que se pretende mapear las tendencias resultantes. Lo ideal es que sea una proyección de área igual y, en el ejemplo anterior, hemos utilizado la proyección Equal Earth centrada en América del Norte.
+
+```{r}
+trends_circles <- vectorize_trends(trends_golo,
+                                   crs = "+proj=eqearth +lon_0=-96")
+```
+
+Luego, asignaremos colores basándonos en la tendencia acumulada (abd_trend) utilizando los mismos intervalos que se utilizan en el sitio web.
+
+```{r}
+# definir la legenda
+max_trend <- ceiling(max(abs(trends_circles$abd_trend)))
+legend_breaks <- seq(0, 40, by = 10)
+legend_breaks[length(legend_breaks)] <- max_trend
+legend_breaks <- c(-rev(legend_breaks), legend_breaks) |> unique()
+legend_labels <- c("<=-40", -20, 0, 20, ">=40")
+legend_colors <- ebirdst_palettes(length(legend_breaks) - 1, type = "trends")
+
+# asignar colores a los circulos
+trends_circles <- trends_circles |> 
+  mutate(color = cut(abd_trend, legend_breaks, labels = legend_colors) |> 
+           as.character())
+```
+
+Finalmente podemos crear un mapa de tendencias para esta especie.
+
+```{r}
+# natural earth boundaries
+countries <- ne_countries(returnclass = "sf", continent = "South America") |> 
+  st_geometry() |> 
+  st_transform(st_crs(trends_circles))
+states <- ne_states(iso_a2 = c("US", "CA", "MX")) |> 
+  st_geometry() |> 
+  st_transform(st_crs(trends_circles))
+
+# set the plotting extent
+plot(st_geometry(trends_circles), border = NA, col = NA)
+# add basemap
+plot(countries, col = "#cfcfcf", border = "#888888", add = TRUE)
+# add trends
+plot(st_geometry(trends_circles),
+     col = trends_circles$color, border = NA,
+     axes = FALSE, bty = "n", reset = FALSE, add = TRUE)
+# add boundaries
+lines(vect(countries), col = "#ffffff", lwd = 3)
+lines(vect(states), col =  "#ffffff", lwd = 1.5, xpd = TRUE)
+
+# add legend using the fields package
+# label the bottom, middle, and top
+label_breaks <- seq(0, 1, length.out = length(legend_breaks))
+image.plot(zlim = c(0, 1), breaks = label_breaks, col = legend_colors,
+           smallplot = c(0.90, 0.93, 0.15, 0.85),
+           legend.only = TRUE,
+           axis.args = list(at = c(0, 0.25, 0.5, 0.75, 1), 
+                            labels = legend_labels,
+                            col.axis = "black", fg = NA,
+                            cex.axis = 0.7, lwd.ticks = 0,
+                            line = -0.75),
+           legend.args = list(text = "Abundance Trend [% change]",
+                              side = 2, line = 0.25))
+```
+

@@ -8,7 +8,7 @@ Conocer herramientas analíticas y buenas prácticas para la descarga, curatorí
 
 **Resultados de aprendizaje** - Identificar las mejores prácticas para el uso apropiado de datos provenientes de la ciencia ciudadana. - Reconocer el proceso de descarga, manipulación y visualización de datos crudos de eBird. - Analizar, filtrar y sintetizar datos de un sitio de interés. - Reconocer los principios del modelamiento de distribución y abundancia relativa utilizando datos de eBird. - Reconocer los distintos productos de “Estados y Tendencias”, cómo acceder a ellos desde R y qué tipo de aplicaciones prácticas pueden ser usadas en conservación.
 
-**Estructura del curso** Cuatro clases de 2 horas cronológicas de duración, realizadas en modalidad a distancia (vía Zoom). Entrega de certificados de participación a quienes se conecten a un mínimo de tres clases, de forma sincrónica. 
+**Estructura del curso** Cuatro clases de 2 horas cronológicas de duración, realizadas en modalidad a distancia (vía Zoom). Entrega de certificados de participación a quienes se conecten a un mínimo de tres clases, de forma sincrónica.
 
 **Contenido del curso**
 
