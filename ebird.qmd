@@ -321,12 +321,12 @@ ggplot(monthly_checklists) +
 ```
 :::
 
-### Conversión a formato espacial {#sec-ebird-applications-spatial}
+### Conversión a formato espacial {#sec-ebird-appli = ions-spatial}
 
 Muchas aplicaciones de datos de eBird requieren convertir los datos en un formato explícitamente espacial, por ejemplo, para hacer un mapa o filtrar las observaciones solo a aquellas dentro de un polígono para un área protegida. El paquete de R [`sf`](https://r-spatial.github.io/sf/) se puede usar para representar puntos, líneas y polígonos espaciales en R. Podemos convertir el data frame de las listas a un objeto `sf` usando la latitud y longitud.
 
 ```{r}
-#| label: ebird-applications-spatial-convert
+#| label: ebird-appli = ions-spatial-convert
 checklists_sf <- st_as_sf(checklists_zf, coords = c("longitude", "latitude"),
                           # 4326 is the code for an unprojected lon/lat
                           # coordiante reference system
@@ -496,7 +496,7 @@ poly <- read_sf("data/ralun.kml") #insertar nombre de archivo propio
 # cargamos la planilla con información de las especies, como su categoría de conservacion
 cat <- read.csv2("data/lista aves de chile.csv")
 # seleccionamos las columnas que son de nuestro interés
-cat <- cat %>% select(nombre.científico..Clements., nombre.común, clasificación.IUCN, clasificación.RCE, Chile.total)
+cat <- cat %>% select(nombre_cientifico, nombre_comun, clasificacion_IUCN, clasificacion_RCE, clasificacion_RCE, estado)
 ```
 
 Una vez cargados los archivos, filtraremos la base de datos de las observaciones de acuerdo a criterios que uno establezca relacionados al esfuerzo de muestreo, como por ejemplo el tipo de observación realizado, la distancia recorrida, la duración del muestreo o la cantidad de observadores.
@@ -592,9 +592,9 @@ tabla_datos <- left_join(especie,registro_último_año, by = "common_name") %>%
   left_join(.,conteo_max_h, by = "common_name") %>%
   left_join(.,prom_conteo_5_años, by = "common_name") %>%
   left_join(.,cod_rep, by = "common_name") %>%
-  left_join(., cat, by = c("scientific_name" = "nombre.científico..Clements.")) %>% 
+  left_join(., cat, by = c("scientific_name" = "nombre_cientifico")) %>% 
   group_by(common_name) %>%
-  select("nombre.común","common_name","scientific_name","registro_último_año","conteo_max_último_año","checklist.x","conteo_max_h","año_max_h","checklist.y","prom_conteos_5_años","cod_rep","clasificación.RCE","clasificación.IUCN","taxonomic_order","Chile.total")
+  select("nombre_comun","common_name","scientific_name","registro_último_año","conteo_max_último_año","checklist.x","conteo_max_h","año_max_h","checklist.y","prom_conteos_5_años","cod_rep","clasificacion_RCE","clasificacion_IUCN","taxonomic_order","estado")
 
 
 # ordenamos la tabla según orden taxonómico, reemplazamos los NAs y los números infinitos por 0
@@ -602,7 +602,7 @@ tabla_datos <- tabla_datos %>%
   arrange(taxonomic_order) %>% # ordenamos la tabla de acuerdo al orden taxonómico
   mutate_all(function(x) ifelse(is.infinite(x), 0, x)) %>% # reemplazamos los numeros infinitos por 0, cuando todos los registros de la especie fueron ingresados como 'X' 
   select(-taxonomic_order)%>% # quitamos la columna de número taxonómico
-  rename(nombre.inglés = common_name, nombre.cientifico = scientific_name) # renombramos las columnas para que tengan el mismo idioma y formato 
+  rename(nombre_ingles = common_name, nombre_cientifico = scientific_name) # renombramos las columnas para que tengan el mismo idioma y formato 
 
 # remplazamos los NA con 0 en columnas numéricas de la tabla resumen
 tabla_datos <- tabla_datos %>%

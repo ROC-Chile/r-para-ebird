@@ -782,7 +782,7 @@ print(trends_raster)
 Estos objetos ráster se pueden exportar a archivos GeoTIFF para su uso en un SIG como QGIS o ArcGIS con
 
 ```{r}
-writeRaster(trends_raster, filename = "ebird-tendencias_golo_2022.tif")
+writeRaster(trends_raster, filename = "ebird-tendencias_golo_2022.tif", overwrite = TRUE)
 ```
 
 A partir de los datos ráster se puede crear un mapa sencillo. Por ejemplo, crearemos un mapa con el porcentaje de cambio anual en la abundancia relativa de la golondrina chilena. Tenga en cuenta que este mapa es ligeramente diferente de los mapas de tendencias que aparecen en el sitio web Status and Trends, que muestran la tendencia acumulada en lugar de la tendencia anual.
@@ -814,7 +814,7 @@ Las estimaciones de tendencias permite resumir a nivel de regiones. Dado que la 
 
 ```{r}
 # limites de las regiones
-regiones <- ne_states(iso_a2 = "CL", returnclass = "sf") |>
+chile <- ne_states(iso_a2 = "CL", returnclass = "sf") |>
   transmute(state = iso_3166_2)
 
 # Convertir las estimaciones de tendencias a nivel de pliegue al formato sf.
@@ -823,7 +823,7 @@ trends_golo_sf <-  st_as_sf(trends_golo_folds,
                               crs = 4326)
 
 # Unir regiones a los datos de tendencias a nivel de plegado
-trends_golo_sf <- st_join(trends_golo_sf, regiones, left = FALSE)
+trends_golo_sf <- st_join(trends_golo_sf, chile, left = FALSE)
 
 # Tendencia media ponderada por abundancia por región y pliegue
 trends_region_folds <- trends_golo_sf |>
@@ -845,12 +845,16 @@ trends_region <- trends_region_folds |>
 Podemos unir estas tendencias regionales con los límites de las regiones de Chile y crear un mapa con ggplot2.
 
 ```{r}
-trends_region_sf <- left_join(regiones, trends_region, by = "state")
+trends_region_sf <- left_join(chile, trends_region, by = "state")
 ggplot(trends_region_sf) +
   geom_sf(aes(fill = abd_ppy_median)) +
   scale_fill_distiller(palette = "Reds", 
                        limits = c(NA, 0),
                        na.value = "grey80") +
+  coord_sf(
+    xlim = c(-76, -66),  # rango este-oeste chile
+    ylim = c(-56, -17)   # rango norte-sur
+  ) +
   guides(fill = guide_colorbar(title.position = "top", barwidth = 15)) +
   labs(title = "Tendencias reproductivas regionales de la Golondrina Chilena 2014-2022",
        fill = "Tendencia en abundancia relativa [% cambio / año]") +
@@ -865,27 +869,23 @@ ggplot(trends_region_sf) +
 En algunos casos, puede que nos interese conocer la tendencia de toda una comunidad de aves, lo cual se puede estimar calculando la tendencia media por celda en un conjunto de especies. Por ejemplo, los productos de datos de tendencias de eBird contienen estimaciones de tendencias para tres especies que se reproducen en la artemisa: el gorrión de Brewer, el gorrión de la artemisa y el cuitlacoche de la artemisa. Podemos calcular una tendencia promedio para este grupo de especies, lo que nos proporcionará una estimación de la tendencia en la comunidad de aves de la artemisa. Primero, veamos la información del modelo para asegurarnos de que todas las especies se modelan para la misma región, estación y rango de años.
 
 ```{r}
-patos <- c("Pato jergón grande", "Pato jergón chico", "Pato gargantillo", "Pato capuchino", "Pato cuchara", "Pato colorado")
+patos <- c("Anas flavirostris", "Anas georgica", "Spatula platalea", "Spatula versicolor", "Anas bahamensis")
 
 ebirdst_runs_chile |> 
-  filter(nombre_comun %in% patos)
-
-# obtengamos los codigos de especie para estas especies
-codigo_patos <- ebirdst_runs_chile |> 
-  filter(nombre_comun %in% patos) |>
-  select("species_code") 
+  filter(scientific_name %in% patos) %>% 
+  select(nombre_comun)
 ```
 
 Todo parece estar bien, así que podemos proceder a comparar las tendencias de estas especies. A continuación, debemos descargar los datos de tendencias de estas especies. Tenga en cuenta que, dado que ya hemos descargado los datos del cuitlacoche sabio anteriormente, no se volverán a descargar aquí.
 
 ```{r}
-ebirdst_download_trends(codigo_patos[[1]]$species_code)
+ebirdst_download_trends(patos)
 ```
 
 Ahora podemos cargar las tendencias y calcular la media por celda.
 
 ```{r}
-trends_patos_especies <- load_trends(codigo_patos[[1]]$species_code)
+trends_patos_especies <- load_trends(patos)
 
 # calculate mean trend for each cell
 trends_patos <- trends_patos_especies |> 
@@ -901,16 +901,22 @@ Por último, hagamos un mapa de estas tendencias de la artemisa, centrándonos s
 ```{r}
 # convert the points to sf format
 all_species <- trends_patos |> 
-  filter(n_species == length(codigo_patos[[1]]$species_code)) |> 
+  filter(n_species == length(patos)) |> 
   st_as_sf(coords = c("longitude", "latitude"),
            crs = 4326)
 
+all_species <- all_species[chile, ]
 # make a map
-ggplot(all_species) +
-  geom_sf(aes(color = abd_ppy), size = 2) +
+ggplot() +
+  geom_sf(data = chile, fill = "grey95", color = "grey70") +
+  geom_sf(data = all_species, aes(color = abd_ppy), size = 2) +
   scale_color_gradient2(low = "#CB181D", high = "#2171B5",
                         limits = c(-4, 4), 
                         oob = scales::oob_squish) +
+  coord_sf(
+    xlim = c(-76, -66),  # rango este-oeste chile
+    ylim = c(-56, -17)   # rango norte-sur
+  ) +
   guides(color = guide_colorbar(title.position = "left", barheight = 15)) +
   labs(title = "Tendencias patos (2012-2022)",
        color = "Relative abundance trend [% change / year]") +

@@ -1,4 +1,4 @@
-"","nombre.común","nombre.inglés","nombre.cientifico","registro_último_año","conteo_max_último_año","checklist.x","conteo_max_h","año_max_h","checklist.y","prom_conteos_5_años","cod_rep","clasificación.RCE","clasificación.IUCN","Chile.total"
+"","nombre_comun","nombre_ingles","nombre_cientifico","registro_último_año","conteo_max_último_año","checklist.x","conteo_max_h","año_max_h","checklist.y","prom_conteos_5_años","cod_rep","clasificacion_RCE","clasificacion_IUCN","estado"
 "1","Perdiz chilena","Chilean Tinamou","Nothoprocta perdicaria",FALSE,0,NA,1,2019,"S61531076",0,0,"LC","LC","X(e)"
 "2","Cisne de cuello negro","Black-necked Swan","Cygnus melancoryphus",FALSE,0,NA,24,2016,"S33022091",3,0,"LC","LC","X"
 "3","Canquén común","Ashy-headed Goose","Chloephaga poliocephala",FALSE,0,NA,9,2021,"S83646542,S84759005",4,0,"NT","LC","X"

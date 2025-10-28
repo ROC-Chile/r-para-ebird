@@ -9,7 +9,6 @@ book:
     - intror.qmd
     - ebird.qmd
     - distabund.qmd
-    - ebirdst.qmd
   editor:
     mode: source
 
