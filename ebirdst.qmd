@@ -954,6 +954,8 @@ ggplot() +
 
 ## Recursos adicionales
 
-- [eBird Best Practices](https://ebird.github.io/ebird-best-practices/)
-- [Viñetas del paquete ebirdst](https://ebird.github.io/ebirdst/)
-- [Viñetas del paquete auk](https://cornelllabofornithology.github.io/auk/)
+-   [eBird Best Practices](https://ebird.github.io/ebird-best-practices/)
+
+-   [Viñetas del paquete ebirdst](https://ebird.github.io/ebirdst/)
+
+-   [Viñetas del paquete auk](https://cornelllabofornithology.github.io/auk/)

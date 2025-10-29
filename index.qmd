@@ -51,6 +51,9 @@ Hemos creado un [video](https://www.youtube.com/watch?v=SLbjGBjgj_w) introductor
 
 ## Recursos adicionales
 El equipo del Laboratorio de Ornitología de la Universidad de Cornell ha creado varios recursos (en inglés) explicando más detalladamente los contenidos que hemos cubierto en este curso. Si quieren más información pueden visitar:
-- [eBird Best Practices](https://ebird.github.io/ebird-best-practices/)
-- [Viñetas del paquete ebirdst](https://ebird.github.io/ebirdst/)
-- [Viñetas del paquete auk](https://cornelllabofornithology.github.io/auk/)
+
+-   [eBird Best Practices](https://ebird.github.io/ebird-best-practices/)
+
+-   [Viñetas del paquete ebirdst](https://ebird.github.io/ebirdst/)
+
+-   [Viñetas del paquete auk](https://cornelllabofornithology.github.io/auk/)
