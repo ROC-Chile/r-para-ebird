@@ -21,3 +21,5 @@ Conocer herramientas analíticas y buenas prácticas para la descarga, curatorí
 4\. Usos y aplicaciones de productos [Estados y Tendencias](https://science.ebird.org/en/status-and-trends)
 
 El contenido y ejercicios desarrollados en el curso los pueden encontrar en la [página web del curso](https://roc-chile.github.io/r-para-ebird/)
+
+Nos pueden contactar a eriksandvig@redobservadores.cl, mariondiaz@redobservadores.cl o vicentepantoja@redobservadores.cl
