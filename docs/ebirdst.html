@@ -213,7 +213,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#vector-círculos-escalados-según-la-abundancia" id="toc-vector-círculos-escalados-según-la-abundancia" class="nav-link" data-scroll-target="#vector-círculos-escalados-según-la-abundancia"><span class="header-section-number">5.3</span> Vector (círculos escalados según la abundancia)</a></li>
   <li><a href="#raster" id="toc-raster" class="nav-link" data-scroll-target="#raster"><span class="header-section-number">5.4</span> Raster</a></li>
   </ul></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"><span class="header-section-number">6</span> </a></li>
+  <li><a href="#incertidumbre" id="toc-incertidumbre" class="nav-link" data-scroll-target="#incertidumbre"><span class="header-section-number">6</span> Incertidumbre</a></li>
   <li><a href="#tendencias-regionales" id="toc-tendencias-regionales" class="nav-link" data-scroll-target="#tendencias-regionales"><span class="header-section-number">7</span> Tendencias regionales</a></li>
   <li><a href="#tendencias-multi-especie" id="toc-tendencias-multi-especie" class="nav-link" data-scroll-target="#tendencias-multi-especie"><span class="header-section-number">8</span> Tendencias multi-especie</a></li>
   </ul>
@@ -351,13 +351,13 @@ Checkpoint
 <span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>ebirdst_runs_chile <span class="ot">&lt;-</span> ebirdst_runs <span class="sc">%&gt;%</span> </span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(scientific_name <span class="sc">%in%</span> aves_chile<span class="sc">$</span>nombre_cientifico) <span class="sc">%&gt;%</span> </span>
 <span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a> <span class="fu">left_join</span>(</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    aves_chile <span class="sc">%&gt;%</span> <span class="fu">select</span>(nombre_cientifico, nombre_comun),</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    aves_chile <span class="sc">%&gt;%</span> <span class="fu">select</span>(nombre_cientifico, nombre_comun, estado),</span>
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"scientific_name"</span> <span class="ot">=</span> <span class="st">"nombre_cientifico"</span>)</span>
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(ebirdst_runs_chile)</span>
 <span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Rows: 470</span></span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Columns: 31</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Columns: 32</span></span>
 <span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $ species_code                   &lt;chr&gt; "absfin1", "amekes", "ameoys", "amered"…</span></span>
 <span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $ scientific_name                &lt;chr&gt; "Geospizopsis plebejus", "Falco sparver…</span></span>
 <span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $ common_name                    &lt;chr&gt; "Ash-breasted Sierra Finch", "American …</span></span>
@@ -388,7 +388,8 @@ Checkpoint
 <span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $ rsquared                       &lt;dbl&gt; NA, 0.877, 0.770, 0.835, NA, NA, NA, NA…</span></span>
 <span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $ beta0                          &lt;dbl&gt; NA, 0.891, 0.834, -0.107, NA, NA, NA, N…</span></span>
 <span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $ trends_version_year            &lt;dbl&gt; NA, 2022, 2022, 2022, NA, NA, NA, NA, N…</span></span>
-<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $ nombre_comun                   &lt;chr&gt; "Plebeyo", "Cernícalo", "Pilpilén común…</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $ nombre_comun                   &lt;chr&gt; "Plebeyo", "Cernícalo", "Pilpilén común…</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $ estado                         &lt;chr&gt; "X", "X", "X", "E", "NR", "E", "X", "X"…</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="sec-ebirdst-review" class="level3" data-number="4.2.1">
 <h3 data-number="4.2.1" class="anchored" data-anchor-id="sec-ebirdst-review"><span class="header-section-number">4.2.1</span> Revisión de expertos</h3>
@@ -894,30 +895,40 @@ Checkpoint
 <section id="sec-ebirdst-applications-stats" class="level3" data-number="4.6.2">
 <h3 data-number="4.6.2" class="anchored" data-anchor-id="sec-ebirdst-applications-stats"><span class="header-section-number">4.6.2</span> Estadísticas regionales</h3>
 <p>Para este ejercicio calcularemos la proporción de la población dentro de areas protegidas en Chile para un grupo de especies. Como un ejemplo de grupo de especies usaremos 10 especies endémicas o casi endémicas de Chile. Para las especies que sean migratorias nos enfocaremos en la temporada reproductiva.</p>
+<p>Para elegir el grupo de especies podemos filtrar las especie en ‘ebirdst_runs_chile’ a solo aquellas que son endémicas. Vemos que solo hay 9 especies endémicas con modelos S&amp;T, por lo que de estas tomaremos las especies con rangos geográficos superpuestos y agregaremos algunas otras especies residentes similares. Recomendamos utilizar un grupo de especies que utilicen areas geográficas similares para realizar el ejercicio de priorización, ya que si son de zonas totalmente distintas es dificil encontrar areas para priorizar para el grupo.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/whttap1_323675721.jpeg" class="img-fluid figure-img"></p>
+<figcaption>© Michel Gutierrez, Macaulay Library (#323675721)</figcaption>
+</figure>
+</div>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>lista_especies <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"cthhue1"</span>, <span class="st">"chipig2"</span>, <span class="st">"chimoc1"</span>, <span class="st">"crachi1"</span>, <span class="st">"chutap1"</span>, </span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"slbpar1"</span>, <span class="st">"chitin1"</span>, <span class="st">"whttap1"</span>, <span class="st">"moutur1"</span>, <span class="st">"dutcan1"</span>)</span>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>endemicas <span class="ot">&lt;-</span> ebirdst_runs_chile <span class="sc">%&gt;%</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(estado <span class="sc">==</span> <span class="st">"X(e)"</span>)</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># descargar datos para el grupo de especies</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(lista_especies)){</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ebirdst_download_status</span>(lista_especies[i], <span class="at">path =</span> <span class="st">"data/ebirdst-data/"</span>, <span class="at">pattern =</span> <span class="st">"proportion-population_seasonal_mean_9km"</span>)</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co"># agregar nombre común, residente/migratoria y calidad</span></span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>lista_especies <span class="ot">&lt;-</span> <span class="fu">filter</span>(ebirdst_runs, species_code <span class="sc">%in%</span> lista_especies) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">quality =</span> <span class="fu">ifelse</span>(is_resident, resident_quality, breeding_quality)) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(species_code, common_name, is_resident, quality)</span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(lista_especies)</span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 10 × 4</span></span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   species_code common_name                 is_resident quality</span></span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;        &lt;chr&gt;                       &lt;lgl&gt;       &lt;chr&gt;  </span></span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 chimoc1      Chilean Mockingbird         TRUE        3      </span></span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 chipig2      Chilean Pigeon              FALSE       3      </span></span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 chitin1      Chilean Tinamou             TRUE        3      </span></span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 chutap1      Chucao Tapaculo             TRUE        3      </span></span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 crachi1      Crag Chilia                 TRUE        2      </span></span>
-<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 cthhue1      Chestnut-throated Huet-huet TRUE        2      </span></span>
-<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>lista_especies <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"cthhue1"</span>, <span class="st">"chipig2"</span>, <span class="st">"chimoc1"</span>, <span class="st">"crachi1"</span>, <span class="st">"chutap1"</span>, </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"slbpar1"</span>, <span class="st">"chitin1"</span>, <span class="st">"whttap1"</span>, <span class="st">"moutur1"</span>, <span class="st">"dutcan1"</span>)</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co"># descargar datos para el grupo de especies</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(lista_especies)){</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ebirdst_download_status</span>(lista_especies[i], <span class="at">path =</span> <span class="st">"data/ebirdst-data/"</span>, <span class="at">pattern =</span> <span class="st">"proportion-population_seasonal_mean_9km"</span>)</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="co"># agregar nombre común, residente/migratoria y calidad</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>lista_especies <span class="ot">&lt;-</span> <span class="fu">filter</span>(ebirdst_runs, species_code <span class="sc">%in%</span> lista_especies) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">quality =</span> <span class="fu">ifelse</span>(is_resident, resident_quality, breeding_quality)) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(species_code, common_name, is_resident, quality)</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(lista_especies)</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 10 × 4</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   species_code common_name                 is_resident quality</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;        &lt;chr&gt;                       &lt;lgl&gt;       &lt;chr&gt;  </span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 chimoc1      Chilean Mockingbird         TRUE        3      </span></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 chipig2      Chilean Pigeon              FALSE       3      </span></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 chitin1      Chilean Tinamou             TRUE        3      </span></span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 chutap1      Chucao Tapaculo             TRUE        3      </span></span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 crachi1      Crag Chilia                 TRUE        2      </span></span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 cthhue1      Chestnut-throated Huet-huet TRUE        2      </span></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Tenemos dos especies migratorias y ocho residentes. Observe que 0 de estas especies tienen una calificación de calidad de 1, lo que indica que se debe tener precaución al utilizar los resultados. Para su uso en el mundo real, debe examinar los mapas de abundancia relativa en busca de errores antes de utilizarlos para el análisis; sin embargo, para este ejemplo, utilizaremos esta lista de especies tal cual. Cargaremos y combinaremos los porcentajes de población reproductora (para las migratorias) y residente (para las residentes) de esta lista de especies.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -1174,6 +1185,12 @@ Tip
 <li>beta0: La intersección de un modelo lineal que ajusta las tendencias reales frente a las estimadas (reales ~ estimadas) para las simulaciones. Los valores positivos de beta0 indican que los modelos están subestimando sistemáticamente la tendencia simulada para esta especie.</li>
 </ul>
 <p>Los datos de tendencias se pueden descargar para una o más especies utilizando ebirdst_download_trends(), donde el primer argumento es un vector de nombres comunes, nombres científicos o códigos de especies. Al igual que con los productos de datos de estado, los datos de tendencias se descargarán en un directorio centralizado y la gestión y el acceso a los archivos se realizará a través de ebirdst. Por ejemplo, descarguemos los datos de tendencias de la temporada de reproducción de la golondrina chilena.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/chiswa1_45851401.jpeg" class="img-fluid figure-img"></p>
+<figcaption>© Joshua Vandermeulen, Macaulay Library (#45851401)</figcaption>
+</figure>
+</div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ebirdst_download_trends</span>(<span class="st">"Tachycineta leucopyga"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -1347,8 +1364,9 @@ Tip
 </div>
 </section>
 </section>
-<section id="section" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> </h1>
+<section id="incertidumbre" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Incertidumbre</h1>
+<p>El modelo utilizado para estimar las tendencias produce un conjunto de 100 estimaciones en cada ubicación, cada una basada en una submuestra aleatoria de datos de eBird. Este conjunto de estimaciones se utiliza para cuantificar la incertidumbre en las estimaciones de las tendencias. La tendencia estimada es la mediana del conjunto, y los intervalos de confianza del 80 % son los percentiles 10 y 90 del conjunto. Aquellos que deseen acceder a las estimaciones de los folds individuales que componen el conjunto pueden utilizar ‘fold_estimates = TRUE’ al cargar los datos. Estas estimaciones a nivel de fold pueden utilizarse para cuantificar la incertidumbre, por ejemplo, al calcular la tendencia de una región determinada. Por ejemplo, carguemos las estimaciones a nivel de fold para la golondrina chilena:</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>trends_golo_folds <span class="ot">&lt;-</span> <span class="fu">load_trends</span>(<span class="st">"chiswa1"</span>, <span class="at">fold_estimates =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(trends_golo_folds)</span>
@@ -1366,13 +1384,13 @@ Tip
 </section>
 <section id="tendencias-regionales" class="level1" data-number="7">
 <h1 data-number="7"><span class="header-section-number">7</span> Tendencias regionales</h1>
-<p>Las estimaciones de tendencias permite resumir a nivel de regiones. Dado que la abundancia relativa de una especie varía a lo largo de su área de distribución, necesitamos ponderar el cálculo de la tendencia media por la abundancia relativa (abd en el marco de datos de tendencias). Para cuantificar la incertidumbre en la tendencia regional, podemos utilizar los datos a nivel de pliegue para producir 100 estimaciones distintas de la tendencia regional y, luego, calcular la mediana y los intervalos de confianza del 80 %. A modo de ejemplo, calculemos las tendencias medias anuales a nivel regional en porcentaje de abundancia relativa para la golondrina chilena en Chile.</p>
+<p>Las estimaciones de tendencias permite resumir a nivel de regiones. Dado que la abundancia relativa de una especie varía a lo largo de su área de distribución, necesitamos ponderar el cálculo de la tendencia media por la abundancia relativa (abd en el marco de datos de tendencias). Para cuantificar la incertidumbre en la tendencia regional, podemos utilizar los datos a nivel de fold para producir 100 estimaciones distintas de la tendencia regional y, luego, calcular la mediana y los intervalos de confianza del 80 %. A modo de ejemplo, calculemos las tendencias medias anuales a nivel regional en porcentaje de abundancia relativa para la golondrina chilena en Chile.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># limites de las regiones</span></span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>chile <span class="ot">&lt;-</span> <span class="fu">ne_states</span>(<span class="at">iso_a2 =</span> <span class="st">"CL"</span>, <span class="at">returnclass =</span> <span class="st">"sf"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">state =</span> iso_3166_2)</span>
 <span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertir las estimaciones de tendencias a nivel de pliegue al formato sf.</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertir las estimaciones de tendencias a nivel de fold al formato sf.</span></span>
 <span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>trends_golo_sf <span class="ot">&lt;-</span>  <span class="fu">st_as_sf</span>(trends_golo_folds, </span>
 <span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitude"</span>, <span class="st">"latitude"</span>), </span>
 <span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">crs =</span> <span class="dv">4326</span>)</span>
@@ -1380,14 +1398,14 @@ Tip
 <span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Unir regiones a los datos de tendencias a nivel de plegado</span></span>
 <span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>trends_golo_sf <span class="ot">&lt;-</span> <span class="fu">st_join</span>(trends_golo_sf, chile, <span class="at">left =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Tendencia media ponderada por abundancia por región y pliegue</span></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Tendencia media ponderada por abundancia por región y fold</span></span>
 <span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>trends_region_folds <span class="ot">&lt;-</span> trends_golo_sf <span class="sc">|&gt;</span></span>
 <span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span></span>
 <span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state, fold) <span class="sc">|&gt;</span></span>
 <span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">abd_ppy =</span> <span class="fu">sum</span>(abd <span class="sc">*</span> abd_ppy) <span class="sc">/</span> <span class="fu">sum</span>(abd),</span>
 <span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
 <span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Resumir por pliegues para cada region</span></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Resumir por fold para cada region</span></span>
 <span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>trends_region <span class="ot">&lt;-</span> trends_region_folds <span class="sc">|&gt;</span> </span>
 <span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state) <span class="sc">|&gt;</span></span>
 <span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">abd_ppy_median =</span> <span class="fu">median</span>(abd_ppy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>

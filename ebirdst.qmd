@@ -76,7 +76,7 @@ str(aves_chile)
 ebirdst_runs_chile <- ebirdst_runs %>% 
   filter(scientific_name %in% aves_chile$nombre_cientifico) %>% 
  left_join(
-    aves_chile %>% select(nombre_cientifico, nombre_comun),
+    aves_chile %>% select(nombre_cientifico, nombre_comun, estado),
     by = c("scientific_name" = "nombre_cientifico")
   )
 
@@ -448,8 +448,15 @@ ggplot(trayectorias, aes(x = week, y = prop_pop, color = species)) +
 
 Para este ejercicio calcularemos la proporción de la población dentro de areas protegidas en Chile para un grupo de especies. Como un ejemplo de grupo de especies usaremos 10 especies endémicas o casi endémicas de Chile. Para las especies que sean migratorias nos enfocaremos en la temporada reproductiva.
 
+Para elegir el grupo de especies podemos filtrar las especie en 'ebirdst_runs_chile' a solo aquellas que son endémicas. Vemos que solo hay 9 especies endémicas con modelos S&T, por lo que de estas tomaremos las especies con rangos geográficos superpuestos y agregaremos algunas otras especies residentes similares. Recomendamos utilizar un grupo de especies que utilicen areas geográficas similares para realizar el ejercicio de priorización, ya que si son de zonas totalmente distintas es dificil encontrar areas para priorizar para el grupo.
+
+![© Michel Gutierrez, Macaulay Library (#323675721)](images/whttap1_323675721.jpeg)
+
 ```{r}
 #| label: ebirdst-applications-stats
+endemicas <- ebirdst_runs_chile %>% 
+  filter(estado == "X(e)")
+
 lista_especies <- c("cthhue1", "chipig2", "chimoc1", "crachi1", "chutap1", 
                   "slbpar1", "chitin1", "whttap1", "moutur1", "dutcan1")
 
@@ -531,6 +538,7 @@ Para el ejercicio final, realizaremos una priorización de sitios multiespecífi
 
 ```{r}
 #| label: ebirdst-applications-prioritization-import
+
 # límite territorio chileno
 chile <- read_sf("data/gis-data.gpkg", layer = "ne_states") %>% 
   filter(country_code == "CL") %>% 
@@ -665,6 +673,8 @@ Se proporciona información sobre el modelo de tendencias para cada especie, inc
 - beta0: La intersección de un modelo lineal que ajusta las tendencias reales frente a las estimadas (reales ~ estimadas) para las simulaciones. Los valores positivos de beta0 indican que los modelos están subestimando sistemáticamente la tendencia simulada para esta especie.
 
 Los datos de tendencias se pueden descargar para una o más especies utilizando ebirdst_download_trends(), donde el primer argumento es un vector de nombres comunes, nombres científicos o códigos de especies. Al igual que con los productos de datos de estado, los datos de tendencias se descargarán en un directorio centralizado y la gestión y el acceso a los archivos se realizará a través de ebirdst. Por ejemplo, descarguemos los datos de tendencias de la temporada de reproducción de la golondrina chilena.
+
+![© Joshua Vandermeulen, Macaulay Library (#45851401)](images/chiswa1_45851401.jpeg)
 
 ```{r}
 #| label: ebirdst-download-trends
@@ -807,7 +817,9 @@ plot(ppy_raster[["abd_ppy"]],
      axes = FALSE)
 ```
 
-# 
+# Incertidumbre
+
+El modelo utilizado para estimar las tendencias produce un conjunto de 100 estimaciones en cada ubicación, cada una basada en una submuestra aleatoria de datos de eBird. Este conjunto de estimaciones se utiliza para cuantificar la incertidumbre en las estimaciones de las tendencias. La tendencia estimada es la mediana del conjunto, y los intervalos de confianza del 80 % son los percentiles 10 y 90 del conjunto. Aquellos que deseen acceder a las estimaciones de los folds individuales que componen el conjunto pueden utilizar 'fold_estimates = TRUE' al cargar los datos. Estas estimaciones a nivel de fold pueden utilizarse para cuantificar la incertidumbre, por ejemplo, al calcular la tendencia de una región determinada. Por ejemplo, carguemos las estimaciones a nivel de fold para la golondrina chilena:
 
 ```{r}
 #| label: trends-folds
@@ -816,7 +828,7 @@ print(trends_golo_folds)
 ```
 
 # Tendencias regionales
-Las estimaciones de tendencias permite resumir a nivel de regiones. Dado que la abundancia relativa de una especie varía a lo largo de su área de distribución, necesitamos ponderar el cálculo de la tendencia media por la abundancia relativa (abd en el marco de datos de tendencias). Para cuantificar la incertidumbre en la tendencia regional, podemos utilizar los datos a nivel de pliegue para producir 100 estimaciones distintas de la tendencia regional y, luego, calcular la mediana y los intervalos de confianza del 80 %. A modo de ejemplo, calculemos las tendencias medias anuales a nivel regional en porcentaje de abundancia relativa para la golondrina chilena en Chile.
+Las estimaciones de tendencias permite resumir a nivel de regiones. Dado que la abundancia relativa de una especie varía a lo largo de su área de distribución, necesitamos ponderar el cálculo de la tendencia media por la abundancia relativa (abd en el marco de datos de tendencias). Para cuantificar la incertidumbre en la tendencia regional, podemos utilizar los datos a nivel de fold para producir 100 estimaciones distintas de la tendencia regional y, luego, calcular la mediana y los intervalos de confianza del 80 %. A modo de ejemplo, calculemos las tendencias medias anuales a nivel regional en porcentaje de abundancia relativa para la golondrina chilena en Chile.
 
 ```{r}
 #| label: trends-region
@@ -824,7 +836,7 @@ Las estimaciones de tendencias permite resumir a nivel de regiones. Dado que la 
 chile <- ne_states(iso_a2 = "CL", returnclass = "sf") |>
   transmute(state = iso_3166_2)
 
-# Convertir las estimaciones de tendencias a nivel de pliegue al formato sf.
+# Convertir las estimaciones de tendencias a nivel de fold al formato sf.
 trends_golo_sf <-  st_as_sf(trends_golo_folds, 
                               coords = c("longitude", "latitude"), 
                               crs = 4326)
@@ -832,14 +844,14 @@ trends_golo_sf <-  st_as_sf(trends_golo_folds,
 # Unir regiones a los datos de tendencias a nivel de plegado
 trends_golo_sf <- st_join(trends_golo_sf, chile, left = FALSE)
 
-# Tendencia media ponderada por abundancia por región y pliegue
+# Tendencia media ponderada por abundancia por región y fold
 trends_region_folds <- trends_golo_sf |>
   st_drop_geometry() |>
   group_by(state, fold) |>
   summarize(abd_ppy = sum(abd * abd_ppy) / sum(abd),
             .groups = "drop")
 
-# Resumir por pliegues para cada region
+# Resumir por fold para cada region
 trends_region <- trends_region_folds |> 
   group_by(state) |>
   summarise(abd_ppy_median = median(abd_ppy, na.rm = TRUE),
@@ -940,3 +952,8 @@ ggplot() +
         plot.title = element_text(hjust = 0.5))
 ```
 
+## Recursos adicionales
+
+- [eBird Best Practices](https://ebird.github.io/ebird-best-practices/)
+- [Viñetas del paquete ebirdst](https://ebird.github.io/ebirdst/)
+- [Viñetas del paquete auk](https://cornelllabofornithology.github.io/auk/)
