@@ -18,7 +18,7 @@ El curso consta de 4 módulos:
 
 3\. [Modelamiento de distribución y abundancia relativa](distabund): tasas de encuentro, abundancia relativa y ejemplos y aplicaciones prácticas usando distribución y abundancia.
 
-4\. **Usos y aplicaciones de productos Estados y Tendencias**: descarga de productos de Estados y Tendencias, carga de datos en R y su uso para una variedad de aplicaciones.
+4\. [Usos y aplicaciones de productos Estados y Tendencias](ebirdst.qmd): descarga de productos de Estados y Tendencias, carga de datos en R y su uso para una variedad de aplicaciones.
 
 ## Configuración {#sec-intro-config}
 
