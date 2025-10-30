@@ -22,4 +22,10 @@ Conocer herramientas analíticas y buenas prácticas para la descarga, curatorí
 
 El contenido y ejercicios desarrollados en el curso los pueden encontrar en la [página web del curso](https://roc-chile.github.io/r-para-ebird/)
 
-Nos pueden contactar a eriksandvig@redobservadores.cl, mariondiaz@redobservadores.cl o vicentepantoja@redobservadores.cl
+Para cualquier pregunta o consulta sobre el contenido, resolver dudas o reportar errores, pueden enviar un correo al equipo del Programa de Monitoreo:
+
+-   mariondiaz\@redobservadores.cl
+
+-   vicentepantoja\@redobservadores.cl
+
+-   eriksandvig\@redobservadores.cl

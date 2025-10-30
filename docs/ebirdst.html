@@ -215,10 +215,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#incertidumbre" id="toc-incertidumbre" class="nav-link" data-scroll-target="#incertidumbre"><span class="header-section-number">6</span> Incertidumbre</a></li>
   <li><a href="#tendencias-regionales" id="toc-tendencias-regionales" class="nav-link" data-scroll-target="#tendencias-regionales"><span class="header-section-number">7</span> Tendencias regionales</a></li>
-  <li><a href="#tendencias-multi-especie" id="toc-tendencias-multi-especie" class="nav-link" data-scroll-target="#tendencias-multi-especie"><span class="header-section-number">8</span> Tendencias multi-especie</a>
-  <ul class="collapse">
-  <li><a href="#recursos-adicionales" id="toc-recursos-adicionales" class="nav-link" data-scroll-target="#recursos-adicionales"><span class="header-section-number">8.1</span> Recursos adicionales</a></li>
-  </ul></li>
+  <li><a href="#tendencias-multi-especie" id="toc-tendencias-multi-especie" class="nav-link" data-scroll-target="#tendencias-multi-especie"><span class="header-section-number">8</span> Tendencias multi-especie</a></li>
+  <li><a href="#recursos-adicionales" id="toc-recursos-adicionales" class="nav-link" data-scroll-target="#recursos-adicionales"><span class="header-section-number">9</span> Recursos adicionales</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/ROC-Chile/r-para-ebird/edit/main/ebirdst.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/ROC-Chile/r-para-ebird/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -475,9 +473,9 @@ Solución
 </section>
 <section id="sec-ebirdst-download" class="level2" data-number="4.3">
 <h2 data-number="4.3" class="anchored" data-anchor-id="sec-ebirdst-download"><span class="header-section-number">4.3</span> Descarga de datos</h2>
-<p>La función <code>ebirdst_download_status()</code> descarga datos de una sola especie a partir del nombre de la especie (nombre común, nombre científico o código de especie). Por ejemplo, para descargar los datos del Picaflor chico, utilice:</p>
+<p>La función <code>ebirdst_download_status()</code> descarga datos de una sola especie a partir del nombre de la especie (nombre común en inglés, nombre científico o código de especie). Por ejemplo, para descargar los datos del Picaflor chico, utilice:</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="fu">ebirdst_download_status</span>(<span class="at">species =</span> <span class="st">"Sephanoides sephaniodes"</span>, <span class="at">path =</span> <span class="st">"data/ebirdst-data"</span>)</span>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="fu">ebirdst_download_status</span>(<span class="at">species =</span> <span class="st">"Sephanoides sephaniodes"</span>, <span class="at">path =</span> <span class="st">"data/ebirdst-data"</span>, <span class="at">force =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>path</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-layout-align="center">
@@ -718,7 +716,7 @@ Solución
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                            <span class="at">path =</span> <span class="st">"data/ebirdst-data/"</span>, </span>
 <span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>                            <span class="at">product =</span> <span class="st">"abundance"</span>, </span>
 <span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>                            <span class="at">period =</span> <span class="st">"seasonal"</span>, </span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>                            <span class="at">resolution =</span> <span class="st">"27km"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>                            <span class="at">resolution =</span> <span class="st">"3km"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Estos ráster se pueden dividir fácilmente en subconjuntos de una sola semana o temporada.</p>
 <div class="cell" data-layout-align="center">
@@ -737,14 +735,14 @@ Solución
 <span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co"># breeding season</span></span>
 <span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>abd_seasonal[[<span class="st">"breeding"</span>]]</span>
 <span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; class       : SpatRaster </span></span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; dimensions  : 618, 1276, 1  (nrow, ncol, nlyr)</span></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; resolution  : 27000, 27000  (x, y)</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; dimensions  : 5562, 11484, 1  (nrow, ncol, nlyr)</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; resolution  : 3000, 3000  (x, y)</span></span>
 <span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; extent      : -17226000, 17226000, -8343000, 8343000  (xmin, xmax, ymin, ymax)</span></span>
 <span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; coord. ref. : WGS 84 / Equal Earth Greenwich (EPSG:8857) </span></span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; source      : grbfir1_abundance_seasonal_mean_27km_2023.tif </span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; source      : grbfir1_abundance_seasonal_mean_3km_2023.tif </span></span>
 <span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; name        : breeding </span></span>
 <span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; min value   :     0.00 </span></span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; max value   :     3.28</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; max value   :     4.57</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>También podemos dividir el ráster semanal en un rango de semanas. Por ejemplo, dividamos solo las estimaciones de las semanas de mayo y luego calculemos el promedio de todas las semanas.</p>
 <div class="cell" data-layout-align="center">
@@ -1272,7 +1270,7 @@ Tip
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>countries <span class="ot">&lt;-</span> <span class="fu">ne_countries</span>(<span class="at">returnclass =</span> <span class="st">"sf"</span>, <span class="at">continent =</span> <span class="st">"South America"</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_geometry</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="fu">st_crs</span>(trends_circles))</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>states <span class="ot">&lt;-</span> <span class="fu">ne_states</span>(<span class="at">iso_a2 =</span> <span class="fu">c</span>(<span class="st">"CL"</span>, <span class="st">"AR"</span>, <span class="st">"UR"</span>, <span class="st">"BR"</span>, <span class="st">"PE"</span>, <span class="st">"BL"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>states <span class="ot">&lt;-</span> <span class="fu">ne_states</span>(<span class="at">iso_a2 =</span> <span class="fu">c</span>(<span class="st">"CL"</span>, <span class="st">"AR"</span>, <span class="st">"UR"</span>, <span class="st">"BR"</span>)) <span class="sc">|&gt;</span> </span>
 <span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_geometry</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="fu">st_crs</span>(trends_circles))</span>
 <span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a></span>
@@ -1398,7 +1396,7 @@ Tip
 <span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitude"</span>, <span class="st">"latitude"</span>), </span>
 <span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">crs =</span> <span class="dv">4326</span>)</span>
 <span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Unir regiones a los datos de tendencias a nivel de plegado</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Unir regiones a los datos de tendencias a nivel de fold</span></span>
 <span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>trends_golo_sf <span class="ot">&lt;-</span> <span class="fu">st_join</span>(trends_golo_sf, chile, <span class="at">left =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Tendencia media ponderada por abundancia por región y fold</span></span>
@@ -1526,8 +1524,10 @@ Tip
 </div>
 </div>
 </div>
-<section id="recursos-adicionales" class="level2" data-number="8.1">
-<h2 data-number="8.1" class="anchored" data-anchor-id="recursos-adicionales"><span class="header-section-number">8.1</span> Recursos adicionales</h2>
+</section>
+<section id="recursos-adicionales" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Recursos adicionales</h1>
+<p>Finalemente pueden consultar los siguientes enlaces para más información sobre el uso de datos de eBird y los paquetes asociados.</p>
 <ul>
 <li><p><a href="https://ebird.github.io/ebird-best-practices/">eBird Best Practices</a></p></li>
 <li><p><a href="https://ebird.github.io/ebirdst/">Viñetas del paquete ebirdst</a></p></li>
@@ -1535,7 +1535,6 @@ Tip
 </ul>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

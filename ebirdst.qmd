@@ -118,12 +118,12 @@ ebirdst_runs %>%
 
 ## Descarga de datos {#sec-ebirdst-download}
 
-La función `ebirdst_download_status()` descarga datos de una sola especie a partir del nombre de la especie (nombre común, nombre científico o código de especie). Por ejemplo, para descargar los datos del Picaflor chico, utilice:
+La función `ebirdst_download_status()` descarga datos de una sola especie a partir del nombre de la especie (nombre común en inglés, nombre científico o código de especie). Por ejemplo, para descargar los datos del Picaflor chico, utilice:
 
 ```{r}
 #| label: ebirdst-download-fake
 #| eval: false
-path <- ebirdst_download_status(species = "Sephanoides sephaniodes", path = "data/ebirdst-data")
+path <- ebirdst_download_status(species = "Sephanoides sephaniodes", path = "data/ebirdst-data", force = TRUE)
 path
 ```
 
@@ -308,7 +308,7 @@ abd_seasonal <- load_raster(species = "grbfir1",
                             path = "data/ebirdst-data/", 
                             product = "abundance", 
                             period = "seasonal", 
-                            resolution = "27km")
+                            resolution = "3km")
 ```
 
 Estos ráster se pueden dividir fácilmente en subconjuntos de una sola semana o temporada.
@@ -748,7 +748,7 @@ Finalmente podemos crear un mapa de tendencias para esta especie.
 countries <- ne_countries(returnclass = "sf", continent = "South America") |> 
   st_geometry() |> 
   st_transform(st_crs(trends_circles))
-states <- ne_states(iso_a2 = c("CL", "AR", "UR", "BR", "PE", "BL")) |> 
+states <- ne_states(iso_a2 = c("CL", "AR", "UR", "BR")) |> 
   st_geometry() |> 
   st_transform(st_crs(trends_circles))
 
@@ -841,7 +841,7 @@ trends_golo_sf <-  st_as_sf(trends_golo_folds,
                               coords = c("longitude", "latitude"), 
                               crs = 4326)
 
-# Unir regiones a los datos de tendencias a nivel de plegado
+# Unir regiones a los datos de tendencias a nivel de fold
 trends_golo_sf <- st_join(trends_golo_sf, chile, left = FALSE)
 
 # Tendencia media ponderada por abundancia por región y fold
@@ -952,7 +952,9 @@ ggplot() +
         plot.title = element_text(hjust = 0.5))
 ```
 
-## Recursos adicionales
+# Recursos adicionales
+
+Finalemente pueden consultar los siguientes enlaces para más información sobre el uso de datos de eBird y los paquetes asociados.
 
 -   [eBird Best Practices](https://ebird.github.io/ebird-best-practices/)
 
